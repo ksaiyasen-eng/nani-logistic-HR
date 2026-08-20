@@ -1,0 +1,923 @@
+<!doctype html>
+<html lang="lo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nany Logistic — ລະບົບຄຸ້ມຄອງພະນັກງານ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#0d4ea6; --blue-d:#0a3b7d; --blue-l:#e8f0fb; --blue-l2:#f4f8fe;
+  --ink:#12233d; --muted:#6b7c93; --line:#e2e8f2; --bg:#f0f4fa; --card:#ffffff;
+  --green:#1a9d5a; --green-l:#e6f6ee; --red:#d64545; --red-l:#fdecec;
+  --amber:#c8871a; --amber-l:#fdf3e0; --purple:#7a4dbd; --purple-l:#f0e9fb;
+  --shadow:0 1px 3px rgba(16,40,80,.06),0 8px 24px rgba(16,40,80,.06);
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:'Noto Sans Lao','Noto Sans Thai',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14.5px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select{font-family:inherit;font-size:inherit;color:inherit}
+h1,h2,h3,h4{margin:0;font-weight:700}
+a{color:var(--blue);text-decoration:none}
+
+/* ===== Top bar ===== */
+.topbar{position:sticky;top:0;z-index:50;background:linear-gradient(120deg,var(--blue),var(--blue-d));color:#fff;box-shadow:0 2px 12px rgba(10,59,125,.25)}
+.topbar-in{max-width:1280px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:11px 20px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:11px;font-weight:700}
+.logo{width:40px;height:40px;border-radius:11px;background:#fff;color:var(--blue);display:grid;place-items:center;font-weight:800;font-size:19px;letter-spacing:-1px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.brand small{display:block;font-weight:400;font-size:11.5px;opacity:.85;margin-top:1px}
+.topbar .spacer{flex:1}
+.month-pick{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.15);padding:5px 10px;border-radius:10px}
+.month-pick label{font-size:12px;opacity:.9}
+.month-pick input,.month-pick select{background:#fff;color:var(--ink);border:none;border-radius:7px;padding:5px 8px;font-weight:600;max-width:210px}
+.save-dot{display:flex;align-items:center;gap:6px;font-size:12px;opacity:.9}
+.save-dot i{width:8px;height:8px;border-radius:50%;background:#7CFC9E;box-shadow:0 0 0 3px rgba(124,252,158,.25)}
+
+/* ===== Nav tabs ===== */
+.nav{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:62px;z-index:40}
+.nav-in{max-width:1280px;margin:0 auto;display:flex;gap:2px;padding:0 12px;overflow-x:auto}
+.nav button{background:none;border:none;padding:14px 15px;cursor:pointer;color:var(--muted);font-weight:600;white-space:nowrap;border-bottom:3px solid transparent;display:flex;align-items:center;gap:7px;font-size:14px}
+.nav button:hover{color:var(--blue)}
+.nav button.active{color:var(--blue);border-bottom-color:var(--blue)}
+.nav button .ico{font-size:16px}
+
+/* ===== Layout ===== */
+.wrap{max-width:1280px;margin:0 auto;padding:22px 20px 60px}
+.page{display:none;animation:fade .25s ease}
+.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+.page-head h2{font-size:21px}
+.page-head p{margin:3px 0 0;color:var(--muted);font-size:13px}
+
+/* ===== Cards ===== */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card-pad{padding:18px}
+.grid{display:grid;gap:16px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 18px;position:relative;overflow:hidden}
+.kpi .lab{color:var(--muted);font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:7px}
+.kpi .val{font-size:25px;font-weight:800;margin-top:8px;letter-spacing:-.5px}
+.kpi .sub{font-size:12px;color:var(--muted);margin-top:3px}
+.kpi .badge{position:absolute;top:14px;right:14px;width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:19px}
+.b-blue{background:var(--blue-l);color:var(--blue)}
+.b-green{background:var(--green-l);color:var(--green)}
+.b-red{background:var(--red-l);color:var(--red)}
+.b-amber{background:var(--amber-l);color:var(--amber)}
+.b-purple{background:var(--purple-l);color:var(--purple)}
+
+/* ===== Section title ===== */
+.sec-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:26px 0 12px;flex-wrap:wrap}
+.sec-title h3{font-size:16px;display:flex;align-items:center;gap:8px}
+.sec-title .hint{color:var(--muted);font-size:12.5px;font-weight:400}
+
+/* ===== Tables ===== */
+.tbl-wrap{overflow-x:auto;border-radius:var(--radius)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:640px}
+thead th{background:var(--blue-l2);color:var(--blue-d);font-weight:700;text-align:right;padding:11px 12px;border-bottom:2px solid var(--line);white-space:nowrap;position:sticky;top:0}
+thead th.l,tbody td.l{text-align:left}
+tbody td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+tbody tr:hover{background:var(--blue-l2)}
+tbody tr:last-child td{border-bottom:none}
+.tfoot td{font-weight:800;background:var(--blue-l);color:var(--blue-d);border-top:2px solid var(--blue);padding:12px}
+.num{font-variant-numeric:tabular-nums}
+.pos{color:var(--green);font-weight:600}
+.neg{color:var(--red);font-weight:600}
+td.name-cell{font-weight:600}
+.code-chip{display:inline-block;background:var(--blue-l);color:var(--blue-d);font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;margin-left:6px}
+
+/* editable table inputs */
+table input.cell,table select.cell{width:78px;border:1px solid var(--line);border-radius:7px;padding:6px 8px;text-align:right;background:#fff}
+table input.cell:focus,table select.cell:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-l)}
+table input.wide{width:120px}
+
+/* ===== Buttons ===== */
+.btn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:9px 15px;border-radius:10px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:7px;transition:.15s}
+.btn:hover{border-color:var(--blue);color:var(--blue)}
+.btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn.primary:hover{background:var(--blue-d);color:#fff}
+.btn.green{background:var(--green);color:#fff;border-color:var(--green)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:6px 11px;font-size:12.5px;border-radius:8px}
+.btn.danger{color:var(--red)}
+.btn.danger:hover{border-color:var(--red);background:var(--red-l)}
+
+/* ===== Avatar ===== */
+.av{width:34px;height:34px;border-radius:9px;background:var(--blue);color:#fff;display:inline-grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+.person{display:flex;align-items:center;gap:10px}
+.person small{color:var(--muted);font-weight:400;display:block;font-size:11.5px}
+
+/* ===== Bars (chart) ===== */
+.bar-row{display:flex;align-items:center;gap:12px;padding:7px 0}
+.bar-row .nm{width:150px;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none}
+.bar-track{flex:1;background:var(--blue-l2);border-radius:8px;height:22px;position:relative;overflow:hidden}
+.bar-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--blue),#3d7ad6);display:flex;align-items:center}
+.bar-row .amt{width:110px;text-align:right;font-size:12.5px;font-weight:700;flex:none}
+
+/* donut */
+.donut-wrap{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.legend{display:flex;flex-direction:column;gap:9px}
+.legend .li{display:flex;align-items:center;gap:9px;font-size:13px}
+.legend .sw{width:13px;height:13px;border-radius:4px;flex:none}
+.legend b{margin-left:auto;font-variant-numeric:tabular-nums}
+
+/* ===== Payslip / calculator ===== */
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pay-col h4{font-size:14px;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--line);display:flex;align-items:center;gap:8px}
+.f-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0}
+.f-row label{font-size:13px;color:var(--ink)}
+.f-row .in{width:150px}
+.in{border:1px solid var(--line);border-radius:9px;padding:8px 11px;text-align:right;background:#fff;width:100%;font-variant-numeric:tabular-nums;font-weight:600}
+.in:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-l)}
+.in.ro{background:var(--blue-l2);color:var(--muted);font-weight:600}
+.total-line{display:flex;justify-content:space-between;padding:11px 0;border-top:2px solid var(--line);margin-top:6px;font-weight:800;font-size:15px}
+.grand{background:linear-gradient(120deg,var(--blue),var(--blue-d));color:#fff;border-radius:12px;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;margin-top:16px}
+.grand .lab{font-size:13px;opacity:.9}
+.grand .amt{font-size:26px;font-weight:800}
+
+/* ===== Modal ===== */
+.overlay{position:fixed;inset:0;background:rgba(16,33,61,.5);display:none;align-items:flex-start;justify-content:center;z-index:100;padding:40px 16px;overflow:auto}
+.overlay.show{display:flex}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:560px;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:pop .2s}
+@keyframes pop{from{transform:scale(.96);opacity:0}to{transform:none;opacity:1}}
+.modal-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.modal-head h3{font-size:17px}
+.modal-body{padding:20px;display:grid;gap:13px}
+.modal-foot{padding:16px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:12.5px;font-weight:600;color:var(--muted)}
+.field input,.field select{border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:#fff}
+.field input:focus,.field select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-l)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.x{cursor:pointer;font-size:22px;color:var(--muted);line-height:1;border:none;background:none}
+
+/* ===== pills / tags ===== */
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600}
+.pill.ok{background:var(--green-l);color:var(--green)}
+.pill.warn{background:var(--amber-l);color:var(--amber)}
+.pill.bad{background:var(--red-l);color:var(--red)}
+.pill.info{background:var(--blue-l);color:var(--blue)}
+
+/* ===== leave layout ===== */
+.leave-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+.lv{border-radius:14px;padding:16px;color:#fff}
+.lv .t{font-size:13px;opacity:.92;font-weight:600}
+.lv .n{font-size:30px;font-weight:800;margin-top:6px}
+.lv .d{font-size:12px;opacity:.9;margin-top:2px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.search{position:relative;flex:1;min-width:180px;max-width:340px}
+.search input{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 12px 9px 34px;background:#fff}
+.search input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-l)}
+.search .mag{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted)}
+
+.empty{text-align:center;padding:44px 20px;color:var(--muted)}
+.empty .big{font-size:40px}
+
+.note-banner{background:var(--amber-l);border:1px solid #f0d9a8;color:#8a5d10;border-radius:12px;padding:11px 15px;font-size:13px;margin-bottom:16px;display:flex;gap:9px}
+
+/* print payslip */
+@media print{
+  .topbar,.nav,.page-head .btn,.no-print,.toolbar{display:none!important}
+  body{background:#fff}
+  .wrap{padding:0}
+  .page{display:none!important}
+  #printArea{display:block!important}
+}
+#printArea{display:none}
+
+@media(max-width:820px){
+  .calc-grid{grid-template-columns:1fr}
+  .grid2{grid-template-columns:1fr}
+  .bar-row .nm{width:110px}
+}
+.footer{text-align:center;color:var(--muted);font-size:12px;margin-top:40px;padding-top:18px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <div class="logo">N</div>
+      <div>Nany Logistic<small>ລະບົບຄຸ້ມຄອງພະນັກງານ · ຂົນສົ່ງ</small></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="month-pick">
+      <label>ປະຈຳເດືອນ</label>
+      <input type="month" id="monthPick">
+    </div>
+    <div class="month-pick"><label>ພະແນກ</label><select id="deptPick"></select>
+    </div>
+    <div class="save-dot"><i></i><span id="saveState">ບັນທຶກອັດຕະໂນມັດ</span></div>
+  </div>
+</div>
+
+<div class="nav"><div class="nav-in" id="nav"></div></div>
+
+<div class="wrap">
+  <div id="pg-dash" class="page"></div>
+  <div id="pg-emp" class="page"></div>
+  <div id="pg-work" class="page"></div>
+  <div id="pg-calc" class="page"></div>
+  <div id="pg-leave" class="page"></div>
+  <div id="pg-welfare" class="page"></div>
+  <div id="pg-summary" class="page"></div>
+  <div id="pg-settings" class="page"></div>
+  <div class="footer">Nany Logistic · ຂໍ້ມູນເກັບໄວ້ໃນເຄື່ອງຂອງທ່ານ (localStorage)</div>
+</div>
+
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+<div id="printArea"></div>
+
+<script>
+/* ================= DATA ENGINE ================= */
+const SEED = /*__DATA__*/[{"code":"ເພັດພູໄທ","name":"ທ. ເພັດພູໄທ","dept":"ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ","workDays":26.0,"forgotScan":0,"lateHrs":0,"absentDays":0,"otHours":0,"baseSalary":8000000.0,"morningBonus":0,"waterPack":0,"produceBottle":0,"produceGlass":0,"otPay":0.0,"driverPay":0,"noAbsenceBonus":200000.0,"dedForgotScan":0,"dedLate":0,"dedAbsent":0,"teamDeposit":0,"socialSecurity":0,"advance":0,"damageComp":0,"honestyIns":0,"otherDed":0,"note":"","bankName":"","bankAcc":""},{"code":"VARI-S085-23","name":"ນ. ນານີ ໄຊຍະເສນ","dept":"ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ","workDays":26.0,"forgotScan":0,"lateHrs":0,"absentDays":0,"otHours":0,"baseSalary":10000000.0,"morningBonus":500000.0,"waterPack":0,"produceBottle":0,"produceGlass":0,"otPay":0.0,"driverPay":0,"noAbsenceBonus":200000.0,"dedForgotScan":0,"dedLate":0,"dedAbsent":0,"teamDeposit":0,"socialSecurity":99000.0,"advance":0,"damageComp":0,"honestyIns":0,"otherDed":0,"note":"","bankName":"NANY SAIYASAN","bankAcc":"160120001409988000"},{"code":"ນ. ສິນທະໄລ ຕາງນະວົງ","name":"ນ. ສິນທະໄລ ຕາງນະວົງ","dept":"ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ","workDays":26.0,"forgotScan":0,"lateHrs":0,"absentDays":0,"otHours":0,"baseSalary":4500000.0,"morningBonus":500000.0,"waterPack":0,"produceBottle":0,"produceGlass":0,"otPay":1019230.0,"driverPay":0,"noAbsenceBonus":200000.0,"dedForgotScan":0,"dedLate":0,"dedAbsent":0,"teamDeposit":0,"socialSecurity":0,"advance":0,"damageComp":0,"honestyIns":0,"otherDed":0,"note":"","bankName":"SINTHALAY TANGNAVONG","bankAcc":"020120001919604001"},{"code":"ນ. ປາລະວີ ພູວະນິດ","name":"ນ. ປາລະວີ ພູວະນິດ","dept":"ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ","workDays":26.0,"forgotScan":0,"lateHrs":0,"absentDays":0,"otHours":0,"baseSalary":4500000.0,"morningBonus":500000.0,"waterPack":0,"produceBottle":0,"produceGlass":0,"otPay":0,"driverPay":0,"noAbsenceBonus":200000.0,"dedForgotScan":0,"dedLate":0,"dedAbsent":0,"teamDeposit":0,"socialSecurity":0,"advance":0,"damageComp":0,"honestyIns":0,"otherDed":0,"note":"","bankName":"PALAVY PHOUVANITH MS","bankAcc":"2221206359000"},{"code":"VARI-S097-23","name":"ທ. ລຸນພອນ ພຸດທະວົງ","dept":"ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ","workDays":26.0,"forgotScan":0,"lateHrs":0,"absentDays":0,"otHours":0,"baseSalary":4550000.0,"morningBonus":200000.0,"waterPack":0,"produceBottle":364283.0,"produceGlass":0,"otPay":0,"driverPay":0,"noAbsenceBonus":300000.0,"dedForgotScan":0,"dedLate":0,"dedAbsent":0,"teamDeposit":50000.0,"socialSecurity":82500.0,"advance":0,"damageComp":0,"honestyIns":0,"otherDed":0,"note":"","bankName":"LOUNPHONE PHOUTTHAVONG MR","bankAcc":"1631205667935"},{"code":"VARI-S141-23","name":"ທ. ຄໍາເພັດ  ວໍລະຈັນ","dept":"ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ","workDays":26.0,"forgotScan":0,"lateHrs":0,"absentDays":0,"otHours":0,"baseSalary":3850000.0,"morningBonus":0,"waterPack":0,"produceBottle":1434780.0,"produceGlass":0,"otPay":0,"driverPay":0,"noAbsenceBonus":0,"dedForgotScan":0,"dedLate":0,"dedAbsent":0,"teamDeposit":50000.0,"socialSecurity":82500.0,"advance":0,"damageComp":0,"honestyIns":0,"otherDed":0,"note":"","bankName":"NATSOULIVONE SENGCHANH MS","bankAcc":"090120000389026001"},{"code":"VARI-S107-23","name":"ທ. ບຸນມາ ມະນິທອງ","dept":"ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ","workDays":26.0,"forgotScan":0,"lateHrs":0,"absentDays":0,"otHours":0,"baseSalary":4250000.0,"morningBonus":200000.0,"waterPack":0,"produceBottle":695233.0,"produceGlass":1215750.0,"otPay":0,"driverPay":0,"noAbsenceBonus":0,"dedForgotScan":0,"dedLate":0,"dedAbsent":0,"teamDeposit":50000.0,"socialSecurity":82500.0,"advance":0,"damageComp":0,"honestyIns":0,"otherDed":0,"note":"","bankName":"BOUNMA MANITHONG MR","bankAcc":"0921218692387"},{"code":"VARI-S204-24","name":"ທ. ຊີບ ຫຼວງອາພອນ","dept":"ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ","workDays":26.0,"forgotScan":0,"lateHrs":0,"absentDays":0,"otHours":0,"baseSalary":4350000.0,"morningBonus":200000.0,"waterPack":0,"produceBottle":781134.0,"produceGlass":0,"otPay":0,"driverPay":0,"noAbsenceBonus":300000.0,"dedForgotScan":0,"dedLate":0,"dedAbsent":0,"teamDeposit":50000.0,"socialSecurity":0,"advance":0,"damageComp":0,"honestyIns":0,"otherDed":0,"note":"","bankName":"CHIP LUANGAPHONE MR","bankAcc":"2211221259458"},{"code":"VARI-S124-23","name":"ທ. ທ່ຽງ ແກ້ວອິນທອນ","dept":"ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ","workDays":26.0,"forgotScan":0,"lateHrs":0,"absentDays":0,"otHours":0,"baseSalary":4000000.0,"morningBonus":200000.0,"waterPack":0,"produceBottle":1125417.0,"produceGlass":385500.0,"otPay":0,"driverPay":0,"noAbsenceBonus":300000.0,"dedForgotScan":0,"dedLate":0,"dedAbsent":0,"teamDeposit":50000.0,"socialSecurity":0,"advance":0,"damageComp":262500.0,"honestyIns":0,"otherDed":0,"note":"","bankName":"THIENG KEOINTHONE MR","bankAcc":"2221223148117"},{"code":"ທ ຕົ້ນຕະວັນ","name":"ທ ຕົ້ນຕະວັນ","dept":"ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ","workDays":26.0,"forgotScan":0,"lateHrs":0,"absentDays":0,"otHours":0,"baseSalary":3300000.0,"morningBonus":200000.0,"waterPack":0,"produceBottle":900000.0,"produceGlass":646500.0,"otPay":0,"driverPay":0,"noAbsenceBonus":300000.0,"dedForgotScan":0,"dedLate":0,"dedAbsent":0,"teamDeposit":50000.0,"socialSecurity":82500.0,"advance":500000.0,"damageComp":262500.0,"honestyIns":0,"otherDed":0,"note":"ເບີກກ່ອນຈຳນວນ 2,000,000 ຫັກ 500,000","bankName":"KHONESAVANH SIHALATH MS","bankAcc":"2221209861689"},{"code":"ທ ວິສະນຸ","name":"ທ ວິສະນຸ","dept":"ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ","workDays":26.0,"forgotScan":0,"lateHrs":0,"absentDays":0,"otHours":0,"baseSalary":3100000.0,"morningBonus":200000.0,"waterPack":0,"produceBottle":1012500.0,"produceGlass":215250.0,"otPay":0,"driverPay":0,"noAbsenceBonus":300000.0,"dedForgotScan":0,"dedLate":0,"dedAbsent":0,"teamDeposit":50000.0,"socialSecurity":0,"advance":0,"damageComp":262500.0,"honestyIns":0,"otherDed":0,"note":"","bankName":"SAMPHOO PHILAVONG MSR","bankAcc":"2221232304474"},{"code":"ທ ຫວານ","name":"ທ ຫວານ","dept":"ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ","workDays":26.0,"forgotScan":0,"lateHrs":0,"absentDays":20.0,"otHours":0,"baseSalary":3000000.0,"morningBonus":200000.0,"waterPack":0,"produceBottle":288917.0,"produceGlass":0,"otPay":0,"driverPay":0,"noAbsenceBonus":0,"dedForgotScan":0,"dedLate":0,"dedAbsent":2307692.31,"teamDeposit":50000.0,"socialSecurity":0,"advance":0,"damageComp":0,"honestyIns":0,"otherDed":0,"note":"","bankName":"PHONETHEVA SOUNAMVONG MR","bankAcc":"034120001845348001"},{"code":"ທ ອາເລັກ","name":"ທ ອາເລັກ","dept":"ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ","workDays":26.0,"forgotScan":0,"lateHrs":0,"absentDays":15.0,"otHours":0,"baseSalary":3500000.0,"morningBonus":200000.0,"waterPack":0,"produceBottle":209625.0,"produceGlass":0,"otPay":0,"driverPay":0,"noAbsenceBonus":0,"dedForgotScan":0,"dedLate":0,"dedAbsent":2019230.77,"teamDeposit":50000.0,"socialSecurity":0,"advance":0,"damageComp":0,"honestyIns":0,"otherDed":0,"note":"","bankName":"KHONESAVANH PARXAIVORLAVONG MR","bankAcc":"0911243547686"},{"code":"ທ ຕ່ອງ","name":"ທ ຕ່ອງ","dept":"ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ","workDays":26.0,"forgotScan":0,"lateHrs":0,"absentDays":0,"otHours":0,"baseSalary":3000000.0,"morningBonus":200000.0,"waterPack":0,"produceBottle":294617.0,"produceGlass":0,"otPay":0,"driverPay":0,"noAbsenceBonus":0,"dedForgotScan":0,"dedLate":0,"dedAbsent":0,"teamDeposit":50000.0,"socialSecurity":0,"advance":200000.0,"damageComp":0,"honestyIns":0,"otherDed":0,"note":"ເບີກກ່ອນ","bankName":"","bankAcc":""},{"code":"ທ ນາວ","name":"ທ ນາວ","dept":"ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ","workDays":26.0,"forgotScan":0,"lateHrs":0,"absentDays":0,"otHours":0,"baseSalary":3000000.0,"morningBonus":200000.0,"waterPack":0,"produceBottle":362513.0,"produceGlass":0,"otPay":0,"driverPay":0,"noAbsenceBonus":0,"dedForgotScan":0,"dedLate":0,"dedAbsent":0,"teamDeposit":50000.0,"socialSecurity":0,"advance":0,"damageComp":0,"honestyIns":0,"otherDed":0,"note":"","bankName":"PHONETHEVA SOUNAMVONG MR","bankAcc":"034120001845348001"},{"code":"ທ  ໜຶ່ງ","name":"ທ ໜຶ່ງ","dept":"ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ","workDays":26.0,"forgotScan":0,"lateHrs":0,"absentDays":0,"otHours":0,"baseSalary":3000000.0,"morningBonus":200000.0,"waterPack":0,"produceBottle":1166250.0,"produceGlass":67500.0,"otPay":0,"driverPay":0,"noAbsenceBonus":300000.0,"dedForgotScan":0,"dedLate":0,"dedAbsent":0,"teamDeposit":50000.0,"socialSecurity":0,"advance":0,"damageComp":262500.0,"honestyIns":0,"otherDed":0,"note":"","bankName":"KHONESAVANH SIHALATH MS","bankAcc":"2221209861689"},{"code":"ທ ຕ່ິກ","name":"ທ ຕິກ","dept":"ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ","workDays":26.0,"forgotScan":0,"lateHrs":0,"absentDays":0,"otHours":0,"baseSalary":3000000.0,"morningBonus":200000.0,"waterPack":0,"produceBottle":781134.0,"produceGlass":0,"otPay":0,"driverPay":0,"noAbsenceBonus":300000.0,"dedForgotScan":0,"dedLate":0,"dedAbsent":0,"teamDeposit":50000.0,"socialSecurity":0,"advance":0,"damageComp":0,"honestyIns":0,"otherDed":0,"note":"","bankName":"TIK DALAVONG","bankAcc":"631236268236"},{"code":"ທ ຄ່ອງ","name":"ທ ຄ່ອງ","dept":"ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ","workDays":26.0,"forgotScan":0,"lateHrs":0,"absentDays":0,"otHours":0,"baseSalary":3000000.0,"morningBonus":200000.0,"waterPack":0,"produceBottle":364283.0,"produceGlass":0,"otPay":0,"driverPay":0,"noAbsenceBonus":300000.0,"dedForgotScan":0,"dedLate":0,"dedAbsent":0,"teamDeposit":50000.0,"socialSecurity":0,"advance":0,"damageComp":0,"honestyIns":0,"otherDed":0,"note":"","bankName":"LOUNPHONE PHOUTTHAVONG MR","bankAcc":"1631205667935"},{"code":"ທ ອອຍ","name":"ທ ອອຍ","dept":"ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ","workDays":26.0,"forgotScan":0,"lateHrs":0,"absentDays":0,"otHours":0,"baseSalary":3000000.0,"morningBonus":200000.0,"waterPack":0,"produceBottle":955500.0,"produceGlass":793500.0,"otPay":0,"driverPay":0,"noAbsenceBonus":300000.0,"dedForgotScan":0,"dedLate":0,"dedAbsent":0,"teamDeposit":50000.0,"socialSecurity":0,"advance":0,"damageComp":0,"honestyIns":0,"otherDed":0,"note":"","bankName":"KHONESAVANH SIHALATH MS","bankAcc":"2221209861689"},{"code":"ທ ສົງ","name":"ທ ສົງ","dept":"ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ","workDays":26.0,"forgotScan":0,"lateHrs":0,"absentDays":22.0,"otHours":0,"baseSalary":3000000.0,"morningBonus":0,"waterPack":0,"produceBottle":85500.0,"produceGlass":0,"otPay":0,"driverPay":0,"noAbsenceBonus":0,"dedForgotScan":0,"dedLate":0,"dedAbsent":2538461.54,"teamDeposit":0,"socialSecurity":0,"advance":0,"damageComp":0,"honestyIns":0,"otherDed":0,"note":"","bankName":"","bankAcc":""}]/*__END__*/;
+const DEPARTMENTS_SEED = ['ພະແນກທຸລະກິດ','ພະແນກບຸກຄະລາກອນ ແລະ ບໍລິຫານ','ພະແນກການເງິນ ແລະ ການບັນຊີ','ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ','ພະແນກໂຮງງານຜະລິດ','ພະແນກໄອທີ','ຊີ້ນຳລວມອົງກອນ','ຊີ້ນຳສະເພາະ','ໜ່ວຍງານກວດກາ','ທີ່ປຶກສາ'];
+const POSITIONS_SEED = ['ຜູ້ອຳນວຍການໃຫຍ່','ອຳນວຍການຝ່າຍ','ຜູ້ຊ່ວຍອຳນວຍການ','ຫົວໜ້າພະແນກ','ຫົວໜ້າໜ່ວຍງານ','ວິຊາການບໍລິຫານ','ວິຊາການການຂາຍ','ວິຊາການບັນຊີ','ວິຊາການໄອທີ','ຂັບລົດ','ແຮງງານ'];
+const CFG_DEFAULT = { otRate:25000, lateRatePerHr:20000, forgotScanFee:20000, teamDeposit:50000,
+  workdaysStd:26, morningDefault:200000, noAbsenceDefault:300000, syncUrl:'', autoSync:false,
+  departments:[...DEPARTMENTS_SEED], positions:[...POSITIONS_SEED],
+  leaveTypes:[
+    {k:'annual',   name:'ລາພັກປະຈຳປີ', color:'#0d4ea6', quota:15},
+    {k:'sick',     name:'ລາປ່ວຍ', color:'#1a9d5a', quota:30},
+    {k:'personal', name:'ລາກິຈ', color:'#c8871a', quota:3},
+  ] };
+function LT(){ return cfg().leaveTypes || []; }
+const money = n => (Math.round(n||0)).toLocaleString('en-US');
+const K = n => money(n)+' ₭';
+
+/* ---- persistence ---- */
+const LS='variHR_v1';
+let DB = load();
+function load(){
+  let d=null;
+  try{ d=JSON.parse(localStorage.getItem(LS)); }catch(e){}
+  if(!d||!d.months) d={ cfg:{}, months:{}, leave:[] };
+  d.cfg={...CFG_DEFAULT,...(d.cfg||{})};
+  if(!Array.isArray(d.cfg.leaveTypes)||!d.cfg.leaveTypes.length) d.cfg.leaveTypes=CFG_DEFAULT.leaveTypes.map(x=>({...x}));
+  if(!Array.isArray(d.cfg.departments)||!d.cfg.departments.length) d.cfg.departments=[...CFG_DEFAULT.departments];
+  if(!Array.isArray(d.cfg.positions)||!d.cfg.positions.length) d.cfg.positions=[...CFG_DEFAULT.positions];
+  const fixLao=s=>(''+s).replace('ອໄນວຍ','ອຳນວຍ').replace('ຫົວໃນ້','ຫົວໜ້າ').replace('ຫ່ວຍງານ','ໜ່ວຍງານ');
+  d.cfg.departments=d.cfg.departments.map(fixLao); d.cfg.positions=d.cfg.positions.map(fixLao);
+  if(!Array.isArray(d.leave)) d.leave=[];
+  return d;
+}
+let _lastEdit=0,_autoT=null;
+function save(){ try{ localStorage.setItem(LS,JSON.stringify(DB)); }catch(e){} _lastEdit=Date.now(); scheduleAuto(); flashSaved(); }
+function scheduleAuto(){ if(!DB.cfg.autoSync||!DB.cfg.syncUrl) return; clearTimeout(_autoT); _autoT=setTimeout(()=>syncPush(true),1600); }
+function flashSaved(){ const s=document.getElementById('saveState'); s.textContent='ບັນທຶກແລ້ວ ✓'; clearTimeout(flashSaved._t); flashSaved._t=setTimeout(()=>s.textContent='ບັນທຶກອັດຕະໂນມັດ',1400); }
+
+let CURMONTH = defaultMonth();
+function defaultMonth(){ return '2026-07'; }
+function monthLabel(m){ const [y,mo]=m.split('-'); const names=['ມັງກອນ','ກຸມພາ','ມີນາ','ເມສາ','ພຶດສະພາ','ມິຖຸນາ','ກໍລະກົດ','ສິງຫາ','ກັນຍາ','ຕຸລາ','ພະຈິກ','ທັນວາ']; return names[+mo-1]+' '+y; }
+
+/* month data = clone of seed on first open, else stored */
+function monthData(){
+  if(!DB.months[CURMONTH]){
+    DB.months[CURMONTH] = JSON.parse(JSON.stringify(SEED)).map((e,i)=>({...e,_id:e.code+'#'+i}));
+    save();
+  }
+  return DB.months[CURMONTH];
+}
+function cfg(){ return DB.cfg; }
+
+/* ================= COMPUTE ================= */
+function tax(t){
+  if(t<=2500000) return 0;
+  if(t<=5000000) return (t-2500000)*0.05;
+  if(t<=15000000) return 125000+(t-5000000)*0.10;
+  if(t<=25000000) return 1125000+(t-15000000)*0.15;
+  if(t<=65000000) return 2625000+(t-25000000)*0.20;
+  return 10625000+(t-65000000)*0.25;
+}
+function compute(e){
+  const income = num(e.baseSalary)+num(e.morningBonus)+num(e.waterPack)+num(e.produceBottle)
+    +num(e.produceGlass)+num(e.otPay)+num(e.driverPay)+num(e.noAbsenceBonus);
+  const preTaxDed = num(e.dedForgotScan)+num(e.dedLate)+num(e.dedAbsent)+num(e.teamDeposit)+num(e.socialSecurity);
+  const taxable = income - preTaxDed;
+  const incomeTax = tax(taxable);
+  const afterTax = taxable - incomeTax;
+  const postTaxDed = num(e.advance)+num(e.damageComp)+num(e.honestyIns)+num(e.otherDed);
+  const net = afterTax - postTaxDed;
+  const totalDed = preTaxDed + incomeTax + postTaxDed;
+  return {income,preTaxDed,taxable,incomeTax,afterTax,postTaxDed,net,totalDed};
+}
+function num(v){ v=parseFloat(v); return isFinite(v)?v:0; }
+function initials(name){ const s=(name||'').replace(/^(ທ\.?|ນ\.?)\s*/,'').trim(); return (s[0]||'?'); }
+
+/* ================= ROUTER ================= */
+const TABS=[
+  {id:'dash',    ico:'📊', name:'ໜ້າຫຼັກ'},
+  {id:'emp',     ico:'👥', name:'ພະນັກງານ'},
+  {id:'work',    ico:'🕓', name:'ຕິດຕາມການເຮັດວຽກ'},
+  {id:'calc',    ico:'🧮', name:'ຄິດໄລ່ຜົນຕອບແທນ'},
+  {id:'leave',   ico:'🌴', name:'ລາພັກ-ລາກິດ'},
+  {id:'welfare', ico:'🎁', name:'ສະຫວັດດີການ'},
+  {id:'summary', ico:'📄', name:'ສະຫຼຸບປະຈຳເດືອນ'},
+  {id:'settings',ico:'⚙️', name:'ຕັ້ງຄ່າ / Sync'},
+];
+let CUR='dash';
+function buildNav(){
+  const nav=document.getElementById('nav');
+  nav.innerHTML=TABS.map(t=>`<button data-tab="${t.id}"><span class="ico">${t.ico}</span>${t.name}</button>`).join('');
+  nav.querySelectorAll('button').forEach(b=>b.onclick=()=>go(b.dataset.tab));
+}
+function go(id){
+  CUR=id;
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg=document.getElementById('pg-'+id); pg.classList.add('active');
+  ({dash:renderDash,emp:renderEmp,work:renderWork,calc:renderCalc,leave:renderLeave,welfare:renderWelfare,summary:renderSummary,settings:renderSettings})[id]();
+}
+
+/* ================= DASHBOARD ================= */
+function renderDash(){
+  const list=monthData().filter(e=>num(e.baseSalary)>0 && inDept(e));
+  const rows=list.map(e=>({e,c:compute(e)}));
+  if(!list.length){ document.getElementById('pg-dash').innerHTML=`
+    <div class="page-head"><div><h2>ໜ້າຫຼັກ · ພາບລວມ</h2><p>ຍັງບໍ່ມີຂໍ້ມູນພະນັກງານ</p></div></div>
+    <div class="card card-pad"><div class="empty"><div class="big">☁️</div>
+      <h3 style="margin:8px 0">ຍັງບໍ່ມີຂໍ້ມູນ</h3>
+      <p style="max-width:460px;margin:6px auto 16px">ໄປທີ່ແທັບ <b>⚙️ ຕັ້ງຄ່າ / Sync</b> ໃສ່ລິ້ງ Google Sheets (Apps Script) ແລ້ວກົດ <b>ດຶງຂໍ້ມູນລົງ</b> ເພື່ອໂຫຼດຂໍ້ມູນພະນັກງານ · ຫຼື ເພີ່ມພະນັກງານໃໝ່ທີ່ແທັບ 👥 ພະນັກງານ</p>
+      <button class="btn primary" onclick="go('settings')">⚙️ ໄປໜ້າຕັ້ງຄ່າ / Sync</button>
+    </div></div>`; return; }
+  const totNet=rows.reduce((a,r)=>a+r.c.net,0);
+  const totIncome=rows.reduce((a,r)=>a+r.c.income,0);
+  const totDed=rows.reduce((a,r)=>a+r.c.totalDed,0);
+  const totTax=rows.reduce((a,r)=>a+r.c.incomeTax,0);
+  const totAbsent=list.reduce((a,e)=>a+num(e.absentDays),0);
+  const avgAtt=list.length? (100*(1 - totAbsent/(list.length*cfg().workdaysStd))) :100;
+
+  const top=[...rows].sort((a,b)=>b.c.net-a.c.net).slice(0,10);
+  const maxNet=Math.max(...top.map(r=>r.c.net),1);
+
+  // deduction breakdown
+  const dbrk=[
+    {n:'ອາກອນເງິນເດືອນ',v:rows.reduce((a,r)=>a+r.c.incomeTax,0),c:'#0d4ea6'},
+    {n:'ປະກັນສັງຄົມ',v:list.reduce((a,e)=>a+num(e.socialSecurity),0),c:'#1a9d5a'},
+    {n:'ຂາດວຽກ',v:list.reduce((a,e)=>a+num(e.dedAbsent),0),c:'#d64545'},
+    {n:'ຝາກທີມຂົນສົ່ງ',v:list.reduce((a,e)=>a+num(e.teamDeposit),0),c:'#c8871a'},
+    {n:'ເບີກກ່ອນ/ອື່ນໆ',v:list.reduce((a,e)=>a+num(e.advance)+num(e.damageComp)+num(e.honestyIns)+num(e.otherDed),0),c:'#7a4dbd'},
+  ].filter(x=>x.v>0);
+
+  document.getElementById('pg-dash').innerHTML=`
+    <div class="page-head"><div><h2>ໜ້າຫຼັກ · ພາບລວມ</h2><p>ສະຫຼຸບຂໍ້ມູນຄ່າຕອບແທນ ແລະ ການເຮັດວຽກ ປະຈຳເດືອນ ${monthLabel(CURMONTH)}</p></div></div>
+    <div class="grid kpis">
+      ${kpi('ພະນັກງານທັງໝົດ',list.length+' ຄົນ','ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ','👥','b-blue')}
+      ${kpi('ລວມຈ່າຍສຸດທິ',K(totNet),'ຫຼັງຫັກທັງໝົດ','💰','b-green')}
+      ${kpi('ລວມລາຍຮັບກ່ອນຫັກ',K(totIncome),'ລວມທຸກລາຍການ','📈','b-blue')}
+      ${kpi('ລວມເງິນຫັກ',K(totDed),'ລວມອາກອນ+ປະກັນ+ອື່ນໆ','➖','b-red')}
+      ${kpi('ລວມອາກອນ',K(totTax),'ຈ່າຍໃຫ້ລັດ','🏛️','b-amber')}
+      ${kpi('ອັດຕາການມາເຮັດວຽກ',avgAtt.toFixed(1)+'%','ຂາດວຽກລວມ '+totAbsent+' ມື້','✅','b-purple')}
+    </div>
+
+    <div class="sec-title"><h3>💵 ຄ່າຕອບແທນສຸດທິ · Top ${top.length}</h3><span class="hint">ຄລິກ "ຄິດໄລ່ຜົນຕອບແທນ" ເພື່ອແກ້ໄຂ</span></div>
+    <div class="card card-pad">
+      ${top.map(r=>`<div class="bar-row"><div class="nm">${r.e.name}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.max(6,100*r.c.net/maxNet)}%"></div></div>
+        <div class="amt">${money(r.c.net)}</div></div>`).join('')}
+    </div>
+
+    <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:16px">
+      <div class="card card-pad">
+        <div class="sec-title" style="margin:0 0 14px"><h3>➗ ອັດຕາສ່ວນເງິນຫັກ</h3></div>
+        ${donut(dbrk)}
+      </div>
+      <div class="card card-pad">
+        <div class="sec-title" style="margin:0 0 14px"><h3>⚠️ ຕ້ອງຕິດຕາມ</h3></div>
+        ${attentionList(list)}
+      </div>
+    </div>`;
+}
+function kpi(lab,val,sub,ico,cls){
+  return `<div class="kpi"><div class="lab">${lab}</div><div class="val">${val}</div><div class="sub">${sub}</div><div class="badge ${cls}">${ico}</div></div>`;
+}
+function donut(items){
+  const tot=items.reduce((a,i)=>a+i.v,0)||1;
+  let acc=0; const R=54,C=2*Math.PI*R;
+  const segs=items.map(i=>{const frac=i.v/tot;const seg=`<circle r="${R}" cx="70" cy="70" fill="none" stroke="${i.c}" stroke-width="24" stroke-dasharray="${frac*C} ${C}" stroke-dashoffset="${-acc*C}" transform="rotate(-90 70 70)"/>`;acc+=frac;return seg;}).join('');
+  return `<div class="donut-wrap">
+    <svg width="140" height="140" viewBox="0 0 140 140">${segs}<circle r="40" cx="70" cy="70" fill="#fff"/><text x="70" y="66" text-anchor="middle" font-size="11" fill="#6b7c93">ລວມຫັກ</text><text x="70" y="84" text-anchor="middle" font-size="13" font-weight="700" fill="#12233d">${(tot/1e6).toFixed(1)}ລ້ານ</text></svg>
+    <div class="legend">${items.map(i=>`<div class="li"><span class="sw" style="background:${i.c}"></span>${i.n}<b>${money(i.v)}</b></div>`).join('')}</div>
+  </div>`;
+}
+function attentionList(list){
+  const items=[];
+  list.forEach(e=>{
+    if(num(e.absentDays)>0) items.push(`<div class="f-row"><span class="person"><span class="av" style="background:#d64545">${initials(e.name)}</span>${e.name}</span><span class="pill bad">ຂາດ ${num(e.absentDays)} ມື້</span></div>`);
+    if(num(e.advance)>0) items.push(`<div class="f-row"><span class="person"><span class="av" style="background:#c8871a">${initials(e.name)}</span>${e.name}</span><span class="pill warn">ເບີກກ່ອນ ${money(e.advance)}</span></div>`);
+    if(!e.bankAcc) items.push(`<div class="f-row"><span class="person"><span class="av" style="background:#6b7c93">${initials(e.name)}</span>${e.name}</span><span class="pill info">ຍັງບໍ່ມີເລກບັນຊີ</span></div>`);
+  });
+  return items.length? items.slice(0,12).join('') : `<div class="empty"><div class="big">🎉</div>ບໍ່ມີລາຍການທີ່ຕ້ອງຕິດຕາມ</div>`;
+}
+
+/* ================= EMPLOYEES ================= */
+let empSearch='';
+function renderEmp(){
+  const data=monthData();
+  const q=empSearch.toLowerCase();
+  const list=data.filter(e=>(e.name+e.code).toLowerCase().includes(q));
+  document.getElementById('pg-emp').innerHTML=`
+    <div class="page-head"><div><h2>ພະນັກງານ</h2><p>ຈັດການຂໍ້ມູນພະນັກງານ · ${data.length} ຄົນ</p></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" onclick="empModal()">＋ ເພີ່ມພະນັກງານ</button><label class="btn" style="margin:0;cursor:pointer"><input type="file" accept=".csv" style="display:none" onchange="onImportFile(this)">📥 ອັບໂຫຼດ CSV</label><button class="btn" onclick="exportFull()">⬇ ດາວໂຫຼດ CSV</button></div></div>
+    <div class="toolbar"><div class="search"><span class="mag">🔍</span><input placeholder="ຄົ້ນຫາຊື່ ຫຼື ລະຫັດ..." value="${empSearch}" oninput="empSearch=this.value;renderEmp()"></div></div>
+    <div class="card tbl-wrap"><table>
+      <thead><tr><th class="l">ຊື່ ແລະ ນາມສະກຸນ</th><th class="l">ລະຫັດ</th><th class="l">ພະແນກ</th><th class="l">ຕໍາແໜ່ງ</th><th>ເງິນເດືອນພື້ນຖານ</th><th class="l">ຊື່ບັນຊີ BCEL</th><th class="l">ເລກບັນຊີ</th><th></th></tr></thead>
+      <tbody>${list.map((e,i)=>{const idx=data.indexOf(e);return `<tr>
+        <td class="l"><span class="person"><span class="av">${initials(e.name)}</span><input class="cell wide" style="text-align:left" value="${(e.name||'').replace(/"/g,'&quot;')}" onchange="empEdit(${idx},'name',this.value)"></span></td>
+        <td class="l"><input class="cell" style="text-align:left;width:120px" value="${(e.code||'').replace(/"/g,'&quot;')}" onchange="empEdit(${idx},'code',this.value)"></td>
+        <td class="l">${optsSel2(idx,'dept',cfg().departments,e.dept)}</td>
+        <td class="l">${optsSel2(idx,'position',cfg().positions,e.position)}</td>
+        <td><input class="cell wide" type="number" value="${num(e.baseSalary)}" onchange="empEdit(${idx},'baseSalary',this.value)"></td>
+        <td class="l"><input class="cell wide" style="text-align:left" value="${(e.bankName||'').replace(/"/g,'&quot;')}" onchange="empEdit(${idx},'bankName',this.value)"></td>
+        <td class="l"><input class="cell wide" style="text-align:left" value="${(e.bankAcc||'').replace(/"/g,'&quot;')}" onchange="empEdit(${idx},'bankAcc',this.value)"></td>
+        <td><button class="btn sm ghost" onclick="empModal(${idx})" title="ລາຍລະອຽດ">⋯</button> <button class="btn sm danger ghost" onclick="empDel(${idx})">🗑</button></td>
+      </tr>`;}).join('')||`<tr><td colspan="8"><div class="empty"><div class="big">🔍</div>ບໍ່ພົບພະນັກງານ</div></td></tr>`}</tbody>
+    </table></div>`;
+}
+function empModal(idx){
+  const data=monthData();
+  const e = idx==null? {code:'',name:'',dept:'ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ',baseSalary:0,morningBonus:cfg().morningDefault,noAbsenceBonus:cfg().noAbsenceDefault,socialSecurity:82500,teamDeposit:cfg().teamDeposit,bankName:'',bankAcc:'',workDays:cfg().workdaysStd} : data[idx];
+  openModal(`
+    <div class="modal-head"><h3>${idx==null?'ເພີ່ມພະນັກງານໃໝ່':'ແກ້ໄຂພະນັກງານ'}</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <div class="grid2">
+        <div class="field"><label>ຊື່ ແລະ ນາມສະກຸນ</label><input id="m_name" value="${e.name||''}"></div>
+        <div class="field"><label>ລະຫັດ / ຊື່ຫຼິ້ນ</label><input id="m_code" value="${e.code||''}"></div>
+      </div>
+      <div class="field"><label>ພະແນກ</label>${optsSel('m_dept',cfg().departments,e.dept)}</div><div class="field"><label>ຕໍາແໜ່ງ</label>${optsSel('m_pos',cfg().positions,e.position)}</div>
+      <div class="grid2">
+        <div class="field"><label>ເງິນເດືອນພື້ນຖານ (₭)</label><input id="m_base" type="number" value="${e.baseSalary||0}"></div>
+        <div class="field"><label>ມື້ເຮັດວຽກ/ເດືອນ</label><input id="m_wd" type="number" value="${e.workDays||26}"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>ຊື່ບັນຊີ BCEL</label><input id="m_bn" value="${e.bankName||''}"></div>
+        <div class="field"><label>ເລກບັນຊີ</label><input id="m_ba" value="${e.bankAcc||''}"></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn ghost" onclick="closeModal()">ຍົກເລີກ</button><button class="btn primary" onclick="empSave(${idx==null?'null':idx})">ບັນທຶກ</button></div>`);
+}
+function empSave(idx){
+  const data=monthData();
+  const g=id=>document.getElementById(id).value;
+  const rec={code:g('m_code')||g('m_name'),name:g('m_name'),dept:g('m_dept'),position:g('m_pos'),baseSalary:num(g('m_base')),workDays:num(g('m_wd')),bankName:g('m_bn'),bankAcc:g('m_ba')};
+  if(idx==null){ data.push({...{morningBonus:cfg().morningDefault,waterPack:0,produceBottle:0,produceGlass:0,otPay:0,driverPay:0,noAbsenceBonus:cfg().noAbsenceDefault,forgotScan:0,lateHrs:0,absentDays:0,otHours:0,dedForgotScan:0,dedLate:0,dedAbsent:0,teamDeposit:cfg().teamDeposit,socialSecurity:82500,advance:0,damageComp:0,honestyIns:0,otherDed:0,note:''},...rec,_id:rec.code+'#'+Date.now()}); }
+  else data[idx]={...data[idx],...rec};
+  save(); closeModal(); renderEmp();
+}
+function empDel(idx){ uiConfirm('ລົບພະນັກງານຄົນນີ້ອອກຈາກເດືອນ '+monthLabel(CURMONTH)+' ?',()=>{ monthData().splice(idx,1); save(); renderEmp(); }); }
+
+/* ================= WORK TRACKING ================= */
+function renderWork(){
+  const data=monthData().filter(e=>num(e.baseSalary)>0);
+  document.getElementById('pg-work').innerHTML=`
+    <div class="page-head"><div><h2>ຕິດຕາມການເຮັດວຽກ</h2><p>ບັນທຶກ ມື້ເຮັດວຽກ · ມາຊ້າ · ລືມສະແກນ · ຂາດວຽກ · OT — ລະບົບຄິດໄລ່ເງິນຫັກໃຫ້ອັດຕະໂນມັດ</p></div></div>
+    <div class="note-banner">💡 <div>ພິມໂຕເລກໃນຊ່ອງໄດ້ເລີຍ ລະບົບຈະຄິດໄລ່ "ຫັກຂາດວຽກ = ເງິນເດືອນ÷${cfg().workdaysStd}×ມື້ຂາດ", "ຫັກມາຊ້າ", "ຫັກລືມສະແກນ" ໃຫ້ອັດຕະໂນມັດ ແລ້ວໄປສະແດງທີ່ໜ້າຄິດໄລ່ຜົນຕອບແທນ</div></div>
+    <div class="card tbl-wrap"><table>
+      <thead><tr><th class="l">ພະນັກງານ</th><th>ມື້ເຮັດວຽກ</th><th>ຂາດວຽກ(ມື້)</th><th>ມາຊ້າ(ຊມ.)</th><th>ລືມສະແກນ(ຄັ້ງ)</th><th>OT(ຊມ.)</th><th>ຫັກຂາດວຽກ</th><th>ຫັກມາຊ້າ</th><th>ຫັກລືມສະແກນ</th><th>OT ໄດ້ຮັບ</th></tr></thead>
+      <tbody>${data.map(e=>{const idx=monthData().indexOf(e);
+        return `<tr>
+        <td class="l"><span class="person"><span class="av">${initials(e.name)}</span>${e.name}</span></td>
+        <td><input class="cell" type="number" value="${e.workDays||26}" onchange="workEdit(${idx},'workDays',this.value)"></td>
+        <td><input class="cell" type="number" value="${e.absentDays||0}" onchange="workEdit(${idx},'absentDays',this.value)"></td>
+        <td><input class="cell" type="number" value="${e.lateHrs||0}" onchange="workEdit(${idx},'lateHrs',this.value)"></td>
+        <td><input class="cell" type="number" value="${e.forgotScan||0}" onchange="workEdit(${idx},'forgotScan',this.value)"></td>
+        <td><input class="cell" type="number" value="${e.otHours||0}" onchange="workEdit(${idx},'otHours',this.value)"></td>
+        <td class="num neg">${money(e.dedAbsent)}</td>
+        <td class="num neg">${money(e.dedLate)}</td>
+        <td class="num neg">${money(e.dedForgotScan)}</td>
+        <td class="num pos">${money(e.otPay)}</td>
+      </tr>`;}).join('')}</tbody>
+    </table></div>`;
+}
+function workEdit(idx,field,val){
+  const e=monthData()[idx]; e[field]=num(val);
+  // recompute derived
+  e.dedAbsent = Math.round(num(e.baseSalary)/(num(e.workDays)||26)*num(e.absentDays));
+  e.dedLate = Math.round(num(e.lateHrs)*cfg().lateRatePerHr);
+  e.dedForgotScan = Math.round(num(e.forgotScan)*cfg().forgotScanFee);
+  e.otPay = Math.round(num(e.otHours)*cfg().otRate);
+  save(); renderWork();
+}
+
+/* ================= CALCULATOR ================= */
+let calcSel=0;
+function renderCalc(){
+  const data=monthData();
+  if(calcSel>=data.length) calcSel=0;
+  const e=data[calcSel]; if(!e){document.getElementById('pg-calc').innerHTML='<div class="empty">ບໍ່ມີຂໍ້ມູນ</div>';return;}
+  const c=compute(e);
+  const opt=data.map((x,i)=>`<option value="${i}" ${i===calcSel?'selected':''}>${x.name}</option>`).join('');
+  const F=(lab,field,ro)=> `<div class="f-row"><label>${lab}</label>${ro?`<div class="in ro" style="width:150px">${money(e[field])}</div>`:`<input class="in" style="width:150px" type="number" value="${num(e[field])}" onchange="calcEdit('${field}',this.value)">`}</div>`;
+  document.getElementById('pg-calc').innerHTML=`
+    <div class="page-head"><div><h2>ຄິດໄລ່ຜົນຕອບແທນ</h2><p>ປັບໂຕເລກໄດ້ທັນທີ · ລະບົບຄິດໄລ່ ອາກອນ ແລະ ລາຍໄດ້ສຸດທິ ຕາມສູດຂອງບໍລິສັດ</p></div>
+      <button class="btn primary" onclick="printPayslip(${calcSel})">🖨 ພິມ Payslip</button></div>
+    <div class="toolbar"><span class="person"><span class="av">${initials(e.name)}</span></span>
+      <select class="in" style="width:auto;text-align:left;font-weight:600" onchange="calcSel=+this.value;renderCalc()">${opt}</select>
+      <span class="code-chip">${e.code}</span><span class="pill info">${e.dept||''}</span></div>
+    <div class="calc-grid">
+      <div class="card card-pad pay-col">
+        <h4>➕ ລາຍຮັບ</h4>
+        ${F('ເງິນເດືອນພື້ນຖານ','baseSalary')}
+        ${F('ເງິນມາເຊົ້າ','morningBonus')}
+        ${F('ນ້ຳແພັກ','waterPack')}
+        ${F('ຍອດຜະລິດ/ຈັດສົ່ງ ຕຸກ 18L','produceBottle')}
+        ${F('ຍອດຜະລິດ/ຈັດສົ່ງ ລັງແກ້ວ','produceGlass')}
+        ${F('ເງິນໂຊເຟີ','driverPay')}
+        ${F('ເງິນ OT ລ່ວງເວລາ','otPay')}
+        ${F('ບໍ່ຂາດວຽກ (ບໍ່ຂາດວຽກ)','noAbsenceBonus')}
+        <div class="total-line"><span>ລວມລາຍຮັບ</span><span class="num pos">${K(c.income)}</span></div>
+      </div>
+      <div class="card card-pad pay-col">
+        <h4>➖ ລາຍການຫັກ</h4>
+        ${F('ຫັກລືມສະແກນ','dedForgotScan')}
+        ${F('ຫັກມາຊ້າ-ອອກກ່ອນ','dedLate')}
+        ${F('ຫັກຂາດວຽກ','dedAbsent')}
+        ${F('ຫັກຝາກທີມຂົນສົ່ງ','teamDeposit')}
+        ${F('ຫັກປະກັນສັງຄົມ','socialSecurity')}
+        <div class="f-row"><label>ລາຍໄດ້ກ່ອນອາກອນ (ຕ້ອງເສຍພາສີ)</label><div class="in ro" style="width:150px">${money(c.taxable)}</div></div>
+        ${F('ຫັກອາກອນເງິນເດືອນ','incomeTaxRO',true)}
+        ${F('ຫັກເບີກກ່ອນລ່ວງໜ້າ','advance')}
+        ${F('ຫັກຊົດເຊີຍຄ່າເສຍຫາຍ','damageComp')}
+        ${F('ຫັກປະກັນຄວາມຊື່ສັດ','honestyIns')}
+        ${F('ຫັກອື່ນໆ','otherDed')}
+        <div class="total-line"><span>ລວມເງິນຫັກທັງໝົດ</span><span class="num neg">${K(c.totalDed)}</span></div>
+      </div>
+    </div>
+    <div class="grand"><div><div class="lab">💰 ລາຍໄດ້ສຸດທິທີ່ໄດ້ຮັບແທ້ · ${monthLabel(CURMONTH)}</div><div style="font-size:12px;opacity:.85;margin-top:3px">ອາກອນຄິດໄລ່ອັດຕະໂນມັດ: ${K(c.incomeTax)}</div></div><div class="amt">${K(c.net)}</div></div>`;
+}
+function calcEdit(field,val){
+  if(field==='incomeTaxRO') return;
+  monthData()[calcSel][field]=num(val); save(); renderCalc();
+}
+
+/* ================= LEAVE ================= */
+let leaveEmp='';
+function renderLeave(){
+  const emps=monthData().filter(inDept);
+  if((!leaveEmp||!emps.find(e=>e.name===leaveEmp)) && emps[0]) leaveEmp=emps[0].name;
+  const logs=DB.leave.filter(l=>l.name===leaveEmp).sort((a,b)=>b.from.localeCompare(a.from));
+  const used={}; LT().forEach(t=>used[t.k]=0);
+  DB.leave.filter(l=>l.name===leaveEmp && l.status==='ອະນຸມັດ').forEach(l=>used[l.type]+=num(l.days));
+  const opt=emps.map(e=>`<option ${e.name===leaveEmp?'selected':''}>${e.name}</option>`).join('');
+  document.getElementById('pg-leave').innerHTML=`
+    <div class="page-head"><div><h2>ລາພັກ-ລາກິດ</h2><p>ບັນທຶກ ແລະ ຕິດຕາມການລາ · ສິດວັນລາຄົງເຫຼືອລາຍຄົນ</p></div>
+      <button class="btn primary" onclick="leaveModal()">＋ ບັນທຶກການລາ</button></div>
+    <div class="toolbar"><span class="person"><span class="av">${initials(leaveEmp)}</span></span>
+      <select class="in" style="width:auto;text-align:left;font-weight:600" onchange="leaveEmp=this.value;renderLeave()">${opt}</select></div>
+    <div class="leave-cards">
+      ${LT().map(t=>{const q=t.quota;const rem=q-used[t.k];return `<div class="lv" style="background:linear-gradient(135deg,${t.color},${shade(t.color)})">
+        <div class="t">${t.name}</div><div class="n">${rem}<span style="font-size:15px;font-weight:500">/${q}</span></div><div class="d">ໃຊ້ໄປ ${used[t.k]} ມື້ · ເຫຼືອ ${rem} ມື້</div></div>`;}).join('')}
+    </div>
+    <div class="sec-title"><h3>📋 ປະຫວັດການລາ — ${leaveEmp}</h3></div>
+    <div class="card tbl-wrap"><table>
+      <thead><tr><th class="l">ປະເພດ</th><th class="l">ຕັ້ງແຕ່</th><th class="l">ຫາ</th><th>ຈຳນວນ(ມື້)</th><th class="l">ເຫດຜົນ</th><th class="l">ສະຖານະ</th><th></th></tr></thead>
+      <tbody>${logs.map((l,i)=>{const gi=DB.leave.indexOf(l);const tt=LT().find(x=>x.k===l.type);return `<tr>
+        <td class="l"><span class="pill" style="background:${tt.color}22;color:${tt.color}">${tt.name}</span></td>
+        <td class="l">${l.from}</td><td class="l">${l.to}</td><td class="num">${l.days}</td><td class="l">${l.reason||'-'}</td>
+        <td class="l">${statusPill(l.status)}</td>
+        <td><button class="btn sm ghost" onclick="leaveToggle(${gi})">↻</button> <button class="btn sm danger ghost" onclick="leaveDel(${gi})">🗑</button></td>
+      </tr>`;}).join('')||`<tr><td colspan="7"><div class="empty"><div class="big">🌴</div>ຍັງບໍ່ມີບັນທຶກການລາ</div></td></tr>`}</tbody>
+    </table></div>`;
+}
+function statusPill(s){ return s==='ອະນຸມັດ'?'<span class="pill ok">ອະນຸມັດ</span>':s==='ປະຕິເສດ'?'<span class="pill bad">ປະຕິເສດ</span>':'<span class="pill warn">ລໍຖ້າພິຈາລະນາ</span>'; }
+function shade(hex){ // darken
+  const n=parseInt(hex.slice(1),16); let r=(n>>16)-30,g=((n>>8)&255)-30,b=(n&255)-30;
+  return '#'+[r,g,b].map(x=>Math.max(0,x).toString(16).padStart(2,'0')).join('');
+}
+function leaveModal(){
+  const emps=monthData();
+  openModal(`<div class="modal-head"><h3>ບັນທຶກການລາ</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label>ພະນັກງານ</label><select id="l_name">${emps.map(e=>`<option ${e.name===leaveEmp?'selected':''}>${e.name}</option>`).join('')}</select></div>
+      <div class="field"><label>ປະເພດການລາ</label><select id="l_type">${LT().map(t=>`<option value="${t.k}">${t.name}</option>`).join('')}</select></div>
+      <div class="grid2">
+        <div class="field"><label>ຕັ້ງແຕ່ວັນທີ</label><input id="l_from" type="date"></div>
+        <div class="field"><label>ຫາວັນທີ</label><input id="l_to" type="date"></div>
+      </div>
+      <div class="field"><label>ຈຳນວນມື້</label><input id="l_days" type="number" value="1"></div>
+      <div class="field"><label>ເຫດຜົນ</label><input id="l_reason" placeholder="ເຊັ່ນ ລາກິດສ່ວນຕົວ"></div>
+      <div class="field"><label>ສະຖານະ</label><select id="l_status"><option>ລໍຖ້າພິຈາລະນາ</option><option>ອະນຸມັດ</option><option>ປະຕິເສດ</option></select></div>
+    </div>
+    <div class="modal-foot"><button class="btn ghost" onclick="closeModal()">ຍົກເລີກ</button><button class="btn primary" onclick="leaveSave()">ບັນທຶກ</button></div>`);
+  const f=document.getElementById('l_from'),t=document.getElementById('l_to');
+  f.value=CURMONTH+'-01'; t.value=CURMONTH+'-01';
+  const upd=()=>{ if(f.value&&t.value){const d=Math.max(1,Math.round((new Date(t.value)-new Date(f.value))/864e5)+1);document.getElementById('l_days').value=d;} };
+  f.onchange=upd; t.onchange=upd;
+}
+function leaveSave(){
+  const g=id=>document.getElementById(id).value;
+  DB.leave.push({name:g('l_name'),type:g('l_type'),from:g('l_from'),to:g('l_to'),days:num(g('l_days')),reason:g('l_reason'),status:g('l_status')});
+  leaveEmp=g('l_name'); save(); closeModal(); renderLeave();
+}
+function leaveToggle(i){ const order=['ລໍຖ້າພິຈາລະນາ','ອະນຸມັດ','ປະຕິເສດ']; const l=DB.leave[i]; l.status=order[(order.indexOf(l.status)+1)%3]; save(); renderLeave(); }
+function leaveDel(i){ uiConfirm('ລົບລາຍການລານີ້?',()=>{ DB.leave.splice(i,1); save(); renderLeave(); }); }
+
+/* ================= WELFARE ================= */
+function renderWelfare(){
+  const list=monthData().filter(e=>num(e.baseSalary)>0 && inDept(e));
+  const tMorning=list.reduce((a,e)=>a+num(e.morningBonus),0);
+  const tNoAbs=list.reduce((a,e)=>a+num(e.noAbsenceBonus),0);
+  const tSSO=list.reduce((a,e)=>a+num(e.socialSecurity),0);
+  const tDep=list.reduce((a,e)=>a+num(e.teamDeposit),0);
+  document.getElementById('pg-welfare').innerHTML=`
+    <div class="page-head"><div><h2>ສະຫວັດດີການ & ເງິນສົມທົບ</h2><p>ສະຫວັດດີການພະນັກງານ · ປະກັນສັງຄົມ · ເງິນຝາກທີມ · ໂບນັດຕ່າງໆ</p></div></div>
+    <div class="grid kpis">
+      ${kpi('ເງິນມາເຊົ້າ','☀️ '+K(tMorning),'ລວມທັງເດືອນ','☀️','b-amber')}
+      ${kpi('ໂບນັດບໍ່ຂາດວຽກ',K(tNoAbs),'ສຳລັບຜູ້ມາຄົບ','🏅','b-green')}
+      ${kpi('ປະກັນສັງຄົມ (ສົມທົບ)',K(tSSO),'ຫັກນຳສົ່ງ','🛡️','b-blue')}
+      ${kpi('ເງິນຝາກທີມຂົນສົ່ງ',K(tDep),'ສະສົມເປັນຫຼັກປະກັນ','🏦','b-purple')}
+    </div>
+    <div class="sec-title"><h3>🎁 ສະຫວັດດີການລາຍຄົນ</h3><span class="hint">ແກ້ໄຂໂຕເລກໄດ້ທີ່ໜ້າ "ຄິດໄລ່ຜົນຕອບແທນ"</span></div>
+    <div class="card tbl-wrap"><table>
+      <thead><tr><th class="l">ພະນັກງານ</th><th>ເງິນມາເຊົ້າ</th><th>ບໍ່ຂາດວຽກ</th><th>ປະກັນສັງຄົມ</th><th>ຝາກທີມຂົນສົ່ງ</th><th>ສະຫວັດດີການລວມ</th></tr></thead>
+      <tbody>${list.map(e=>{const w=num(e.morningBonus)+num(e.noAbsenceBonus);return `<tr>
+        <td class="l"><span class="person"><span class="av">${initials(e.name)}</span>${e.name}</span></td>
+        <td class="num">${money(e.morningBonus)}</td><td class="num">${money(e.noAbsenceBonus)}</td>
+        <td class="num">${money(e.socialSecurity)}</td><td class="num">${money(e.teamDeposit)}</td>
+        <td class="num pos">${money(w)}</td></tr>`;}).join('')}</tbody>
+      <tfoot><tr class="tfoot"><td class="l">ລວມ</td><td class="num">${money(tMorning)}</td><td class="num">${money(tNoAbs)}</td><td class="num">${money(tSSO)}</td><td class="num">${money(tDep)}</td><td class="num">${money(tMorning+tNoAbs)}</td></tr></tfoot>
+    </table></div>
+    <div class="note-banner" style="margin-top:16px">🏦 <div><b>ເງິນຝາກທີມຂົນສົ່ງ:</b> ຫັກ ${K(cfg().teamDeposit)}//ເດືອນ ເກັບເປັນຫຼັກປະກັນຂອງທີມ (ຄືນເມື່ອລາອອກໂດຍບໍ່ມີຄວາມເສຍຫາຍ) · <b>ເງິນມາເຊົ້າ</b> ໃຫ້ຜູ້ເຂົ້າວຽກເຊົ້າຕົງເວລາຕະຫຼອດເດືອນ · <b>ໂບນັດບໍ່ຂາດວຽກ</b> ໃຫ້ຜູ້ບໍ່ຂາດ-ບໍ່ຊ້າ</div></div>`;
+}
+
+/* ================= MONTHLY SUMMARY ================= */
+function renderSummary(){
+  const list=monthData().filter(e=>num(e.baseSalary)>0 && inDept(e));
+  const rows=list.map(e=>({e,c:compute(e)}));
+  const sum=f=>rows.reduce((a,r)=>a+(typeof f==='function'?f(r):num(r.e[f])),0);
+  document.getElementById('pg-summary').innerHTML=`
+    <div class="page-head"><div><h2>ສະຫຼຸບຜົນຕອບແທນປະຈຳເດືອນ</h2><p>ໃບສະຫຼຸບເງິນເດືອນທັງພະແນກ · ${monthLabel(CURMONTH)} · ${list.length} ຄົນ</p></div>
+      <div class="no-print" style="display:flex;gap:8px"><button class="btn" onclick="exportCSV()">⬇ CSV</button><button class="btn primary" onclick="window.print()">🖨 ພິມ</button></div></div>
+    <div class="card tbl-wrap"><table style="min-width:900px">
+      <thead><tr><th class="l">ພະນັກງານ</th><th>ເງິນເດືອນພື້ນຖານ</th><th>ຍອດຜະລິດ/ຈັດສົ່ງ</th><th>ສະຫວັດດີການ</th><th>ລວມລາຍຮັບ</th><th>ຫັກກ່ອນອາກອນ</th><th>ອາກອນ</th><th>ຫັກອື່ນໆ</th><th>ສຸດທິ</th></tr></thead>
+      <tbody>${rows.map(r=>{const e=r.e,c=r.c;const prod=num(e.produceBottle)+num(e.produceGlass)+num(e.driverPay)+num(e.otPay);const wf=num(e.morningBonus)+num(e.noAbsenceBonus)+num(e.waterPack);const other=num(e.advance)+num(e.damageComp)+num(e.honestyIns)+num(e.otherDed);return `<tr>
+        <td class="l"><span class="person"><span class="av">${initials(e.name)}</span><span>${e.name}<small>${e.code}</small></span></span></td>
+        <td class="num">${money(e.baseSalary)}</td><td class="num">${money(prod)}</td><td class="num">${money(wf)}</td>
+        <td class="num">${money(c.income)}</td><td class="num neg">${money(c.preTaxDed)}</td><td class="num neg">${money(c.incomeTax)}</td>
+        <td class="num neg">${money(other)}</td><td class="num pos"><b>${money(c.net)}</b></td></tr>`;}).join('')}</tbody>
+      <tfoot><tr class="tfoot"><td class="l">ລວມທັງພະແນກ (${list.length} ຄົນ)</td>
+        <td class="num">${money(sum('baseSalary'))}</td>
+        <td class="num">${money(sum(r=>num(r.e.produceBottle)+num(r.e.produceGlass)+num(r.e.driverPay)+num(r.e.otPay)))}</td>
+        <td class="num">${money(sum(r=>num(r.e.morningBonus)+num(r.e.noAbsenceBonus)+num(r.e.waterPack)))}</td>
+        <td class="num">${money(sum(r=>r.c.income))}</td>
+        <td class="num neg">${money(sum(r=>r.c.preTaxDed))}</td>
+        <td class="num neg">${money(sum(r=>r.c.incomeTax))}</td>
+        <td class="num neg">${money(sum(r=>num(r.e.advance)+num(r.e.damageComp)+num(r.e.honestyIns)+num(r.e.otherDed)))}</td>
+        <td class="num pos">${money(sum(r=>r.c.net))}</td></tr></tfoot>
+    </table></div>
+    <div class="sec-title"><h3>🖨 ພິມໃບເງິນເດືອນລາຍຄົນ (Payslip)</h3></div>
+    <div class="card card-pad" style="display:flex;flex-wrap:wrap;gap:8px">
+      ${list.map(e=>{const idx=monthData().indexOf(e);return `<button class="btn sm" onclick="printPayslip(${idx})">🧾 ${e.name}</button>`;}).join('')}
+    </div>`;
+}
+function exportCSV(){
+  const list=monthData().filter(e=>num(e.baseSalary)>0 && inDept(e));
+  const head=['ລຳດັບ','ລະຫັດ','ຊື່','ເງິນເດືອນພື້ນຖານ','ຍອດຜະລິດຈັດສົ່ງ','ສະຫວັດດີການ','ລວມລາຍຮັບ','ຫັກກ່ອນອາກອນ','ອາກອນ','ຫັກອື່ນໆ','ສຸດທິ','ຊື່ບັນຊີ','ເລກບັນຊີ'];
+  const lines=[head.join(',')];
+  list.forEach((e,i)=>{const c=compute(e);const prod=num(e.produceBottle)+num(e.produceGlass)+num(e.driverPay)+num(e.otPay);const wf=num(e.morningBonus)+num(e.noAbsenceBonus)+num(e.waterPack);const other=num(e.advance)+num(e.damageComp)+num(e.honestyIns)+num(e.otherDed);
+    lines.push([i+1,e.code,'"'+e.name+'"',e.baseSalary,prod,wf,Math.round(c.income),Math.round(c.preTaxDed),Math.round(c.incomeTax),other,Math.round(c.net),'"'+(e.bankName||'')+'"','="'+(e.bankAcc||'')+'"'].join(','));});
+  const blob=new Blob(['﻿'+lines.join('\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='NanyLogistic_payroll_'+CURMONTH+'.csv';a.click();
+}
+
+/* ================= PAYSLIP PRINT ================= */
+function printPayslip(idx){
+  const e=monthData()[idx]; const c=compute(e);
+  const row=(l,v,neg)=>`<tr><td style="padding:5px 8px">${l}</td><td style="padding:5px 8px;text-align:right;font-variant-numeric:tabular-nums;color:${neg?'#c00':'#000'}">${neg&&v?'('+money(v)+')':money(v)}</td></tr>`;
+  document.getElementById('printArea').innerHTML=`
+    <div style="max-width:720px;margin:0 auto;font-family:'Noto Sans Lao','Noto Sans Thai',sans-serif;padding:30px;color:#000">
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #0d4ea6;padding-bottom:14px;margin-bottom:18px">
+        <div style="display:flex;align-items:center;gap:12px"><div style="width:48px;height:48px;border-radius:12px;background:#0d4ea6;color:#fff;display:grid;place-items:center;font-weight:800;font-size:24px">N</div>
+        <div><div style="font-size:20px;font-weight:800">Nany Logistic</div><div style="color:#555;font-size:13px">ໃບແຈ້ງເງິນເດືອນ · Payslip</div></div></div>
+        <div style="text-align:right"><div style="font-weight:700">${monthLabel(CURMONTH)}</div><div style="color:#555;font-size:12px">ເລກທີ: /HRAD</div></div>
+      </div>
+      <table style="width:100%;font-size:13px;margin-bottom:14px"><tr>
+        <td style="padding:3px 0"><b>ພະນັກງານ:</b> ${e.name}</td><td style="padding:3px 0"><b>ລະຫັດ:</b> ${e.code}</td></tr>
+        <tr><td style="padding:3px 0"><b>ພະແນກ:</b> ${e.dept||'-'}</td><td style="padding:3px 0"><b>ມື້ເຮັດວຽກ:</b> ${e.workDays||26} ມື້</td></tr>
+        <tr><td style="padding:3px 0"><b>ບັນຊີ BCEL:</b> ${e.bankName||'-'}</td><td style="padding:3px 0"><b>ເລກບັນຊີ:</b> ${e.bankAcc||'-'}</td></tr>
+      </table>
+      <div style="display:flex;gap:16px">
+        <table style="flex:1;border:1px solid #ddd;border-collapse:collapse;font-size:13px"><thead><tr style="background:#e8f0fb"><th colspan="2" style="padding:8px;text-align:left;color:#0d4ea6">ລາຍຮັບ</th></tr></thead><tbody>
+          ${row('ເງິນເດືອນພື້ນຖານ',e.baseSalary)}${row('ເງິນມາເຊົ້າ',e.morningBonus)}${row('ຍອດຜະລິດ/ຈັດສົ່ງ ຕຸກ',e.produceBottle)}${row('ຍອດຜະລິດ/ຈັດສົ່ງ ລັງແກ້ວ',e.produceGlass)}${row('ເງິນໂຊເຟີ',e.driverPay)}${row('OT ລ່ວງເວລາ',e.otPay)}${row('ບໍ່ຂາດວຽກ',e.noAbsenceBonus)}${row('ນ້ຳແພັກ',e.waterPack)}
+          <tr style="background:#f4f8fe;font-weight:700"><td style="padding:7px 8px">ລວມລາຍຮັບ</td><td style="padding:7px 8px;text-align:right">${money(c.income)}</td></tr>
+        </tbody></table>
+        <table style="flex:1;border:1px solid #ddd;border-collapse:collapse;font-size:13px"><thead><tr style="background:#fdecec"><th colspan="2" style="padding:8px;text-align:left;color:#c00">ລາຍການຫັກ</th></tr></thead><tbody>
+          ${row('ຫັກລືມສະແກນ',e.dedForgotScan,1)}${row('ຫັກມາຊ້າ',e.dedLate,1)}${row('ຫັກຂາດວຽກ',e.dedAbsent,1)}${row('ຫັກຝາກທີມຂົນສົ່ງ',e.teamDeposit,1)}${row('ຫັກປະກັນສັງຄົມ',e.socialSecurity,1)}${row('ຫັກອາກອນເງິນເດືອນ',c.incomeTax,1)}${row('ຫັກເບີກກ່ອນ',e.advance,1)}${row('ຫັກຊົດເຊີຍເສຍຫາຍ',e.damageComp,1)}${row('ຫັກອື່ນໆ',num(e.honestyIns)+num(e.otherDed),1)}
+          <tr style="background:#fdf3f3;font-weight:700"><td style="padding:7px 8px">ລວມຫັກ</td><td style="padding:7px 8px;text-align:right;color:#c00">(${money(c.totalDed)})</td></tr>
+        </tbody></table>
+      </div>
+      <div style="background:#0d4ea6;color:#fff;border-radius:10px;padding:14px 18px;margin-top:16px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:15px">💰 ລາຍໄດ້ສຸດທິທີ່ໄດ້ຮັບແທ້</span><span style="font-size:24px;font-weight:800">${K(c.net)}</span></div>
+      <div style="margin-top:26px;display:flex;justify-content:space-between;font-size:13px;color:#333">
+        <div style="text-align:center">.................................<br>ຜູ້ຮັບເງິນ</div>
+        <div style="text-align:center">.................................<br>ຜູ້ຈ່າຍ / ການເງິນ</div>
+        <div style="text-align:center">.................................<br>ຜູ້ອະນຸມັດ</div>
+      </div>
+      <div style="margin-top:20px;font-size:11px;color:#888;text-align:center">ສອບຖາມຂໍ້ມູນເພີ່ມເຕີມ ໂທ/WhatsApp: 020 97231286</div>
+    </div>`;
+  window.print();
+}
+
+/* ================= MODAL / INIT ================= */
+function openModal(html){ document.getElementById('modal').innerHTML=html; document.getElementById('overlay').classList.add('show'); }
+function closeModal(){ document.getElementById('overlay').classList.remove('show'); }
+document.getElementById('overlay').onclick=e=>{ if(e.target.id==='overlay') closeModal(); };
+
+/* ================= DEPT FILTER + HELPERS ================= */
+let DEPTFILTER='';
+function inDept(e){ return !DEPTFILTER || (e.dept||'')===DEPTFILTER; }
+function populateDept(){
+  const sel=document.getElementById('deptPick'); if(!sel) return;
+  sel.innerHTML=['<option value="">ທຸກພະແນກ</option>'].concat(cfg().departments.map(d=>`<option ${d===DEPTFILTER?'selected':''}>${d}</option>`)).join('');
+}
+function optsSel(id,arr,cur){
+  return `<select id="${id}"><option value=""></option>`+arr.map(v=>`<option ${v===cur?'selected':''}>${v}</option>`).join('')+`</select>`;
+}
+
+/* ================= GOOGLE SHEETS SYNC ================= */
+function setSync(t,ok){ const el=document.getElementById('syncStat'); if(el){ el.textContent=t; el.style.color=ok===false?'var(--red)':ok===true?'var(--green)':'var(--muted)'; } }
+async function syncPull(silent){
+  const url=cfg().syncUrl; if(!url){ if(!silent)alert('ໃສ່ລິ້ງ Apps Script ກ່ອນ'); return; }
+  if(!silent) setSync('ກຳລັງດຶງຂໍ້ມູນ...');
+  try{
+    const r=await fetch(url+(url.includes('?')?'&':'?')+'action=all');
+    const j=await r.json();
+    if(Array.isArray(j.employees)){
+      const months={};
+      j.employees.forEach((e,i)=>{ const m=(e.month||CURMONTH)+''; if(!months[m])months[m]=[]; const o={...e}; delete o.month; NUMKEYS.forEach(k=>{ if(o[k]!==undefined)o[k]=num(o[k]); }); o._id=(o.code||'e')+'#'+m+i; months[m].push(o); });
+      DB.months=months;
+    }
+    if(Array.isArray(j.leave)) DB.leave=j.leave.map(l=>({...l,days:num(l.days)}));
+    if(j.config && typeof j.config==='object') DB.cfg={...DB.cfg,...j.config};
+    try{ localStorage.setItem(LS,JSON.stringify(DB)); }catch(e){}
+    populateDept(); go(CUR);
+    setSync((silent?'🔄 ':'')+'ດຶງຂໍ້ມູນ ✓ '+new Date().toLocaleTimeString(),true);
+  }catch(err){ if(!silent) setSync('ຜິດພາດ: '+err.message+' (ຕ້ອງເປີດຈາກໄຟລ໌ໃນເຄື່ອງ/ໂຮສ ບໍ່ແມ່ນ artifact)',false); }
+}
+async function syncPush(silent){
+  const url=cfg().syncUrl; if(!url){ if(!silent)alert('ໃສ່ລິ້ງກ່ອນ'); return; }
+  if(!silent) setSync('ກຳລັງສົ່ງຂໍ້ມູນ...');
+  const employees=[];
+  Object.keys(DB.months).forEach(m=>DB.months[m].forEach(e=>{ const o={...e}; delete o._id; employees.push({month:m,...o}); }));
+  const payload={action:'replaceAll',employees,leave:DB.leave,config:DB.cfg};
+  try{
+    await fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+    setSync((silent?'🔄 ':'')+'ບັນທຶກຂຶ້ນ Google Sheets ✓ '+new Date().toLocaleTimeString()+' ('+employees.length+' ແຖວ)',true);
+  }catch(err){ if(!silent) setSync('ຜິດພາດ: '+err.message,false); }
+}
+
+/* ===== AUTO-SYNC (real-time) auto-pull ===== */
+setInterval(()=>{ if(!DB.cfg.autoSync||!DB.cfg.syncUrl) return; if(Date.now()-_lastEdit<12000) return; const a=document.activeElement; if(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)) return; if(document.getElementById('overlay').classList.contains('show')) return; syncPull(true); },20000);
+
+/* ===== CSV IMPORT / EXPORT (historical + new employees) ===== */
+const COLS=[{k:'code',t:'ລະຫັດ'},{k:'name',t:'ຊື່ ແລະ ນາມສະກຸນ'},{k:'nickname',t:'ຊື່ຫຼິ້ນ'},{k:'dept',t:'ພະແນກ'},{k:'position',t:'ຕໍາແໜ່ງ'},{k:'workDays',t:'ມື້ເຮັດວຽກ'},{k:'forgotScan',t:'ລືມສະແກນ'},{k:'lateHrs',t:'ຊົ່ວໂມງມາຊ້າ'},{k:'absentDays',t:'ມື້ຂາດວຽກ'},{k:'otHours',t:'ຊົ່ວໂມງOT'},{k:'baseSalary',t:'ເງິນເດືອນພື້ນຖານ'},{k:'morningBonus',t:'ເງິນມາເຊົ້າ'},{k:'waterPack',t:'ນ້ຳແພັກ'},{k:'produceBottle',t:'ຍອດຜະລິດຈັດສົ່ງຕຸກ'},{k:'produceGlass',t:'ຍອດຜະລິດຈັດສົ່ງລັງແກ້ວ'},{k:'otPay',t:'ເງິນOT'},{k:'driverPay',t:'ເງິນໂຊເຟີ'},{k:'noAbsenceBonus',t:'ບໍ່ຂາດວຽກ'},{k:'dedForgotScan',t:'ຫັກລືມສະແກນ'},{k:'dedLate',t:'ຫັກມາຊ້າ'},{k:'dedAbsent',t:'ຫັກຂາດວຽກ'},{k:'teamDeposit',t:'ຫັກຝາກທີມຂົນສົ່ງ'},{k:'socialSecurity',t:'ຫັກປະກັນສັງຄົມ'},{k:'advance',t:'ຫັກເບີກກ່ອນ'},{k:'damageComp',t:'ຫັກຊົດເຊີຍ'},{k:'honestyIns',t:'ຫັກປະກັນຊື່ສັດ'},{k:'otherDed',t:'ຫັກອື່ນໆ'},{k:'note',t:'ໝາຍເຫດ'},{k:'bankName',t:'ຊື່ບັນຊີ'},{k:'bankAcc',t:'ເລກບັນຊີ'}];
+const NUMKEYS=['workDays','forgotScan','lateHrs','absentDays','otHours','baseSalary','morningBonus','waterPack','produceBottle','produceGlass','otPay','driverPay','noAbsenceBonus','dedForgotScan','dedLate','dedAbsent','teamDeposit','socialSecurity','advance','damageComp','honestyIns','otherDed'];
+function csvCell(v){ v=(v==null?'':''+v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+function parseCSV(txt){ txt=txt.replace(/^\uFEFF/,''); const rows=[]; let row=[],cur='',q=false;
+  for(let i=0;i<txt.length;i++){ const ch=txt[i];
+    if(q){ if(ch==='"'){ if(txt[i+1]==='"'){cur+='"';i++;} else q=false; } else cur+=ch; }
+    else { if(ch==='"')q=true; else if(ch===','){row.push(cur);cur='';} else if(ch==='\n'){row.push(cur);rows.push(row);row=[];cur='';} else if(ch==='\r'){} else cur+=ch; } }
+  if(cur!==''||row.length){ row.push(cur); rows.push(row); }
+  return rows.filter(r=>r.some(c=>(c||'').trim()!==''));
+}
+function normH(s){ return (s||'').toString().toLowerCase().replace(/[\s\.\(\)\/,_-]/g,''); }
+function matchKey(header){ const x=normH(header);
+  for(const c of COLS){ if(x===normH(c.t)||x===c.k.toLowerCase()) return c.k; }
+  if(x==='month'||x.includes('ເດືອນ')) return 'month';
+  const kw=[['bankName','ຊື່ບັນຊີ'],['bankAcc','ເລກບັນຊີ'],['bankAcc','account'],['produceBottle','ຕຸກ'],['produceGlass','ລັງແກ້ວ'],['baseSalary','ພື້ນຖານ'],['morningBonus','ມາເຊົ້າ'],['waterPack','ແພັກ'],['driverPay','ໂຊເຟີ'],['noAbsenceBonus','ບໍ່ຂາດ'],['teamDeposit','ຝາກທີມ'],['socialSecurity','ປະກັນສັງຄົມ'],['advance','ເບີກກ່ອນ'],['damageComp','ຊົດເຊີຍ'],['honestyIns','ຊື່ສັດ'],['otherDed','ອື່ນໆ'],['note','ໝາຍເຫດ'],['position','ຕໍາແໜ່ງ'],['workDays','ມື້ເຮັດ'],['forgotScan','ລືມສະແກນ'],['lateHrs','ມາຊ້າ'],['absentDays','ຂາດຕັດ'],['code','ລະຫັດ'],['name','ຊື່'],['dept','ພະແນກ']];
+  for(const [k,w] of kw){ if(x.includes(normH(w))) return k; }
+  return null;
+}
+function onImportFile(inp){ const f=inp.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{ importCSV(r.result); inp.value=''; }; r.readAsText(f,'utf-8'); }
+function importCSV(txt){
+  const rows=parseCSV(txt); if(rows.length<2){ alert('ໄຟລ໌ບໍ່ມີຂໍ້ມູນ'); return; }
+  const heads=rows[0].map(matchKey);
+  if(!heads.includes('code')&&!heads.includes('name')){ alert('ບໍ່ພົບຖັນ "ລະຫັດ" ຫຼື "ຊື່" ໃນໄຟລ໌ — ກະລຸນາໃຊ້ແມ່ແບບ CSV'); return; }
+  const mode=(document.getElementById('impMode')||{}).value||'merge';
+  const byMonth={};
+  for(let i=1;i<rows.length;i++){ const r=rows[i]; const o={};
+    heads.forEach((k,ci)=>{ if(!k)return; let v=(r[ci]||'').trim(); if(NUMKEYS.indexOf(k)>=0) v=num(v.replace(/[, ]/g,'')); o[k]=v; });
+    const m=(o.month&&/^\d{4}-\d{2}/.test(o.month))?o.month.slice(0,7):CURMONTH; delete o.month;
+    if(!o.code&&!o.name) continue; if(!o.code)o.code=o.name; if(!o.dept)o.dept=cfg().departments[3]||cfg().departments[0]||'';
+    (byMonth[m]=byMonth[m]||[]).push(o); }
+  let added=0,updated=0,months=0;
+  Object.keys(byMonth).forEach(m=>{ months++; if(!DB.months[m]) DB.months[m]=[]; if(mode==='replace') DB.months[m]=[];
+    byMonth[m].forEach(o=>{ const arr=DB.months[m]; const ex=arr.find(e=>(e.code||'')===o.code&&o.code);
+      if(ex){ Object.assign(ex,o); updated++; }
+      else { arr.push(Object.assign({workDays:26,morningBonus:0,noAbsenceBonus:0,socialSecurity:0,teamDeposit:0,waterPack:0,produceBottle:0,produceGlass:0,otPay:0,driverPay:0,forgotScan:0,lateHrs:0,absentDays:0,otHours:0,dedForgotScan:0,dedLate:0,dedAbsent:0,advance:0,damageComp:0,honestyIns:0,otherDed:0,note:'',bankName:'',bankAcc:''},o,{_id:o.code+'#'+m+Date.now()+added})); added++; } }); });
+  save(); populateDept(); go(CUR);
+  const msg='ນຳເຂົ້າສຳເລັດ ✓ ເພີ່ມ '+added+' · ອັບເດດ '+updated+' · '+months+' ເດືອນ';
+  const st=document.getElementById('impStat'); if(st){st.textContent=msg;st.style.color='var(--green)';} alert(msg);
+}
+function exportFull(){ const rows=(DB.months[CURMONTH]||[]).filter(e=>e.name||e.code);
+  const head=['ເດືອນ'].concat(COLS.map(c=>c.t)); const lines=[head.map(csvCell).join(',')];
+  rows.forEach(e=>lines.push([CURMONTH].concat(COLS.map(c=>e[c.k]!=null?e[c.k]:'')).map(csvCell).join(',')));
+  dlCSV('NanyLogistic_full_'+CURMONTH+'.csv', lines.join('\n')); }
+function downloadTemplate(){ const head=['ເດືອນ'].concat(COLS.map(c=>c.t));
+  const ex=[CURMONTH,'VARI-S000-25','ທ. ຕົວຢ່າງ','','ພະແນກຂົນສົ່ງ ແລະ ແຟຣນຊາຍ','ຂັບລົດ',26,0,0,0,0,3000000,200000,0,0,0,0,0,300000,0,0,0,50000,82500,0,0,0,0,'','ຊື່ບັນຊີ BCEL','000000000'];
+  dlCSV('NanyLogistic_template.csv', head.map(csvCell).join(',')+'\n'+ex.map(csvCell).join(',')); }
+function dlCSV(name,txt){ const b=new Blob(['\uFEFF'+txt],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=name; a.click(); }
+function empEdit(idx,field,val){ const e=monthData()[idx]; if(!e)return; e[field]=(['baseSalary','workDays'].indexOf(field)>=0?num(val):val); if(field==='baseSalary'||field==='workDays') e.dedAbsent=Math.round(num(e.baseSalary)/(num(e.workDays)||26)*num(e.absentDays)); save(); }
+function optsSel2(idx,field,arr,cur){ return '<select class="cell" style="width:150px;text-align:left" onchange="empEdit('+idx+',\''+field+'\',this.value)"><option value=""></option>'+arr.map(v=>'<option '+(v===cur?'selected':'')+'>'+v+'</option>').join('')+'</select>'; }
+
+/* ================= CONFIG EDIT HELPERS ================= */
+function cfgNum(k,v){ cfg()[k]=num(v); save(); }
+function cfgStr(k,v){ cfg()[k]=v; save(); if(k==='syncUrl') setSync('ບັນທຶກລິ້ງແລ້ວ — ກົດ "ດຶງຂໍ້ມູນ" ຫຼື "ສົ່ງຂໍ້ມູນ"'); }
+function ltEdit(i,f,v){ cfg().leaveTypes[i][f]= f==='quota'?num(v):v; save(); if(f==='quota'||f==='color') renderSettings(); }
+function ltAdd(){ cfg().leaveTypes.push({k:'lt'+Date.now(),name:'ປະເພດໃໝ່',color:'#7a4dbd',quota:0}); save(); renderSettings(); }
+function ltDel(i){ uiConfirm('ລົບປະເພດການລານີ້?',()=>{ cfg().leaveTypes.splice(i,1); save(); renderSettings(); }); }
+function deptEdit(i,v){ cfg().departments[i]=v; save(); populateDept(); }
+function deptAdd(){ cfg().departments.push(''); save(); populateDept(); renderSettings(); focusLast('#deptList input'); }
+function deptDel(i){ cfg().departments.splice(i,1); save(); populateDept(); renderSettings(); }
+function posEdit(i,v){ cfg().positions[i]=v; save(); }
+function posAdd(){ cfg().positions.push(''); save(); renderSettings(); focusLast('#posList input'); }
+function posDel(i){ cfg().positions.splice(i,1); save(); renderSettings(); }
+function focusLast(sel){ setTimeout(()=>{ const els=document.querySelectorAll(sel); if(els.length) els[els.length-1].focus(); },30); }
+function resetAll(){ uiConfirm('ລ້າງຂໍ້ມູນທັງໝົດໃນເຄື່ອງ ແລ້ວໂຫຼດຄ່າເລີ່ມຕົ້ນໃໝ່?',()=>{ try{localStorage.removeItem(LS);}catch(e){} location.reload(); }); }
+function uiConfirm(msg,onYes){ openModal(`<div class="modal-head"><h3>ຢືນຢັນ</h3><button class="x" onclick="closeModal()">×</button></div><div class="modal-body"><p style="margin:0;font-size:14.5px">${msg}</p></div><div class="modal-foot"><button class="btn ghost" onclick="closeModal()">ຍົກເລີກ</button><button class="btn danger" id="_okBtn">ຢືນຢັນ</button></div>`); const b=document.getElementById('_okBtn'); b.onclick=()=>{ closeModal(); onYes(); }; }
+
+/* ================= SETTINGS PAGE ================= */
+function renderSettings(){
+  const c=cfg();
+  const rateF=(lab,key)=>`<div class="f-row"><label>${lab}</label><input class="in" style="width:150px" type="number" value="${num(c[key])}" onchange="cfgNum('${key}',this.value)"></div>`;
+  document.getElementById('pg-settings').innerHTML=`
+    <div class="page-head"><div><h2>ຕັ້ງຄ່າ & Sync</h2><p>ເຊື່ອມຕໍ່ Google Sheets · ຈັດການພະແນກ/ຕໍາແໜ່ງ · ປັບໂຄຕາວັນລາ ແລະ ອັດຕາຕ່າງໆ</p></div>
+      <button class="btn danger ghost" onclick="resetAll()">↺ ລ້າງຂໍ້ມູນ</button></div>
+
+    <div class="card card-pad" style="border-left:4px solid var(--green)">
+      <div class="sec-title" style="margin:0 0 12px"><h3>☁️ ຊິງຂໍ້ມູນກັບ Google Sheets</h3><span class="hint">ໃຊ້ຮ່ວມກັນຫຼາຍເຄື່ອງ</span></div>
+      <div class="field" style="margin-bottom:12px"><label>ລິ້ງ Apps Script Web App (/exec)</label>
+        <input class="in" style="text-align:left" placeholder="https://script.google.com/macros/s/..../exec" value="${c.syncUrl||''}" onchange="cfgStr('syncUrl',this.value)"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn green" onclick="syncPush()">⬆ ສົ່ງຂໍ້ມູນຂຶ້ນ (ຄັ້ງທຳອິດ/ສຳຮອງ)</button>
+        <button class="btn primary" onclick="syncPull()">⬇ ດຶງຂໍ້ມູນລົງ</button>
+        <span id="syncStat" style="font-size:12.5px;color:var(--muted)"></span>
+      </div>
+      <label style="display:flex;align-items:center;gap:9px;margin-top:14px;font-size:13.5px;cursor:pointer;background:var(--blue-l2);padding:10px 12px;border-radius:10px">
+        <input type="checkbox" ${c.autoSync?'checked':''} style="width:18px;height:18px" onchange="cfg().autoSync=this.checked;save();setSync(this.checked?'ເປີດ Sync ອັດຕະໂນມັດ ✓':'ປິດ Sync ອັດຕະໂນມັດ',this.checked)">
+        <span><b>🔄 Sync ອັດຕະໂນມັດ (real-time)</b> — ບັນທຶກຂຶ້ນ Google Sheets ອັດຕະໂນມັດທຸກຄັ້ງທີ່ແກ້ໄຂ ແລະ ດຶງຂໍ້ມູນໃໝ່ທຸກ 20 ວິນາທີ</span>
+      </label>
+      <div class="note-banner" style="margin:14px 0 0">📌 <div>ວິທີຕັ້ງຄ່າ ເບິ່ງໃນໄຟລ໌ <b>Google-Apps-Script-Code.gs</b> · ເປີດ Google Sheet ▸ Extensions ▸ Apps Script ▸ ວາງໂຄດ ▸ Deploy ເປັນ Web app (Anyone) ▸ ຄັດລອກລິ້ງ /exec ມາວາງບ່ອນນີ້ · <b>Sync ໃຊ້ໄດ້ເມື່ອເປີດຈາກໄຟລ໌ໃນເຄື່ອງ ຫຼື ໂຮສ (GitHub Pages) ເທົ່ານັ້ນ</b></div></div>
+    </div>
+
+    <div class="card card-pad" style="border-left:4px solid var(--blue);margin-top:16px">
+      <div class="sec-title" style="margin:0 0 12px"><h3>📥 ອັບໂຫຼດ / ດາວໂຫຼດ ຂໍ້ມູນ (CSV)</h3><span class="hint">ນຳເຂົ້າຂໍ້ມູນຍ້ອນຫຼັງ ຫຼື ພະນັກງານໃໝ່</span></div>
+      <div class="note-banner" style="margin:0 0 12px">📅 <div>ຂໍ້ມູນຈະນຳເຂົ້າໃສ່ເດືອນ <b>${monthLabel(CURMONTH)}</b> (ປ່ຽນເດືອນທີ່ແຖບເທິງ) · ຫຼື ໃສ່ຖັນ "ເດືອນ" ຮູບແບບ YYYY-MM ໃນໄຟລ໌ ເພື່ອອັບໂຫຼດຫຼາຍເດືອນພ້ອມກັນ · ກົດ "ແມ່ແບບ CSV" ເພື່ອເບິ່ງຮູບແບບຖັນ</div></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <label class="btn green" style="margin:0;cursor:pointer"><input type="file" accept=".csv" style="display:none" onchange="onImportFile(this)">📥 ເລືອກໄຟລ໌ CSV ອັບໂຫຼດ</label>
+        <select id="impMode" class="in" style="width:auto"><option value="merge">ອັບເດດ/ເພີ່ມ (merge)</option><option value="replace">ແທນທັງເດືອນ (replace)</option></select>
+        <button class="btn" onclick="exportFull()">⬇ ດາວໂຫຼດຂໍ້ມູນເດືອນນີ້</button>
+        <button class="btn ghost" onclick="downloadTemplate()">📄 ແມ່ແບບ CSV</button>
+        <span id="impStat" style="font-size:12.5px;color:var(--muted)"></span>
+      </div>
+    </div>
+    <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:16px">
+      <div class="card card-pad pay-col">
+        <h4>🌴 ປະເພດການລາ ແລະ ໂຄຕາວັນລາ</h4>
+        <div class="tbl-wrap"><table style="min-width:auto"><thead><tr><th class="l">ປະເພດ</th><th>ໂຄຕາ(ມື້/ປີ)</th><th>ສີ</th><th></th></tr></thead>
+          <tbody>${c.leaveTypes.map((t,i)=>`<tr>
+            <td class="l"><input class="cell wide" style="text-align:left" value="${t.name}" onchange="ltEdit(${i},'name',this.value)"></td>
+            <td><input class="cell" type="number" value="${num(t.quota)}" onchange="ltEdit(${i},'quota',this.value)"></td>
+            <td><input type="color" value="${t.color}" style="width:42px;height:30px;border:1px solid var(--line);border-radius:6px" onchange="ltEdit(${i},'color',this.value)"></td>
+            <td><button class="btn sm danger ghost" onclick="ltDel(${i})">🗑</button></td></tr>`).join('')}</tbody></table></div>
+        <button class="btn sm" style="margin-top:10px" onclick="ltAdd()">＋ ເພີ່ມປະເພດການລາ</button>
+      </div>
+      <div class="card card-pad pay-col">
+        <h4>💵 ອັດຕາ ແລະ ຄ່າຄົງທີ່ (ຄິດໄລ່ເງິນຫັກ)</h4>
+        ${rateF('OT ຕໍ່ຊົ່ວໂມງ (₭)','otRate')}
+        ${rateF('ຫັກມາຊ້າ ຕໍ່ຊົ່ວໂມງ (₭)','lateRatePerHr')}
+        ${rateF('ຫັກລືມສະແກນ ຕໍ່ຄັ້ງ (₭)','forgotScanFee')}
+        ${rateF('ເງິນຝາກທີມຂົນສົ່ງ/ເດືອນ (₭)','teamDeposit')}
+        ${rateF('ມື້ເຮັດວຽກມາດຕະຖານ/ເດືອນ','workdaysStd')}
+        ${rateF('ເງິນມາເຊົ້າ (ຄ່າເລີ່ມຕົ້ນ)','morningDefault')}
+        ${rateF('ໂບນັດບໍ່ຂາດວຽກ (ຄ່າເລີ່ມຕົ້ນ)','noAbsenceDefault')}
+      </div>
+    </div>
+
+    <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:16px">
+      <div class="card card-pad pay-col">
+        <h4>🏢 ພະແນກ (Departments)</h4>
+        <div id="deptList" style="display:flex;flex-direction:column;gap:7px">${c.departments.map((d,i)=>`<div style="display:flex;gap:8px;align-items:center"><input class="in" style="text-align:left;flex:1" value="${(d||'').replace(/"/g,'&quot;')}" onchange="deptEdit(${i},this.value)"><button class="btn sm danger ghost" onclick="deptDel(${i})">🗑</button></div>`).join('')}</div>
+        <button class="btn sm" style="margin-top:10px" onclick="deptAdd()">＋ ເພີ່ມພະແນກ</button>
+      </div>
+      <div class="card card-pad pay-col">
+        <h4>🎖️ ຕໍາແໜ່ງ (Positions)</h4>
+        <div id="posList" style="display:flex;flex-direction:column;gap:7px">${c.positions.map((p,i)=>`<div style="display:flex;gap:8px;align-items:center"><input class="in" style="text-align:left;flex:1" value="${(p||'').replace(/"/g,'&quot;')}" onchange="posEdit(${i},this.value)"><button class="btn sm danger ghost" onclick="posDel(${i})">🗑</button></div>`).join('')}</div>
+        <button class="btn sm" style="margin-top:12px" onclick="posAdd()">＋ ເພີ່ມຕໍາແໜ່ງ</button>
+      </div>
+    </div>`;
+}
+
+
+document.getElementById('monthPick').value=CURMONTH;
+document.getElementById('monthPick').onchange=e=>{ CURMONTH=e.target.value||CURMONTH; populateDept(); go(CUR); };
+document.getElementById('deptPick').onchange=e=>{ DEPTFILTER=e.target.value; go(CUR); };
+
+buildNav(); populateDept(); go('dash');
+</script>
+</body>
+</html>
