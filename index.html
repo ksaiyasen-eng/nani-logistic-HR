@@ -80,7 +80,17 @@ tr:last-child td{border-bottom:0}
 .net{display:inline-flex;align-items:center;gap:6px;font-size:12px}
 .net i{width:8px;height:8px;border-radius:50%;background:#7FD3A0;display:inline-block}
 .net.busy i{background:#F2B84B}.net.off i{background:#F28B6B}
-.punch{width:100%;min-height:120px;border-radius:20px;font-size:26px;border:0;color:#fff;background:var(--pri);display:grid;place-items:center;gap:2px;padding:16px}
+.punch{width:100%;min-height:140px;border-radius:22px;font-size:28px;border:0;color:#fff;background:#16A34A;display:grid;place-items:center;gap:2px;padding:16px}
+.punch .e{font-size:52px;line-height:1}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));gap:12px}
+.tile{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:18px;min-height:110px;display:grid;place-items:center;gap:4px;padding:12px;font-weight:600}
+.tile .e{font-size:42px;line-height:1}
+.ic{position:relative;display:inline-block;width:52px;height:52px;flex:none}.ic svg{width:52px;height:52px}
+.ic i{position:absolute;right:-4px;top:-4px;font-style:normal;font-size:18px;line-height:1}
+.ic em{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);font-style:normal;font-size:11px;font-weight:700;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:0 4px;line-height:15px;white-space:nowrap;color:var(--ink)}
+.qrow{grid-column:1/-1;display:grid;grid-template-columns:60px minmax(0,1fr) auto;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line2)}
+.qrow .ql{font-size:15px;line-height:1.3;color:var(--ink)}.qrow .ql small{display:block;color:var(--mut);font-size:12px}
+.step{display:flex;align-items:center;gap:6px}.step button{width:44px;min-height:44px;padding:0;font-size:22px}.step input{width:70px;text-align:center;font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
 .punch.out{background:var(--acc)}
 .punch small{font-size:14px;font-weight:500;opacity:.9}
 .bar{height:10px;border-radius:5px;background:var(--pri)}
@@ -121,7 +131,7 @@ th,th.emp{background:#1C2330}
 </style>
 </head>
 <body>
-<div id="app"></div><div id="dlg"></div><div id="toast" role="status" aria-live="polite"></div><div id="print"></div>
+<div id="app"></div><svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="jug" viewBox="0 0 48 48"><rect x="19.5" y="1.5" width="9" height="8" rx="2" fill="#C9E0FA" stroke="#5B8DD6" stroke-width="1.4"/><path d="M19 9.5h10l1 3c5 0 9 2 9 6v24a4 4 0 0 1-4 4H13a4 4 0 0 1-4-4V18.5c0-4 4-6 9-6z" fill="#D6E8FC" stroke="#5B8DD6" stroke-width="1.6"/><rect x="7.5" y="17.5" width="33" height="4.5" rx="2.2" fill="#BCD6F6" stroke="#5B8DD6" stroke-width="1.2"/><rect x="7.5" y="31" width="33" height="4.5" rx="2.2" fill="#BCD6F6" stroke="#5B8DD6" stroke-width="1.2"/><rect x="11" y="23.5" width="26" height="6" rx="1" fill="#fff" stroke="#A9C6EE" stroke-width=".8"/><path d="M17 24.6c1.2 1.6 1.8 2.4 1.8 3.2a1.8 1.8 0 0 1-3.6 0c0-.8.6-1.6 1.8-3.2z" fill="#2BB3C0"/><path d="M20.5 26.8h12" stroke="#2BB3C0" stroke-width="1.6" stroke-linecap="round"/><path d="M12 38v4" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".9"/></symbol><symbol id="glass" viewBox="0 0 48 48"><rect x="19.5" y="1.5" width="9" height="4" rx="1.5" fill="#CBD5E1" stroke="#64748B" stroke-width="1"/><path d="M19.5 5.5c-1.5 1-2 2.5-1.6 4" stroke="#64748B" stroke-width="1.1" fill="none"/><path d="M20.5 5.5h7v9c0 4 6 6.5 6 12v16a4 4 0 0 1-4 4h-11a4 4 0 0 1-4-4v-16c0-5.5 6-8 6-12z" fill="#EEF4F8" stroke="#8FA3B5" stroke-width="1.6"/><path d="M18.5 22v19" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><path d="M24 27c1.4 1.8 2.1 2.8 2.1 3.7a2.1 2.1 0 0 1-4.2 0c0-.9.7-1.9 2.1-3.7z" fill="none" stroke="#8FA3B5" stroke-width="1"/><path d="M21 34.5h6" stroke="#8FA3B5" stroke-width="1.2" stroke-linecap="round"/><g fill="#B8C7D4"><circle cx="27" cy="20" r=".7"/><circle cx="29.5" cy="25" r=".6"/><circle cx="20" cy="38" r=".6"/><circle cx="28.5" cy="40" r=".7"/></g></symbol><symbol id="pack250" viewBox="0 0 48 48"><rect x="5.0" y="26.0" width="4.0" height="2.5" rx="1" fill="#C9E0FA" stroke="#5B8DD6" stroke-width=".9"/><path d="M5.4 28.5h3.2v2.4c0 1.6 2.9 1.3 2.9 3.2V44.4a1.6 1.6 0 0 1-1.6 1.6H4.1a1.6 1.6 0 0 1-1.6-1.6V34.1c0-1.9 2.9-1.6 2.9-3.2z" fill="#D6E8FC" stroke="#5B8DD6" stroke-width="1.2"/><rect x="3.1" y="37.4" width="7.8" height="3.8" fill="#fff"/><circle cx="7.0" cy="39.3" r="1.2" fill="#2BB3C0"/><rect x="16.3" y="26.0" width="4.0" height="2.5" rx="1" fill="#C9E0FA" stroke="#5B8DD6" stroke-width=".9"/><path d="M16.7 28.5h3.2v2.4c0 1.6 2.9 1.3 2.9 3.2V44.4a1.6 1.6 0 0 1-1.6 1.6H15.4a1.6 1.6 0 0 1-1.6-1.6V34.1c0-1.9 2.9-1.6 2.9-3.2z" fill="#D6E8FC" stroke="#5B8DD6" stroke-width="1.2"/><rect x="14.4" y="37.4" width="7.8" height="3.8" fill="#fff"/><circle cx="18.3" cy="39.3" r="1.2" fill="#2BB3C0"/><rect x="27.6" y="26.0" width="4.0" height="2.5" rx="1" fill="#C9E0FA" stroke="#5B8DD6" stroke-width=".9"/><path d="M28.0 28.5h3.2v2.4c0 1.6 2.9 1.3 2.9 3.2V44.4a1.6 1.6 0 0 1-1.6 1.6H26.7a1.6 1.6 0 0 1-1.6-1.6V34.1c0-1.9 2.9-1.6 2.9-3.2z" fill="#D6E8FC" stroke="#5B8DD6" stroke-width="1.2"/><rect x="25.7" y="37.4" width="7.8" height="3.8" fill="#fff"/><circle cx="29.6" cy="39.3" r="1.2" fill="#2BB3C0"/><rect x="38.9" y="26.0" width="4.0" height="2.5" rx="1" fill="#C9E0FA" stroke="#5B8DD6" stroke-width=".9"/><path d="M39.3 28.5h3.2v2.4c0 1.6 2.9 1.3 2.9 3.2V44.4a1.6 1.6 0 0 1-1.6 1.6H38.0a1.6 1.6 0 0 1-1.6-1.6V34.1c0-1.9 2.9-1.6 2.9-3.2z" fill="#D6E8FC" stroke="#5B8DD6" stroke-width="1.2"/><rect x="37.0" y="37.4" width="7.8" height="3.8" fill="#fff"/><circle cx="40.9" cy="39.3" r="1.2" fill="#2BB3C0"/><rect x="1.5" y="30" width="45" height="17" rx="3" fill="none" stroke="#5B8DD6" stroke-width="1.2" stroke-dasharray="3 2"/></symbol><symbol id="packmid" viewBox="0 0 48 48"><rect x="6.4" y="14.0" width="5.1" height="2.9" rx="1" fill="#C9E0FA" stroke="#5B8DD6" stroke-width=".9"/><path d="M6.8 16.9h4.3v3.8c0 2.6 3.8 2.0 3.8 5.1V43.8a2.2 2.2 0 0 1-2.2 2.2H5.2a2.2 2.2 0 0 1-2.2-2.2V25.8c0-3.1 3.8-2.6 3.8-5.1z" fill="#D6E8FC" stroke="#5B8DD6" stroke-width="1.2"/><rect x="3.6" y="31.5" width="10.8" height="6.5" fill="#fff"/><circle cx="9.0" cy="34.7" r="1.9" fill="#2BB3C0"/><rect x="21.4" y="14.0" width="5.1" height="2.9" rx="1" fill="#C9E0FA" stroke="#5B8DD6" stroke-width=".9"/><path d="M21.8 16.9h4.3v3.8c0 2.6 3.8 2.0 3.8 5.1V43.8a2.2 2.2 0 0 1-2.2 2.2H20.2a2.2 2.2 0 0 1-2.2-2.2V25.8c0-3.1 3.8-2.6 3.8-5.1z" fill="#D6E8FC" stroke="#5B8DD6" stroke-width="1.2"/><rect x="18.6" y="31.5" width="10.8" height="6.5" fill="#fff"/><circle cx="24.0" cy="34.7" r="1.9" fill="#2BB3C0"/><rect x="36.4" y="14.0" width="5.1" height="2.9" rx="1" fill="#C9E0FA" stroke="#5B8DD6" stroke-width=".9"/><path d="M36.8 16.9h4.3v3.8c0 2.6 3.8 2.0 3.8 5.1V43.8a2.2 2.2 0 0 1-2.2 2.2H35.2a2.2 2.2 0 0 1-2.2-2.2V25.8c0-3.1 3.8-2.6 3.8-5.1z" fill="#D6E8FC" stroke="#5B8DD6" stroke-width="1.2"/><rect x="33.6" y="31.5" width="10.8" height="6.5" fill="#fff"/><circle cx="39.0" cy="34.7" r="1.9" fill="#2BB3C0"/><rect x="1.5" y="24" width="45" height="23" rx="3" fill="none" stroke="#5B8DD6" stroke-width="1.2" stroke-dasharray="3 2"/></symbol><symbol id="pack2l" viewBox="0 0 48 48"><rect x="9.2" y="2.0" width="7.6" height="4.0" rx="1" fill="#C9E0FA" stroke="#5B8DD6" stroke-width=".9"/><path d="M9.6 6.0h6.8v5.3c0 3.5 6.1 2.8 6.1 7.0V43.5a2.5 2.5 0 0 1-2.5 2.5H6.0a2.5 2.5 0 0 1-2.5-2.5V18.3c0-4.2 6.1-3.5 6.1-7.0z" fill="#D6E8FC" stroke="#5B8DD6" stroke-width="1.2"/><rect x="4.1" y="26.0" width="17.8" height="8.9" fill="#fff"/><circle cx="13.0" cy="30.5" r="2.8" fill="#2BB3C0"/><rect x="31.2" y="2.0" width="7.6" height="4.0" rx="1" fill="#C9E0FA" stroke="#5B8DD6" stroke-width=".9"/><path d="M31.6 6.0h6.8v5.3c0 3.5 6.1 2.8 6.1 7.0V43.5a2.5 2.5 0 0 1-2.5 2.5H28.0a2.5 2.5 0 0 1-2.5-2.5V18.3c0-4.2 6.1-3.5 6.1-7.0z" fill="#D6E8FC" stroke="#5B8DD6" stroke-width="1.2"/><rect x="26.1" y="26.0" width="17.8" height="8.9" fill="#fff"/><circle cx="35.0" cy="30.5" r="2.8" fill="#2BB3C0"/><rect x="1.5" y="18" width="45" height="29" rx="3" fill="none" stroke="#5B8DD6" stroke-width="1.2" stroke-dasharray="3 2"/></symbol></svg><div id="dlg"></div><div id="toast" role="status" aria-live="polite"></div><div id="print"></div>
 <script>
 "use strict";
 const API = "https://sfwsedtxdlummiqblufq.supabase.co/functions/v1/hr-api";
@@ -349,13 +359,14 @@ function renderEmp() {
   const tp = m.todayPunches.map((p) => `<span class="pill ${p.kind === "in" ? "p-pri" : "p-bad"}">${p.kind === "in" ? "ເຂົ້າ" : "ອອກ"} ${esc(fmtTime(p.at))}</span>`).join("");
   $("#app").innerHTML = `
   <div class="top"><div class="wrap" style="max-width:720px"><div id="hav">${avatar(null, e.name, 48)}</div><div style="flex:1;min-width:0"><h1 class="hi">ສະບາຍດີ, ${esc(e.name)}</h1><div class="sm mut">${esc(e.emp_code)} · ${esc(e.position || "")}</div></div>
-    <span class="net" id="net"><i></i> ເຊື່ອມຕໍ່ແລ້ວ</span><button class="sm" id="lo">ອອກ</button></div></div>
+    <span class="net" id="net"><i></i> ເຊື່ອມຕໍ່ແລ້ວ</span><button class="sm" id="hm">ຄູ່ມື</button><button class="sm" id="lo">ອອກ</button></div></div>
   <div class="wrap grid" style="max-width:720px;gap:14px">
     <section class="card grid" style="gap:12px">
-      <button class="punch ${next === "out" ? "out" : ""}" id="pb"><span>${next === "out" ? "ອອກວຽກ" : "ເຂົ້າວຽກ"}</span><small>ເວລາເຮັດວຽກ ${esc(m.settings.shift.start)}–${esc(m.settings.shift.end)} · ວັນທີ ${esc(dmy(m.today))}</small></button>
-      <div class="row">${tp || `<span class="mut sm">ມື້ນີ້ຍັງບໍ່ມີການສະແກນ</span>`}</div>
+      <button class="punch ${next === "out" ? "out" : ""}" id="pb"><span class="e" aria-hidden="true">${next === "out" ? "🏠👈" : "👉🏢"}</span><span>${next === "out" ? "ອອກວຽກ" : "ເຂົ້າວຽກ"}</span><small>ເວລາເຮັດວຽກ ${esc(m.settings.shift.start)}–${esc(m.settings.shift.end)} · ວັນທີ ${esc(dmy(m.today))}</small></button>
+      <div class="row">${tp || `<span class="mut sm">📭 ມື້ນີ້ຍັງບໍ່ມີການສະແກນ</span>`}</div>
       <div id="pmsg"></div>
     </section>
+    <div class="tiles"><button class="tile" id="tTrip" hidden><span class="e" aria-hidden="true">🚚</span>ບັນທຶກການສົ່ງ</button><button class="tile" id="tLeave"><span class="e" aria-hidden="true">📝</span>ຂໍລາ</button><button class="tile" id="tPay"><span class="e" aria-hidden="true">💵</span>ສະລິບເງິນເດືອນ</button><button class="tile" id="tAtt"><span class="e" aria-hidden="true">📅</span>ປະຫວັດສະແກນ</button><button class="tile" id="tMe"><span class="e" aria-hidden="true">👤</span>ຂໍ້ມູນສ່ວນຕົວ</button><button class="tile" id="tMan"><span class="e" aria-hidden="true">📖</span>ຄູ່ມື</button></div>
     <section class="card row" style="gap:14px;flex-wrap:nowrap"><div id="pfav">${avatar(null, e.name)}</div><div style="flex:1;min-width:0"><h2>ຂໍ້ມູນສ່ວນຕົວ</h2><div class="xs mut">ເຫັນສະເພາະທ່ານ ແລະ HR</div></div><button id="pfb">ແກ້ໄຂ</button></section>
     <section class="card grid" style="gap:12px" id="myjob" hidden></section>
     <section class="card grid" style="gap:12px" id="trk" hidden></section>
@@ -372,6 +383,9 @@ function renderEmp() {
   </div>`;
   $("#lo").onclick = () => dialog({ title: "ອອກຈາກລະບົບ?", body: `<p class="mut">ຄັ້ງຕໍ່ໄປຕ້ອງໃສ່ລະຫັດ ແລະ PIN ໃໝ່</p>`, ok: "ອອກ", onOk: () => logout() });
   $("#pb").onclick = doPunch;
+  $("#hm").onclick = manualDialog;
+  $("#tLeave").onclick = () => leaveForm(null); $("#tPay").onclick = openPayslips; $("#tMe").onclick = profileForm; $("#tMan").onclick = manualDialog;
+  $("#tAtt").onclick = () => { $("#am").scrollIntoView({ behavior: "smooth", block: "center" }); $("#attb").click(); };
   $("#pfb").onclick = profileForm;
   api("myProfile").then((j) => setAvatars(j.photo, e.name)).catch(() => {});
   $("#nl").onclick = () => leaveForm(null);
@@ -603,8 +617,8 @@ function payslipHTML(r, month) {
 const printPayslips = (rows, month) => doPrint(rows.map((r) => payslipHTML(r, month)).join(""));
 
 /* ---------- HR app ---------- */
-const TABS_ADMIN = [["home", "ໜ້າຫຼັກ"], ["emps", "ພະນັກງານ"], ["work", "ຕິດຕາມການເຮັດວຽກ"], ["trucks", "ລົດຂົນສົ່ງ"], ["scan", "ສະແກນເຂົ້າ-ອອກ"], ["pay", "ຄິດໄລ່ຜົນຕອບແທນ"], ["leave", "ລາພັກ-ລາກິດ"], ["welfare", "ສະຫວັດດີການ"], ["summary", "ສະຫຼຸບປະຈຳເດືອນ"], ["links", "ລິ້ງວຽກ"], ["docs", "ເອກະສານ"], ["bills", "ຈ່າຍປະຈຳ"], ["jd", "ຕຳແໜ່ງ & JD"], ["settings", "ຕັ້ງຄ່າ"]];
-const TABS_STAFF = [["home", "ໜ້າຫຼັກ"], ["scan", "ສະແກນເຂົ້າ-ອອກ"], ["leave", "ລາພັກ-ລາກິດ"], ["holidays", "ວັນພັກ"], ["links", "ລິ້ງວຽກ"], ["docs", "ເອກະສານ"], ["bills", "ຈ່າຍປະຈຳ"], ["jd", "ຕຳແໜ່ງ & JD"]];
+const TABS_ADMIN = [["home", "ໜ້າຫຼັກ"], ["emps", "ພະນັກງານ"], ["work", "ຕິດຕາມການເຮັດວຽກ"], ["trucks", "ລົດຂົນສົ່ງ"], ["scan", "ສະແກນເຂົ້າ-ອອກ"], ["pay", "ຄິດໄລ່ຜົນຕອບແທນ"], ["leave", "ລາພັກ-ລາກິດ"], ["welfare", "ສະຫວັດດີການ"], ["summary", "ສະຫຼຸບປະຈຳເດືອນ"], ["links", "ລິ້ງວຽກ"], ["docs", "ເອກະສານ"], ["bills", "ຈ່າຍປະຈຳ"], ["jd", "ຕຳແໜ່ງ & JD"], ["settings", "ຕັ້ງຄ່າ"], ["manual", "ຄູ່ມື"]];
+const TABS_STAFF = [["home", "ໜ້າຫຼັກ"], ["scan", "ສະແກນເຂົ້າ-ອອກ"], ["leave", "ລາພັກ-ລາກິດ"], ["holidays", "ວັນພັກ"], ["links", "ລິ້ງວຽກ"], ["docs", "ເອກະສານ"], ["bills", "ຈ່າຍປະຈຳ"], ["jd", "ຕຳແໜ່ງ & JD"], ["manual", "ຄູ່ມື"]];
 const isAdmin = () => S.role === "admin";
 async function startHR() {
   try { const j = await api("employees"); S.cache.emps = j.employees; S.cache.settings = j.settings; } catch (e) { return; }
@@ -632,7 +646,7 @@ function stopPoll() { clearInterval(pollT); pollT = null; }
 async function renderTab() {
   stopPoll();
   const m = $("#main"); m.innerHTML = `<div class="empty">ກຳລັງໂຫຼດ…</div>`;
-  try { await ({ home: tabHome, emps: tabEmps, work: tabWork, trucks: tabTrucks, scan: tabScan, pay: tabPay, leave: tabLeave, welfare: tabWelfare, summary: tabSummary, settings: tabSettings, holidays: tabHolidays, links: tabLinks, docs: tabDocs, bills: tabBills, jd: tabJd })[S.tab](m); }
+  try { await ({ home: tabHome, emps: tabEmps, work: tabWork, trucks: tabTrucks, scan: tabScan, pay: tabPay, leave: tabLeave, welfare: tabWelfare, summary: tabSummary, settings: tabSettings, holidays: tabHolidays, links: tabLinks, docs: tabDocs, bills: tabBills, jd: tabJd, manual: tabManual })[S.tab](m); }
   catch (e) { if (S.token) m.innerHTML = `<div class="err-box">${esc(e.message)}</div>`; }
 }
 async function loadMonth() { const j = await api("monthGet", { month: S.month }); S.cache.month = j; return j; }
@@ -1453,8 +1467,8 @@ function tLadder(e) {
   const cfg = T.cfg, big = tVeh(e.veh)?.type === "big", n = (e.crew || []).filter(Boolean).length;
   const nudge = (pre, q, t, perUnit = true) => {
     const x = tNext(q, t, perUnit);
-    if (x) return `<div class="tl-n">${pre}ອີກ ${fmt(x.more)} ຕຸກ ຂຶ້ນຂັ້ນ ${fmt(x.rate)} → +${fmt(x.gain)} ₭${n > 1 ? ` (+${fmt(x.gain / n)}/ຄົນ)` : ""}</div>`;
-    return num(q) > 0 && t.length ? `<div class="tl-n" style="color:var(--ok);background:var(--ok2)">${pre}ຂັ້ນສູງສຸດແລ້ວ</div>` : "";
+    if (x) return `<div class="tl-n">🎯 ${pre}ອີກ ${fmt(x.more)} ຕຸກ ຂຶ້ນຂັ້ນ ${fmt(x.rate)} → +${fmt(x.gain)} ₭${n > 1 ? ` (+${fmt(x.gain / n)}/ຄົນ)` : ""}</div>`;
+    return num(q) > 0 && t.length ? `<div class="tl-n" style="color:var(--ok);background:var(--ok2)">🏆 ${pre}ຂັ້ນສູງສຸດແລ້ວ</div>` : "";
   };
   const ladder = (label, t, q, nudges) => {
     if (!(t || []).length) return "";
@@ -1474,6 +1488,9 @@ function tLadder(e) {
 }
 // [field, label, default rate] — pack = company customers; packSelf* = customers the crew found themselves
 const T_FLAT = [["glass", "ຂວດແກ້ວ", 1500], ["m250", "250ml", 350], ["pack", "ແພັກ ບໍລິສັດ", 350], ["packSelf", "ແພັກ ລູກຄ້າຫາເອງ", 2000], ["packSelf2", "ແພັກ 2L ລູກຄ້າຫາເອງ", 1500]];
+// picture of the product + customer badge + size tag, readable without the text label
+const T_PIC = { hh: ["jug", "🏠", "18L"], org: ["jug", "🏢", "18L"], glass: ["glass", "", ""], m250: ["pack250", "", "250ml"], pack: ["packmid", "🏢", ""], packSelf: ["packmid", "🤝", ""], packSelf2: ["pack2l", "🤝", "2L"] };
+const pIc = (k) => { const [sym, badge, size] = T_PIC[k] || []; return sym ? `<span class="ic" aria-hidden="true"><svg><use href="#${sym}"/></svg>${badge ? `<i>${badge}</i>` : ""}${size ? `<em>${size}</em>` : ""}</span>` : ""; };
 const T_ERP = ["hh", "org", "glass", "m250", "pack"]; // fields ERP fills on small trucks; big trucks get only rounds
 function tCalc(e) {
   const cfg = T.cfg, big = tVeh(e.veh)?.type === "big", lines = []; let total = 0, qty = 0;
@@ -1487,7 +1504,7 @@ function tCalc(e) {
 const TQ = { hh: "ຄົວເຮືອນ", org: "ອົງກອນ", glass: "ແກ້ວ", m250: "250ml", pack: "ແພັກບໍລິສັດ", packSelf: "ແພັກຫາເອງ", packSelf2: "ແພັກ2Lຫາເອງ" };
 const tQty = (e) => { const r = (e.rounds || []).map((x, i) => (num(x) > 0 ? fmt(x) + (e.places?.[i] ? ` (${e.places[i]})` : "") : "")).filter(Boolean); const s = Object.keys(TQ).filter((k) => num(e[k])).map((k) => `${TQ[k]} ${fmt(e[k])}`); if (r.length) s.unshift("ຮອບ " + r.join(" / ")); return s.join(" · ") || "—"; };
 const tShare = (e) => num(e.total) / Math.max(1, (e.crew || []).filter(Boolean).length);
-const TST = { approved: ["ອະນຸມັດ", "p-ok"], pending: ["ລໍຖ້າ", "p-warn"] };
+const TST = { approved: ["✅ ອະນຸມັດ", "p-ok"], pending: ["⏳ ລໍຖ້າ", "p-warn"] };
 // pay month M ← round (M-1)/startDay … M/(startDay-1)
 function tPeriod(month, sd) {
   sd = num(sd) || 21; const [y, mo] = month.split("-").map(Number);
@@ -1579,9 +1596,10 @@ function tEntryForm(cur, onDone) {
         const lock = (k) => (erpLock && (k === "rd" ? big : !big && T_ERP.includes(k)) ? "disabled" : "");
         const inp = (attr, l, v, k) => `<label>${esc(l)}<input ${attr} type="text" inputmode="numeric" value="${esc(v ?? "")}" ${lock(k)} style="text-align:right;font-variant-numeric:tabular-nums"></label>`;
         $("#tqf", r).innerHTML = (big ? [0, 1, 2, 3].map((i) => `<div class="grid" style="gap:4px">${inp(`data-rd="${i}"`, `ຮອບ ${i + 1} (ຕຸກ)`, e.rounds[i], "rd")}<input data-pl="${i}" maxlength="60" placeholder="ສົ່ງທີ່ໃສ ເຊັ່ນ ສາຂາ…" value="${esc(e.places[i])}" aria-label="ສະຖານທີ່ຮອບ ${i + 1}"></div>`) : [])
-          .concat([inp('data-q="hh"', "ຄົວເຮືອນ 18L", e.hh, "hh"), inp('data-q="org"', "ອົງກອນ 18L", e.org, "org")])
-          .concat(T_FLAT.map(([k, l]) => inp(`data-q="${k}"`, l, e[k], k))).join("");
+          .concat([["hh", "ຄົວເຮືອນ", "ຕຸກ 18L"], ["org", "ອົງກອນ", "ຕຸກ 18L"], ...T_FLAT.map(([k, l, d]) => [k, l, fmt(num(cfg.flat?.[k] ?? d)) + " ₭"])].map(([k, l, sub]) =>
+            `<div class="qrow">${pIc(k)}<span class="ql">${esc(l)}<small>${esc(sub)}</small></span><span class="step"><button type="button" data-st="-1" ${lock(k)} aria-label="ລົບ ${esc(l)}">−</button><input data-q="${k}" type="text" inputmode="numeric" value="${esc(e[k] ?? "")}" ${lock(k)} aria-label="${esc(l)}"><button type="button" data-st="1" ${lock(k)} aria-label="ເພີ່ມ ${esc(l)}">+</button></span></div>`)).join("");
         $$("input", $("#tqf", r)).forEach((i) => i.addEventListener("input", preview));
+        $$("[data-st]", $("#tqf", r)).forEach((b) => b.onclick = () => { const i = b.parentElement.querySelector("input"); i.value = Math.max(0, num(i.value) + +b.dataset.st) || ""; i.dispatchEvent(new Event("input")); });
       };
       $("#tv", r).addEventListener("change", () => { e.veh = val(r, "tv"); if (admin && !touched) e.crew = vehCrew(e.veh); else read(); drawCrew(); drawQty(); preview(); });
       ["ta", "tn"].forEach((id) => $("#" + id, r) && $("#" + id, r).addEventListener("input", preview));
@@ -1744,12 +1762,13 @@ async function loadTrucksEmp() {
   const todayE = T.entries.find((e) => e.date === T.today && e.veh === me.veh && canEdit(e));
   el.hidden = false;
   el.innerHTML = `<div class="row" style="justify-content:space-between"><h2>ລາຍງານລົດ${me.veh ? " · " + esc(tVehName(me.veh)) : ""}</h2><span class="pill p-pri">${esc(me.nick)}</span></div>
-    <button class="pri" id="trn" style="min-height:56px;font-size:17px">${todayE ? "ແກ້ໄຂລາຍງານມື້ນີ້" : "+ ບັນທຶກການສົ່ງ"}</button>
-    <div class="grid g2" style="gap:10px"><div class="kpi"><span class="mut sm">ຮອບນີ້ · ອະນຸມັດແລ້ວ</span><span class="v">${fmt(tot(true))} ₭</span></div><div class="kpi"><span class="mut sm">ລໍຖ້າອະນຸມັດ</span><span class="v" style="color:var(--warn)">${fmt(tot(false))} ₭</span></div></div>
+    <button class="pri" id="trn" style="min-height:56px;font-size:17px">🚚 ${todayE ? "ແກ້ໄຂລາຍງານມື້ນີ້" : "+ ບັນທຶກການສົ່ງ"}</button>
+    <div class="grid g2" style="gap:10px"><div class="kpi"><span class="mut sm">✅ ຮອບນີ້ · ອະນຸມັດແລ້ວ</span><span class="v">${fmt(tot(true))} ₭</span></div><div class="kpi"><span class="mut sm">⏳ ລໍຖ້າອະນຸມັດ</span><span class="v" style="color:var(--warn)">${fmt(tot(false))} ₭</span></div></div>
     <div class="xs mut">ຮອບ ${esc(dmy(p.start))}–${esc(dmy(p.end))} · ເຂົ້າເງິນເດືອນ ${esc(monthLabel(pm))} · ບັນທຶກ/ແກ້ຍ້ອນຫຼັງໄດ້ ${back} ມື້</div>
     <div class="grid" style="gap:8px">${vis.length ? vis.map((e) => `<div class="row" style="justify-content:space-between;border-top:1px solid var(--line2);padding-top:8px;flex-wrap:nowrap"><div style="min-width:0;flex:1"><div class="b sm">${esc(dmy(e.date))} · ${esc(tVehName(e.veh))}</div><div class="xs mut">${esc(tQty(e))}</div><div class="xs">${(e.crew || []).length ? esc(e.crew.join(", ")) : `<span style="color:var(--acc)">ຍັງບໍ່ມີທີມ</span>`}</div></div>
       <div style="display:grid;gap:4px;justify-items:end"><b class="num">${inCrew(e) ? fmt(tShare(e)) + " ₭" : "—"}</b>${pill(TST, e.status === "approved" ? "approved" : "pending")}${canEdit(e) ? `<button class="sm" data-tme="${esc(e.id)}">ແກ້ໄຂ</button>` : ""}</div></div>`).join("") : `<div class="mut sm">ຍັງບໍ່ມີລາຍງານ</div>`}</div>`;
   $("#trn").onclick = () => tEntryForm(todayE || null, loadTrucksEmp);
+  const tt = $("#tTrip"); if (tt) { tt.hidden = false; tt.onclick = () => tEntryForm(todayE || null, loadTrucksEmp); }
   $$("[data-tme]", el).forEach((b) => b.onclick = () => tEntryForm(T.entries.find((e) => e.id === b.dataset.tme), loadTrucksEmp));
 }
 
@@ -1816,6 +1835,42 @@ async function tabSummary(m) {
 
 /* settings */
 async function tabHolidays(m) { await holidayBlock(m, true); }
+/* ຄູ່ມືການນຳໃຊ້ — who: emp = ພະນັກງານທຸກຄົນ, drv = ຄົນຂັບ/ຜູ້ຊ່ວຍ, hr = HR, admin = ແອດມິນເທົ່ານັ້ນ */
+const MANUAL = [
+  { who: "emp", t: "ເຂົ້າລະບົບ", s: ["ເປີດລິ້ງແອັບ ແລ້ວເລືອກ <b>ພະນັກງານ</b>", "ໃສ່ <b>ລະຫັດພະນັກງານ</b> ແລະ <b>PIN 6 ຕົວ</b> ທີ່ HR ໃຫ້", "ລືມ PIN — ແຈ້ງ HR ອອກ PIN ໃໝ່. ໃສ່ຜິດ 5 ເທື່ອ ລະບົບລັອກ 15 ນາທີ", "ບໍ່ຕ້ອງອອກຈາກລະບົບທຸກມື້ — ໂທລະສັບຈື່ໄວ້ 30 ວັນ"] },
+  { who: "emp", t: "ສະແກນເຂົ້າວຽກ / ອອກວຽກ", s: ["ກົດປຸ່ມໃຫຍ່ <b>ເຂົ້າວຽກ</b> ຕອນມາຮອດ ແລະ <b>ອອກວຽກ</b> ຕອນເລີກ", "ເທື່ອທຳອິດ ໂທລະສັບຈະຖາມຕຳແໜ່ງ (GPS) — ກົດ <b>ອະນຸຍາດ</b>", "ຕ້ອງຢູ່ບ່ອນເຮັດວຽກ ຖ້າຢູ່ໄກເກີນ ລະບົບຈະບອກວ່າ <b>ຢູ່ນອກເຂດ</b> ພ້ອມໄລຍະຫ່າງ", "ຫາກໍ່ສະແກນ ຕ້ອງລໍ 2 ນາທີ ຈຶ່ງສະແກນອີກໄດ້", "ລືມສະແກນ ຫຼື ບໍ່ມີເນັດ — ແຈ້ງ HR ໃຫ້ບັນທຶກແທນ (ລືມສະແກນມີຄ່າປັບ)"] },
+  { who: "emp", t: "ຂໍລາ", s: ["ກົດ <b>+ ຂໍລາ</b> ໃນສ່ວນ ໂຄວຕາລາ", "ເລືອກປະເພດລາ, ວັນທີ, ເຄິ່ງມື້ (ຖ້າມີ) ແລະ ໃສ່ເຫດຜົນ", "ລາປ່ວຍຫຼາຍມື້ ອາດຕ້ອງແນບໃບແພດ (ຮູບ ຫຼື PDF)", "ໃບລາໄປຫາຫົວໜ້າຂອງທ່ານ — ເບິ່ງສະຖານະໃນ <b>ໃບລາຂອງຂ້ອຍ</b>", "ຍົກເລີກໄດ້ຕອນຍັງ <b>ລໍຖ້າ</b>. ກົດ <b>ພິມ</b> ເພື່ອພິມໃບລາ"] },
+  { who: "emp", t: "ອະນຸມັດໃບລາ (ສຳລັບຫົວໜ້າ)", s: ["ຖ້າທ່ານເປັນຫົວໜ້າ ຈະເຫັນສ່ວນ <b>ໃບລາລໍຖ້າອະນຸມັດ</b>", "ກວດໂຄວຕາທີ່ເຫຼືອ ແລ້ວກົດ <b>ອະນຸມັດ</b> ຫຼື <b>ປະຕິເສດ</b> (ປະຕິເສດຕ້ອງໃສ່ເຫດຜົນ)"] },
+  { who: "emp", t: "ສະລິບເງິນເດືອນ", s: ["ກົດ <b>ເປີດ (ໃສ່ PIN)</b> ແລ້ວໃສ່ PIN ອີກເທື່ອ", "ເຫັນສະເພາະເດືອນທີ່ HR ປິດແລ້ວ — ຖ້າຍັງບໍ່ເຫັນ ແມ່ນ HR ຍັງບໍ່ທັນປິດເດືອນ"] },
+  { who: "emp", t: "ຂໍ້ມູນສ່ວນຕົວ ແລະ ຮູບ", s: ["ກົດປຸ່ມໃນບັດ <b>ຂໍ້ມູນສ່ວນຕົວ</b> ເພື່ອໃສ່ເບີໂທ, ທີ່ຢູ່, ຜູ້ຕິດຕໍ່ສຸກເສີນ ແລະ ຮູບ", "ເຫັນສະເພາະທ່ານ ແລະ HR ເທົ່ານັ້ນ"] },
+  { who: "drv", t: "ບັນທຶກການສົ່ງປະຈຳວັນ", s: ["ບັນທຶກໃນແອັບນີ້ເທົ່ານັ້ນ — <b>ຢ່າໃຊ້ໜ້າເກົ່າ</b> ບໍ່ດັ່ງນັ້ນຍອດຈະບໍ່ເຂົ້າເງິນເດືອນ", "ກົດ <b>+ ບັນທຶກການສົ່ງ</b> ທຸກມື້ຫຼັງສົ່ງແລ້ວ", "ໝາຍ <b>ທີມ</b> ທີ່ຂຶ້ນລົດ (ສູງສຸດ 6 ຄົນ) — ເງິນແບ່ງເທົ່າກັນ", "ແກ້ໄຂຍ້ອນຫຼັງໄດ້ສອງສາມມື້ ກ່ອນຜູ້ຈັດການອະນຸມັດ. ຈຳນວນທີ່ມາຈາກ ERP ແກ້ບໍ່ໄດ້"] },
+  { who: "drv", t: "ລົດນ້ອຍ — ໃສ່ຈຳນວນ", s: ["<b>ຄົວເຮືອນ 18L</b> ແລະ <b>ອົງກອນ 18L</b> ຄິດຕາມຂັ້ນ", "<b>ຂວດແກ້ວ</b>, <b>250ml</b>", "<b>ແພັກ ບໍລິສັດ</b> = ລູກຄ້າຂອງບໍລິສັດ", "<b>ແພັກ ລູກຄ້າຫາເອງ</b> ແລະ <b>ແພັກ 2L ລູກຄ້າຫາເອງ</b> = ລູກຄ້າທີ່ທີມຫາມາເອງ (ໄດ້ຫຼາຍກວ່າ)"] },
+  { who: "drv", t: "ລົດໃຫຍ່ 9041 — ໃສ່ຮອບ", s: ["ໃສ່ຈຳນວນຕຸກ <b>ແຕ່ລະຮອບ</b> (ສູງສຸດ 4 ຮອບ) ແລະ <b>ສົ່ງທີ່ໃສ</b> ໃຕ້ແຕ່ລະຮອບ", "ຖ້າຂາຍ 18L ໃຫ້ລູກຄ້າໂດຍກົງ ໃສ່ຊ່ອງ <b>ຄົວເຮືອນ</b> / <b>ອົງກອນ</b> — ຄິດເງິນເພີ່ມຈາກຄ່າຮອບ"] },
+  { who: "drv", t: "ຂັ້ນຜົນຕອບແທນ ແລະ ຍອດຂອງຂ້ອຍ", s: ["ຕອນໃສ່ຈຳນວນ ຈະເຫັນຂັ້ນປັດຈຸບັນ ແລະ <b>ອີກ N ຕຸກ ຂຶ້ນຂັ້ນ…</b> ພ້ອມເງິນທີ່ຈະໄດ້ເພີ່ມ", "ໜ້າຫຼັກສະແດງຍອດ <b>ອະນຸມັດແລ້ວ</b> ແລະ <b>ລໍຖ້າອະນຸມັດ</b> ຂອງຮອບນີ້", "ເງິນຍອດຈ່າຍລາຍອາທິດ ຫຼື ທ້າຍເດືອນ ຕາມທີ່ຕົກລົງກັບຜູ້ຈັດການ"] },
+  { who: "hr", t: "ພະນັກງານ ແລະ PIN", s: ["ແຖບ <b>ພະນັກງານ</b>: ເພີ່ມ/ແກ້ໄຂ, ນຳເຂົ້າ CSV", "<b>PIN</b> = ອອກ PIN ໃໝ່ (ສະແດງຄັ້ງດຽວ — ສົ່ງໃຫ້ພະນັກງານໂດຍກົງ)", "<b>ຫົວໜ້າ</b> = ຕັ້ງຜູ້ອະນຸມັດລາ. ພະນັກງານທີ່ບໍ່ມີຫົວໜ້າຂໍລາບໍ່ໄດ້", "<b>ຖອນເຄື່ອງ</b> = ອອກຈາກລະບົບທຸກເຄື່ອງ (ເຊັ່ນ ເສຍໂທລະສັບ)"] },
+  { who: "hr", t: "ສະແກນເຂົ້າ-ອອກ", s: ["ແຖບ <b>ສະແກນເຂົ້າ-ອອກ</b>: ເບິ່ງກະດານມື້ນີ້ ແລະ ປະຕິທິນລາຍຄົນ", "ທຸງທີ່ຕ້ອງກວດ: ບໍ່ມີພິກັດ, GPS ບໍ່ແມ່ນ, ເຄື່ອງດຽວກັນຫຼາຍຄົນ", "<b>ເພີ່ມການສະແກນແທນ</b> / ລຶບ — ຕ້ອງໃສ່ເຫດຜົນທຸກຄັ້ງ (ບັນທຶກໃນ audit)"] },
+  { who: "hr", t: "ລາພັກ-ລາກິດ", s: ["ແຖບ <b>ລາພັກ-ລາກິດ</b>: ເບິ່ງໃບລາທັງໝົດ ແລະ ໂຄວຕາ", "<b>ບັນທຶກລາແທນພະນັກງານ</b> — ຍັງລໍໃຫ້ຫົວໜ້າອະນຸມັດ (HR ບໍ່ແມ່ນຜູ້ອະນຸມັດ)"] },
+  { who: "hr", t: "ລົດຂົນສົ່ງ — ອະນຸມັດ ແລະ ຈ່າຍລາຍອາທິດ", s: ["ກວດລາຍງານປະຈຳວັນ ແລ້ວກົດ <b>ອະນຸມັດ</b> (ລາຍງານທີ່ບໍ່ມີທີມ ອະນຸມັດບໍ່ໄດ້)", "<b>ຜູກຊື່ ↔ ພະນັກງານ</b> ໃຫ້ຄົນຂັບທຸກຄົນ ບໍ່ດັ່ງນັ້ນເງິນບໍ່ເຂົ້າເງິນເດືອນ", "ສ່ວນ <b>ຈ່າຍເງິນຍອດລາຍອາທິດ</b>: ໝາຍ ✓ ຄົນທີ່ຮັບລາຍອາທິດ, ເລືອກອາທິດ, ກົດ <b>ຈ່າຍແລ້ວ</b> ຫຼັງຈ່າຍເງິນ", "ທ້າຍຮອບ ກົດ <b>ດຶງເຂົ້າເງິນເດືອນ</b> — ລະບົບຫັກຍອດທີ່ຈ່າຍລາຍອາທິດແລ້ວອອກໃຫ້ເອງ"], admin: true },
+  { who: "hr", t: "ເງິນເດືອນປະຈຳເດືອນ", s: ["ເລືອກເດືອນຢູ່ດ້ານເທິງ", "<b>ເປີດເດືອນ</b> → <b>ນຳເຂົ້າຈາກການສະແກນ</b> (ມາຊ້າ, ຂາດ, ລືມສະແກນ, ລາບໍ່ຮັບເງິນ)", "ດຶງເງິນຍອດລົດຈາກແຖບ ລົດຂົນສົ່ງ → ກວດໃນ <b>ຄິດໄລ່ຜົນຕອບແທນ</b>", "ກວດຄົບແລ້ວ <b>ປິດເດືອນ</b> — ພະນັກງານຈຶ່ງເຫັນສະລິບ. ເປີດຄືນຕ້ອງໃສ່ເຫດຜົນ"], admin: true },
+  { who: "hr", t: "ຕັ້ງຄ່າ ແລະ ສຳຮອງ", s: ["ແຖບ <b>ຕັ້ງຄ່າ</b>: ອັດຕາ, ເວລາເຮັດວຽກ, ວັນພັກ, ປະເພດລາ", "<b>ຕຳແໜ່ງສະຖານທີ່</b>: ໄປຢືນບ່ອນເຮັດວຽກ ກົດ <b>ໃຊ້ຕຳແໜ່ງປັດຈຸບັນ</b> → ກວດໃນແຜນທີ່ → ບັນທຶກ. ປ່ອຍວ່າງ = ສະແກນໄດ້ທຸກບ່ອນ", "ໃສ່ <b>ວັນພັກ</b> ຂອງແຕ່ລະເດືອນກ່ອນ — ລະບົບບໍ່ເດົາເອງ", "ທ້າຍເດືອນ ກົດ <b>ສົ່ງອອກສຳຮອງ</b> ເກັບໄຟລ໌ໄວ້ບ່ອນປອດໄພ"], admin: true },
+];
+const WHO = { emp: "ພະນັກງານ", drv: "ຄົນຂັບ / ຜູ້ຊ່ວຍ", hr: "HR / ແອດມິນ" };
+function manualHTML(groups) {
+  return groups.map((g) => `<section class="grid" style="gap:8px"><h3>${esc(WHO[g])}</h3>${MANUAL.filter((x) => x.who === g).map((x, i) =>
+    `<details class="card" style="padding:14px 18px"${i ? "" : " open"}><summary style="cursor:pointer;font-weight:600">${esc(x.t)}${x.admin ? ` <span class="pill">ແອດມິນ</span>` : ""}</summary>
+      <ol style="margin:10px 0 0;padding-left:20px;display:grid;gap:6px">${x.s.map((s) => `<li>${s}</li>`).join("")}</ol></details>`).join("")}</section>`).join("");
+}
+async function tabManual(m) {
+  const g = S.cache.mg || "hr";
+  m.innerHTML = `<div class="grid" style="gap:14px;max-width:820px"><div class="row"><h2 style="flex:1">ຄູ່ມືການນຳໃຊ້</h2>${Object.entries(WHO).map(([k, l]) => `<button class="sm ${k === g ? "pri" : ""}" data-mg="${k}">${esc(l)}</button>`).join("")}<button class="sm" id="mpr">ພິມ</button></div>
+    <div class="mut sm">ສົ່ງລິ້ງແອັບໃຫ້ທີມ — ພະນັກງານ ແລະ ຄົນຂັບເປີດຄູ່ມືໄດ້ຈາກປຸ່ມ <b>ຄູ່ມື</b> ໃນໜ້າຂອງເຂົາເຈົ້າ</div>${manualHTML([g])}</div>`;
+  $$("[data-mg]", m).forEach((b) => b.onclick = () => { S.cache.mg = b.dataset.mg; tabManual(m); });
+  // print view only shows #print, so copy the selected role's guide there with every section open
+  $("#mpr", m).onclick = () => { $("#print").innerHTML = `<h1>ຄູ່ມືການນຳໃຊ້ · Nany Logistic HR</h1>${manualHTML([g]).replace(/<details /g, "<details open ")}`; print(); };
+}
+function manualDialog() {
+  dialog({ title: "ຄູ່ມືການນຳໃຊ້", wide: true, ok: "", cancel: "ປິດ", body: `<div class="grid" style="gap:14px">${manualHTML(["emp", "drv"])}</div>` });
+}
 async function holidayBlock(m, standalone) {
   const j = await api("holidays");
   const html = `<section class="card grid" style="gap:10px" id="hb"><h2>ວັນພັກຕາມປະຕິທິນ</h2><div class="mut sm">ວັນອາທິດເປັນວັນພັກອັດຕະໂນມັດ. ວັນພັກອື່ນຕ້ອງກອກເອງ — ລະບົບບໍ່ເດົາ.</div>
