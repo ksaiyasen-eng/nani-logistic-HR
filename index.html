@@ -10,19 +10,20 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700&display=swap">
 <style>
-:root{--ink:#1D2A2E;--mut:#5B6B70;--line:#E2DED3;--line2:#EEEBE3;--bg:#F6F4EE;--card:#fff;--pri:#0B5A53;--pri2:#E3EFEC;--acc:#B4542F;--acc2:#F6E6DE;--warn:#9A6B00;--warn2:#FBF1D6;--ok:#2F7A3E;--ok2:#E2F1E4;--r:14px}
+:root{--ink:#1B2333;--mut:#667085;--line:#E3E8EF;--line2:#EEF1F6;--bg:#EEF2F8;--card:#fff;--pri:#2563EB;--pri-h:#1D4ED8;--pri2:#E8EFFE;--acc:#D9483B;--acc2:#FDECEA;--warn:#9A6B00;--warn2:#FBF1D6;--ok:#2F7A3E;--ok2:#E2F1E4;--hero:#1F2430;--r:20px;--sh:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.06)}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Noto Sans Lao",system-ui,sans-serif;-webkit-text-size-adjust:100%}
-a{color:var(--pri)}a:hover{color:#08423D}
+a{color:var(--pri)}a:hover{color:var(--pri-h)}
 button,input,select,textarea{font:inherit;color:inherit}
-button{cursor:pointer;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:#fff;font-weight:600}
-button:hover{background:#FAF9F5}
-button.pri{background:var(--pri);border-color:var(--pri);color:#fff}button.pri:hover{background:#08423D}
+button{cursor:pointer;min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:#fff;font-weight:600}
+button:hover{background:#F6F8FB}
+button.pri{background:var(--pri);border-color:var(--pri);color:#fff}button.pri:hover{background:var(--pri-h)}
 button.dng{background:var(--acc);border-color:var(--acc);color:#fff}
 button.sm{min-height:34px;padding:0 10px;font-size:13px;border-radius:8px}
 button:disabled{opacity:.5;cursor:not-allowed}
 :focus-visible{outline:3px solid #F2B84B;outline-offset:2px}
-input,select,textarea{min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;width:100%}
+input,select,textarea{min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;width:100%}
 textarea{min-height:80px}
 .dsel{display:flex;gap:6px;min-width:0}.dsel select{width:auto;flex:1 1 0;min-width:64px;padding:8px}.dsel.bad select{border-color:var(--acc)}
 .fsel{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
@@ -32,7 +33,7 @@ th.emp{z-index:3;background:#FBFAF7}
 .emp .nm{font-weight:600;line-height:1.45}.emp .cd{font-size:12px;color:var(--mut);white-space:nowrap;margin-top:2px;font-variant-numeric:tabular-nums}
 label{display:grid;gap:4px;font-size:13px;color:var(--mut);font-weight:500}
 .wrap{max-width:1240px;margin:0 auto;padding:16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.card{background:var(--card);border:0;border-radius:var(--r);padding:20px;box-shadow:var(--sh)}
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .grid{display:grid;gap:14px}
 .g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
@@ -40,20 +41,42 @@ label{display:grid;gap:4px;font-size:13px;color:var(--mut);font-weight:500}
 .mut{color:var(--mut)}.sm{font-size:13px}.xs{font-size:12px}.b{font-weight:600}
 .num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
 h1,h2,h3{margin:0;line-height:1.3}h1{font-size:22px}h2{font-size:18px}h3{font-size:15px}
-.tw{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:#fff}
+.tw{overflow-x:auto;border:0;border-radius:var(--r);background:#fff;box-shadow:var(--sh)}
+.card .tw,.dlg .tw{box-shadow:none;border:1px solid var(--line2);border-radius:14px}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;font-weight:600;color:var(--mut);font-size:12px;padding:10px;border-bottom:1px solid var(--line);background:#FBFAF7;position:sticky;top:0;white-space:nowrap}
 td{padding:8px 10px;border-bottom:1px solid var(--line2);vertical-align:middle}
 tr:last-child td{border-bottom:0}
 .pill{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;background:var(--line2);color:var(--mut);white-space:nowrap}
+.tl-r{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.tl-s{border:1px solid var(--line);border-radius:10px;padding:4px 10px;font-size:12px;color:var(--mut);text-align:center;line-height:1.3;font-variant-numeric:tabular-nums}
+.tl-s b{display:block;font-size:14px;color:var(--ink)}.tl-s.on{border-color:var(--warn);background:var(--warn2)}.tl-s.on b{color:var(--warn)}
+.tl-n{color:var(--warn);background:var(--warn2);border-radius:10px;padding:8px 11px;font-size:14px;font-weight:600;margin-top:6px}
 .p-ok{background:var(--ok2);color:var(--ok)}.p-warn{background:var(--warn2);color:var(--warn)}.p-bad{background:var(--acc2);color:var(--acc)}.p-pri{background:var(--pri2);color:var(--pri)}
-.top{background:var(--pri);color:#fff}
-.top .wrap{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding-top:12px;padding-bottom:12px}
-.top select,.top input{width:auto;min-height:38px;background:#fff;color:var(--ink)}
-.tabs{display:flex;gap:4px;overflow-x:auto;padding:0 16px;max-width:1240px;margin:0 auto}
-.tabs button{border:0;border-radius:10px 10px 0 0;background:transparent;color:#D6E8E4;white-space:nowrap;min-height:42px}
-.tabs button[aria-selected=true]{background:var(--bg);color:var(--pri)}
-.kpi{display:grid;gap:2px}.kpi .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.top{background:transparent;color:var(--ink)}
+.top .wrap{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding-top:16px;padding-bottom:8px}
+.top select,.top input{width:auto;min-height:40px;background:var(--card);color:var(--ink);box-shadow:var(--sh);border-color:transparent}
+.top .hi{font-size:clamp(18px,4.8vw,22px);font-weight:700}
+@media (max-width:600px){.top .net{font-size:0;gap:0}}
+.tabs{display:flex;gap:4px;overflow-x:auto;padding:0 16px;max-width:1240px;margin:0 auto;scrollbar-width:none}
+.tabs button{border:0;border-radius:12px;background:transparent;color:var(--mut);white-space:nowrap;min-height:42px;font-weight:500}
+.tabs button:hover{background:var(--line2);color:var(--ink)}
+.tabs button[aria-selected=true]{background:var(--pri2);color:var(--pri);font-weight:600}
+/* HR shell: sidebar on wide screens, scrollable tab strip on phones */
+.side{background:var(--card);box-shadow:var(--sh);position:sticky;top:0;z-index:20}
+.side .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;padding:14px 16px 6px}
+.side .brand i{width:30px;height:30px;border-radius:50%;background:var(--pri);color:#fff;display:grid;place-items:center;font-style:normal;font-size:15px}
+.side .tabs{padding-bottom:10px}
+@media (min-width:1024px){
+  .shell{display:grid;grid-template-columns:248px 1fr;min-height:100vh}
+  .side{height:100vh;display:flex;flex-direction:column;box-shadow:none;border-right:1px solid var(--line2)}
+  .side .brand{padding:24px 22px 18px}
+  .side .tabs{flex-direction:column;overflow:auto;padding:0 14px 20px;margin:0;flex:1}
+  .side .tabs button{text-align:left;padding:0 14px}
+}
+.kpi{display:grid;gap:6px}.kpi .v{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
+.kpis>.kpi:first-child{background:var(--hero);color:#fff}.kpis>.kpi:first-child .mut{color:#C9CED8}
+@media (max-width:600px){.kpis{grid-template-columns:1fr 1fr;gap:10px}.kpis .kpi{padding:14px}.kpis .kpi .v{font-size:19px}}
 .net{display:inline-flex;align-items:center;gap:6px;font-size:12px}
 .net i{width:8px;height:8px;border-radius:50%;background:#7FD3A0;display:inline-block}
 .net.busy i{background:#F2B84B}.net.off i{background:#F28B6B}
@@ -82,6 +105,18 @@ tr:last-child td{border-bottom:0}
 @media (pointer:coarse){button.sm{min-height:44px;padding:0 14px}.dsel{display:flex;gap:6px;min-width:0}.dsel select{width:auto;flex:1 1 0;min-width:64px;padding:8px}.dsel.bad select{border-color:var(--acc)}
 .fsel{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 input.cell{min-height:44px}}
+@media (prefers-color-scheme:dark){
+:root{color-scheme:dark;--ink:#E7EBF2;--mut:#98A2B3;--line:#2B3342;--line2:#232A36;--bg:#0F141C;--card:#171D27;--pri:#2563EB;--pri-h:#1D4ED8;--pri2:#1A2740;--acc:#C93F33;--acc2:#3A1F1C;--warn:#E3B04B;--warn2:#3A2E10;--ok:#6FCF82;--ok2:#173321;--hero:#2563EB;--sh:0 1px 2px rgba(0,0,0,.3)}
+a,a:hover,.tabs button[aria-selected=true],.p-pri{color:#8AB4FF}
+button,input,select,textarea,.emp,.tw,.dlg{background:var(--card)}
+button:hover{background:#1F2734}
+button.pri{background:var(--pri)}button.dng{background:var(--acc)}
+th,th.emp{background:#1C2330}
+.p-bad,.err-box{color:#F0A58C}.warn-box{color:#F0CF86}
+.top select,.top input{background:var(--card);color:var(--ink)}
+.dlgbg{background:rgba(0,0,0,.6)}
+}
+@media print and (prefers-color-scheme:dark){body,.doc{background:#fff;color:#000}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -167,10 +202,12 @@ const FLAG = { no_location: "ບໍ່ມີພິກັດ", low_accuracy: "GPS
 const pill = (map, k) => { const x = map[k] || [k, ""]; return `<span class="pill ${x[1]}">${esc(x[0])}</span>`; };
 
 const ERR = {
+  bad_photo: "ຮູບບໍ່ຖືກຕ້ອງ ຫຼື ໃຫຍ່ເກີນ — ເລືອກຮູບ JPG/PNG ໃໝ່",
   unauthorized: "ໝົດເວລາເຂົ້າລະບົບ ຫຼື ບໍ່ມີສິດ — ກະລຸນາເຂົ້າລະບົບໃໝ່", forbidden: "ທ່ານບໍ່ມີສິດເຮັດລາຍການນີ້",
   bad_login: "ລະຫັດພະນັກງານ ຫຼື PIN ບໍ່ຖືກຕ້ອງ", bad_pin: "PIN ບໍ່ຖືກຕ້ອງ", locked: "ໃສ່ຜິດຫຼາຍເທື່ອ — ຖືກລັອກ 15 ນາທີ",
   not_setup: "ລະບົບຍັງບໍ່ໄດ້ຕັ້ງລະຫັດແອດມິນ", already_setup: "ລະບົບຕັ້ງຄ່າແລ້ວ", bad_setup_code: "ລະຫັດຕັ້ງຄ່າບໍ່ຖືກຕ້ອງ",
   password_too_short: "ລະຫັດຜ່ານຕ້ອງຍາວຢ່າງໜ້ອຍ 10 ຕົວອັກສອນ", bad_current_password: "ລະຫັດຜ່ານປັດຈຸບັນບໍ່ຖືກ",
+  out_of_area: "ທ່ານຢູ່ນອກເຂດບ່ອນເຮັດວຽກ — ເຂົ້າໃກ້ບ່ອນເຮັດວຽກແລ້ວລອງໃໝ່", location_required: "ຕ້ອງເປີດ GPS ແລະ ອະນຸຍາດຕຳແໜ່ງ ຈຶ່ງສະແກນໄດ້",
   too_soon: "ຫາກໍ່ສະແກນໄປ — ລໍຖ້າ 2 ນາທີ ແລ້ວລອງໃໝ່", state_changed: "ສະຖານະປ່ຽນແລ້ວ — ໂຫຼດໃໝ່", overlap: "ຊ່ວງວັນລາຊ້ອນກັບໃບລາທີ່ມີຢູ່ແລ້ວ",
   no_working_days: "ຊ່ວງນີ້ບໍ່ມີວັນເຮັດວຽກ (ວັນອາທິດ/ວັນພັກ)", reason_required: "ກະລຸນາໃສ່ເຫດຜົນ", no_approver: "ທ່ານຍັງບໍ່ມີຫົວໜ້າຜູ້ອະນຸມັດ — ແຈ້ງ HR",
   note_required: "ກະລຸນາໃສ່ໝາຍເຫດ", already_decided: "ໃບລານີ້ຖືກພິຈາລະນາແລ້ວ", cannot_cancel: "ຍົກເລີກບໍ່ໄດ້",
@@ -180,19 +217,36 @@ const ERR = {
   leave_type_in_use: "ປະເພດລານີ້ຖືກໃຊ້ແລ້ວ ລຶບບໍ່ໄດ້ — ໃຫ້ປິດໃຊ້ງານແທນ", has_approver: "ພະນັກງານຄົນນີ້ມີຫົວໜ້າ — ໃຫ້ຍື່ນລາປົກກະຕິ",
   import_errors: "ມີແຖວຜິດ — ບໍ່ໄດ້ນຳເຂົ້າ", bad_request: "ຂໍ້ມູນບໍ່ຖືກຕ້ອງ", too_large: "ຂໍ້ມູນໃຫຍ່ເກີນ", server_error: "ເຊີບເວີຂັດຂ້ອງ — ລອງໃໝ່",
 };
-const errMsg = (j) => (ERR[j.error] || ("ຜິດພາດ: " + j.error)) + (j.field ? ` (${j.field})` : "") + (j.docNo ? ` — ${j.docNo}` : "");
+const errMsg = (j) => (ERR[j.error] || ("ຜິດພາດ: " + j.error)) + (j.field ? ` (${j.field})` : "") + (j.dist != null ? ` — ຫ່າງ ${fmt(j.dist)} ມ (ອະນຸຍາດ ${fmt(j.radius)} ມ)` : "") + (j.docNo ? ` — ${j.docNo}` : "");
 
 /* ---------- state + api ---------- */
 const S = { role: null, token: null, payToken: null, tab: "home", month: SS.get("hr_month") || curMonth(), dept: "", me: null, cache: {} };
 let pollT = null, pollBusy = false;
 
 function setNet(st) { const n = $("#net"); if (n) { n.className = "net " + st; n.lastChild.textContent = st === "off" ? " ອອບລາຍ" : st === "busy" ? " ກຳລັງໂຫຼດ" : " ເຊື່ອມຕໍ່ແລ້ວ"; } }
+// ອ່ານຢ່າງດຽວ = ລອງໃໝ່ໄດ້ 3 ຄັ້ງ; ຂຽນ = ບໍ່ລອງໃໝ່ ແລະ ຄຳຂໍທີ່ຄືກັນທຸກຢ່າງທີ່ກຳລັງສົ່ງຢູ່ (ກົດຊ້ຳ) ໃຊ້ຄຳຂໍດຽວກັນ
+const READ_ACTIONS = new Set(["me", "employees", "settingsGet", "holidays", "monthGet", "attendanceBoard", "attendanceFlags", "attendanceMonthAdmin", "myAttendance", "myLeaves", "leavesAdmin", "leaveDoc", "leaveAttachment", "leaveQuote", "approvals", "payslipMonths", "payslip", "welfare", "status", "importProposals", "auditLog", "boot", "entries", "payroll.get", "hr.links", "hr.driverPay", "listDocs", "myProfile", "empProfile"]);
+const inflight = new Map();
+function post(url, ct, body, read) {
+  const key = url + body;
+  if (!read && inflight.has(key)) return inflight.get(key);
+  const run = async () => {
+    for (let a = 1; ; a++) {
+      const ac = new AbortController(), t = setTimeout(() => ac.abort(), 30000);
+      try { return await (await fetch(url, { method: "POST", headers: { "content-type": ct }, body, signal: ac.signal })).json(); }
+      catch (e) { if (!read || a >= 3) throw e; await new Promise((r) => setTimeout(r, 600 * a)); }
+      finally { clearTimeout(t); }
+    }
+  };
+  const p = run();
+  if (!read) { inflight.set(key, p); p.finally(() => inflight.delete(key)).catch(() => {}); }
+  return p;
+}
 async function api(action, data = {}) {
   setNet("busy");
   let j;
   try {
-    const r = await fetch(API, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action, token: S.token, ...data }) });
-    j = await r.json();
+    j = await post(API, "application/json", JSON.stringify({ action, token: S.token, ...data }), READ_ACTIONS.has(action));
   } catch { setNet("off"); const e = new Error("ເຊື່ອມຕໍ່ອິນເຕີເນັດບໍ່ໄດ້ — ກວດເນັດແລ້ວລອງໃໝ່"); e.code = "network"; throw e; }
   setNet("ok");
   if (!j.ok) {
@@ -235,10 +289,13 @@ function logout(msg) {
 }
 
 /* ---------- login ---------- */
+// in-memory copy: storage can be blocked (private mode, embedded views), and then the HR button did nothing
+let loginMode = null;
+const setLoginMode = (m) => { loginMode = m; SS.set("hr_login_mode", m); renderLogin(); };
 async function renderLogin(msg) {
   let st = { setupNeeded: false, staffEnabled: false };
   try { st = await api("status"); } catch (e) { msg = e.message; }
-  const mode = SS.get("hr_login_mode") || "emp";
+  const mode = loginMode || SS.get("hr_login_mode") || "emp";
   $("#app").innerHTML = `<div class="wrap" style="max-width:440px;padding-top:6vh">
     <div class="card grid" style="gap:16px">
       <div><h1>Nany Logistic HR</h1><div class="mut sm">ລະບົບບໍລິຫານພະນັກງານ</div></div>
@@ -263,8 +320,8 @@ async function renderLogin(msg) {
       </form>
       <div class="mut xs">${VER}</div>
     </div></div>`;
-  $("#mEmp").onclick = () => { SS.set("hr_login_mode", "emp"); renderLogin(); };
-  $("#mHr").onclick = () => { SS.set("hr_login_mode", "hr"); renderLogin(); };
+  $("#mEmp").onclick = () => setLoginMode("emp");
+  $("#mHr").onclick = () => setLoginMode("hr");
   $("#lf").onsubmit = async (ev) => {
     ev.preventDefault(); const btn = $("#lf button[type=submit]"); btn.disabled = true;
     try {
@@ -291,7 +348,7 @@ function renderEmp() {
   const m = S.me, e = m.emp, next = m.next;
   const tp = m.todayPunches.map((p) => `<span class="pill ${p.kind === "in" ? "p-pri" : "p-bad"}">${p.kind === "in" ? "ເຂົ້າ" : "ອອກ"} ${esc(fmtTime(p.at))}</span>`).join("");
   $("#app").innerHTML = `
-  <div class="top"><div class="wrap" style="max-width:720px"><div style="flex:1"><h1 style="font-size:16px">${esc(e.name)}</h1><div class="xs" style="opacity:.85">${esc(e.emp_code)} · ${esc(e.position || "")}</div></div>
+  <div class="top"><div class="wrap" style="max-width:720px"><div id="hav">${avatar(null, e.name, 48)}</div><div style="flex:1;min-width:0"><h1 class="hi">ສະບາຍດີ, ${esc(e.name)}</h1><div class="sm mut">${esc(e.emp_code)} · ${esc(e.position || "")}</div></div>
     <span class="net" id="net"><i></i> ເຊື່ອມຕໍ່ແລ້ວ</span><button class="sm" id="lo">ອອກ</button></div></div>
   <div class="wrap grid" style="max-width:720px;gap:14px">
     <section class="card grid" style="gap:12px">
@@ -299,6 +356,7 @@ function renderEmp() {
       <div class="row">${tp || `<span class="mut sm">ມື້ນີ້ຍັງບໍ່ມີການສະແກນ</span>`}</div>
       <div id="pmsg"></div>
     </section>
+    <section class="card row" style="gap:14px;flex-wrap:nowrap"><div id="pfav">${avatar(null, e.name)}</div><div style="flex:1;min-width:0"><h2>ຂໍ້ມູນສ່ວນຕົວ</h2><div class="xs mut">ເຫັນສະເພາະທ່ານ ແລະ HR</div></div><button id="pfb">ແກ້ໄຂ</button></section>
     <section class="card grid" style="gap:12px" id="myjob" hidden></section>
     <section class="card grid" style="gap:12px" id="trk" hidden></section>
     ${m.isApprover ? `<section class="card grid" style="gap:10px"><div class="row" style="justify-content:space-between"><h2>ໃບລາລໍຖ້າອະນຸມັດ</h2><span class="pill ${m.pendingApprovals ? "p-warn" : ""}">${m.pendingApprovals}</span></div><div id="apl"><div class="mut sm">ກຳລັງໂຫຼດ…</div></div></section>` : ""}
@@ -314,6 +372,8 @@ function renderEmp() {
   </div>`;
   $("#lo").onclick = () => dialog({ title: "ອອກຈາກລະບົບ?", body: `<p class="mut">ຄັ້ງຕໍ່ໄປຕ້ອງໃສ່ລະຫັດ ແລະ PIN ໃໝ່</p>`, ok: "ອອກ", onOk: () => logout() });
   $("#pb").onclick = doPunch;
+  $("#pfb").onclick = profileForm;
+  api("myProfile").then((j) => setAvatars(j.photo, e.name)).catch(() => {});
   $("#nl").onclick = () => leaveForm(null);
   $("#alll").onclick = async () => { try { const j = await api("myLeaves"); $("#myl").innerHTML = leaveListHTML(j.requests); bindLeaveList($("#myl")); } catch (e) { fail(e); } };
   bindLeaveList($("#myl"));
@@ -361,6 +421,54 @@ async function doPunch() {
       body: `<p>ເມື່ອກົດສະແກນ ລະບົບຈະຂໍຕຳແໜ່ງ GPS ຂອງໂທລະສັບ <b>ສະເພາະຕອນສະແກນ</b> ເພື່ອຢືນຢັນວ່າທ່ານຢູ່ບ່ອນເຮັດວຽກ.</p><ul class="sm"><li>ເຈົ້າໜ້າທີ່ HR ເທົ່ານັ້ນທີ່ເຫັນ</li><li>ເກັບໄວ້ ${esc(S.me.settings.gpsRetentionMonths)} ເດືອນ ແລ້ວລຶບພິກັດ (ເກັບແຕ່ເວລາ)</li><li>ຖ້າບໍ່ອະນຸຍາດ ຍັງສະແກນໄດ້ ແຕ່ຈະຖືກໝາຍໃຫ້ HR ກວດ</li><li>ເວລາທີ່ບັນທຶກແມ່ນເວລາຂອງເຊີບເວີ ບໍ່ແມ່ນເວລາໃນໂທລະສັບ</li></ul>`,
       onOk: () => { LS.set("hr_gps_ok", "1"); setTimeout(go, 50); } });
   } else go();
+}
+/* ---------- ຂໍ້ມູນສ່ວນຕົວ + ຮູບ (ເຈົ້າຂອງ ແລະ HR ເທົ່ານັ້ນ) ---------- */
+const PF = [["phone", "ເບີໂທ", "tel"], ["address", "ທີ່ຢູ່ປັດຈຸບັນ", "area"], ["birth_date", "ວັນເກີດ", "date"], ["blood_type", "ກຸ່ມເລືອດ", "blood"],
+  ["emergency_name", "ຜູ້ຕິດຕໍ່ສຸກເສີນ", "text"], ["emergency_relation", "ຄວາມສຳພັນ", "text"], ["emergency_phone", "ເບີໂທຜູ້ຕິດຕໍ່ສຸກເສີນ", "tel"], ["id_no", "ເລກບັດປະຈຳຕົວ / ໜັງສືຜ່ານແດນ", "text"]];
+const avatar = (src, name, size = 56) => src
+  ? `<img src="${esc(src)}" alt="${esc(name)}" width="${size}" height="${size}" style="border-radius:50%;object-fit:cover;display:block">`
+  : `<div aria-hidden="true" style="width:${size}px;height:${size}px;border-radius:50%;background:var(--pri2);color:var(--pri);display:grid;place-items:center;font-weight:700;font-size:${Math.round(size / 2.4)}px">${esc(String(name || "?").trim().charAt(0))}</div>`;
+const setAvatars = (photo, name) => { if ($("#pfav")) $("#pfav").innerHTML = avatar(photo, name); if ($("#hav")) $("#hav").innerHTML = avatar(photo, name, 48); };
+// ຫຍໍ້ຮູບເປັນ JPEG ≤ 320px ໃນເຄື່ອງ ກ່ອນສົ່ງ (ປະມານ 20–40 KB)
+async function photoData(file) {
+  let img;
+  try { img = await createImageBitmap(file); } catch { const e = new Error("ເປີດຮູບນີ້ບໍ່ໄດ້ — ເລືອກຮູບ JPG ຫຼື PNG"); throw e; }
+  const k = Math.min(1, 320 / Math.max(img.width, img.height));
+  const c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+  c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+  return c.toDataURL("image/jpeg", 0.82);
+}
+async function profileForm() {
+  let j; try { j = await api("myProfile"); } catch (e) { return fail(e); }
+  const p = j.profile || {}, name = S.me.emp.name;
+  let photo; // undefined = ບໍ່ປ່ຽນ, null = ລຶບ, string = ຮູບໃໝ່
+  const field = ([k, label, t]) => `<label${t === "area" || k === "id_no" ? ` style="grid-column:1/-1"` : ""}>${esc(label)}${
+    t === "area" ? `<textarea id="pf_${k}" maxlength="300">${esc(p[k])}</textarea>`
+    : t === "blood" ? `<select id="pf_${k}">${["", "A", "B", "AB", "O"].map((o) => `<option ${o === (p[k] || "") ? "selected" : ""}>${o}</option>`).join("")}</select>`
+    : `<input id="pf_${k}" type="${t === "tel" ? "tel" : t === "date" ? "date" : "text"}" ${t === "tel" ? `inputmode="tel" autocomplete="tel"` : ""} value="${esc(p[k])}">`}</label>`;
+  dialog({ title: "ຂໍ້ມູນສ່ວນຕົວ", ok: "ບັນທຶກ", body: `<div class="grid" style="gap:14px">
+    <div class="row" style="gap:14px"><div id="pf_av">${avatar(j.photo, name, 88)}</div>
+      <div class="grid" style="gap:6px"><label class="b" style="color:var(--ink)">ຮູບພາບ<input id="pf_file" type="file" accept="image/*"></label>
+      ${j.photo ? `<button type="button" class="sm" id="pf_del">ລຶບຮູບ</button>` : ""}</div></div>
+    <div class="grid g2">${PF.map(field).join("")}</div>
+    <div class="xs mut">ຂໍ້ມູນນີ້ເຫັນສະເພາະທ່ານ ແລະ HR/ແອດມິນ</div></div>`,
+    onOpen: (r) => {
+      $("#pf_file", r).onchange = async (ev) => { const f = ev.target.files[0]; if (!f) return; try { photo = await photoData(f); $("#pf_av", r).innerHTML = avatar(photo, name, 88); } catch (e) { fail(e); } };
+      if ($("#pf_del", r)) $("#pf_del", r).onclick = () => { photo = null; $("#pf_av", r).innerHTML = avatar(null, name, 88); };
+    },
+    onOk: async (r) => {
+      const profile = Object.fromEntries(PF.map(([k]) => [k, $("#pf_" + k, r).value.trim()]));
+      const res = await api("profileSave", { profile, ...(photo !== undefined ? { photo } : {}) });
+      setAvatars(res.photo, name);
+      toast("ບັນທຶກແລ້ວ");
+    } });
+}
+async function profileView(e) {
+  let j; try { j = await api("empProfile", { id: e.id }); } catch (x) { return fail(x); }
+  const p = j.profile || {};
+  dialog({ title: "ຂໍ້ມູນສ່ວນຕົວ — " + e.name, ok: "", cancel: "ປິດ", body: `<div class="grid" style="gap:14px">
+    <div class="row" style="gap:14px">${avatar(j.photo, e.name, 88)}<div><div class="b">${esc(e.name)}</div><div class="xs mut">${esc(e.emp_code)} · ${esc(e.position || "")}</div></div></div>
+    <div class="grid g2">${PF.map(([k, label, t]) => `<div><div class="xs mut">${esc(label)}</div><div>${esc((t === "date" && p[k] ? dmy(p[k]) : p[k]) || "—")}</div></div>`).join("")}</div></div>` });
 }
 async function loadApprovals() {
   try {
@@ -506,11 +614,12 @@ function renderShell() {
   const tabs = isAdmin() ? TABS_ADMIN : TABS_STAFF;
   if (!tabs.find((t) => t[0] === S.tab)) S.tab = "home";
   const depts = [...new Set((S.cache.emps || []).map((e) => (e.dept || "").trim()).filter(Boolean))];
-  $("#app").innerHTML = `<header class="top"><div class="wrap"><div style="flex:1;min-width:180px"><h1 style="font-size:16px">Nany Logistic HR</h1><div class="xs" style="opacity:.85">${isAdmin() ? "ແອດມິນ" : "ພະນັກງານ HR"}</div></div>
+  $("#app").innerHTML = `<div class="shell"><aside class="side"><div class="brand"><i aria-hidden="true">N</i>Nany HR</div>
+    <nav class="tabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${k === S.tab}" data-tab="${k}">${esc(l)}</button>`).join("")}</nav></aside>
+    <div style="min-width:0"><header class="top"><div class="wrap"><div style="flex:1;min-width:180px"><h1 class="hi">ສະບາຍດີ, ${isAdmin() ? "ແອດມິນ" : "HR"}</h1><div class="sm mut">ຍິນດີຕ້ອນຮັບສູ່ລະບົບບໍລິຫານພະນັກງານ</div></div>
     <input type="month" id="mo" value="${esc(S.month)}" aria-label="ເດືອນ"><select id="dp" aria-label="ພະແນກ"><option value="">ທຸກພະແນກ</option>${depts.map((d) => `<option ${d === S.dept ? "selected" : ""}>${esc(d)}</option>`).join("")}</select>
-    <span class="net" id="net"><i></i> ເຊື່ອມຕໍ່ແລ້ວ</span><button class="sm" id="lo">ອອກ</button></div>
-    <nav class="tabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${k === S.tab}" data-tab="${k}">${esc(l)}</button>`).join("")}</nav></header>
-    <main class="wrap" id="main"></main>`;
+    <span class="net" id="net"><i></i> ເຊື່ອມຕໍ່ແລ້ວ</span><button class="sm" id="lo">ອອກ</button></div></header>
+    <main class="wrap" id="main"></main></div></div>`;
   $("#mo").onchange = () => { S.month = $("#mo").value || curMonth(); SS.set("hr_month", S.month); renderTab(); };
   $("#dp").onchange = () => { S.dept = $("#dp").value; renderTab(); };
   $("#lo").onclick = () => logout();
@@ -545,7 +654,7 @@ async function tabHome(m) {
   const watch = rows.filter((r) => num(r.absent_days) || num(r.advance) || !r.has_account);
   m.innerHTML = `<div class="grid" style="gap:14px">
     ${mj ? monthGuard(mj) : ""}
-    <div class="grid g4">
+    <div class="grid g4 kpis">
       ${mj ? `<div class="card kpi"><span class="mut sm">ພະນັກງານ (${esc(monthLabel(S.month))})</span><span class="v">${rows.length}</span></div>
       <div class="card kpi"><span class="mut sm">ຈ່າຍສຸດທິລວມ</span><span class="v">${fmt(sum((r) => r.computed.net))}</span></div>
       <div class="card kpi"><span class="mut sm">ລາຍຮັບລວມ</span><span class="v">${fmt(sum((r) => r.computed.income))}</span></div>
@@ -593,7 +702,7 @@ async function tabEmps(m) {
       <td class="sm">${esc(e.bank)} <span data-acc="${esc(e.id)}">${esc(e.account_no || "—")}</span>${e.has_account ? ` <button class="sm" data-rev="${esc(e.id)}">ສະແດງ</button>` : ""}</td>
       <td class="sm">${esc(e.approver_name || "—")}${e.delegate_name ? `<div class="xs mut">ແທນ: ${esc(e.delegate_name)} ຮອດ ${esc(dmy(e.delegate_until))}</div>` : ""}</td>
       <td>${e.has_pin ? `<span class="pill p-ok">ມີ</span>` : `<span class="pill">ບໍ່ມີ</span>`}</td>
-      <td style="white-space:nowrap"><button class="sm" data-ed="${esc(e.id)}">ແກ້ໄຂ</button> <button class="sm" data-ap="${esc(e.id)}">ຫົວໜ້າ</button> <button class="sm" data-pin="${esc(e.id)}">PIN</button> <button class="sm" data-rv="${esc(e.id)}">ຖອນເຄື່ອງ</button></td></tr>`).join("") : `<tr><td colspan="11" class="empty">ຍັງບໍ່ມີພະນັກງານ — ກົດ "ນຳເຂົ້າ CSV" ຫຼື "+ ເພີ່ມພະນັກງານ"</td></tr>`}</tbody></table></div></div>`;
+      <td style="white-space:nowrap"><button class="sm" data-pf="${esc(e.id)}">ຂໍ້ມູນສ່ວນຕົວ</button> <button class="sm" data-ed="${esc(e.id)}">ແກ້ໄຂ</button><button class="sm" data-ap="${esc(e.id)}">ຫົວໜ້າ</button> <button class="sm" data-pin="${esc(e.id)}">PIN</button> <button class="sm" data-rv="${esc(e.id)}">ຖອນເຄື່ອງ</button></td></tr>`).join("") : `<tr><td colspan="11" class="empty">ຍັງບໍ່ມີພະນັກງານ — ກົດ "ນຳເຂົ້າ CSV" ຫຼື "+ ເພີ່ມພະນັກງານ"</td></tr>`}</tbody></table></div></div>`;
   $("#q").oninput = debounce(() => { S.cache.q = $("#q").value; const p = $("#q").selectionStart; tabEmps(m).then(() => { const i = $("#q"); i.focus(); i.setSelectionRange(p, p); }); }, 400);
   $("#ae").onclick = () => empForm(null);
   $("#ic").onclick = () => csvImport("emp");
@@ -603,6 +712,7 @@ async function tabEmps(m) {
     onOk: async () => { const r = await api("setMissingPins"); showPins(r.pins); return false; } });
   $$("[data-rev]").forEach((b) => b.onclick = async () => { try { const r = await api("empReveal", { id: b.dataset.rev }); $(`[data-acc="${b.dataset.rev}"]`).textContent = r.account_no; b.remove(); } catch (e) { fail(e); } });
   $$("[data-ed]").forEach((b) => b.onclick = () => empForm(empById(b.dataset.ed)));
+  $$("[data-pf]").forEach((b) => b.onclick = () => profileView(empById(b.dataset.pf)));
   $$("[data-ap]").forEach((b) => b.onclick = () => approverForm(empById(b.dataset.ap)));
   $$("[data-pin]").forEach((b) => b.onclick = () => dialog({ title: "ຕັ້ງ PIN ໃໝ່", ok: "ສ້າງ PIN ໃໝ່", danger: true, body: `<p>PIN ເກົ່າ ແລະ ທຸກເຄື່ອງທີ່ຈື່ໄວ້ຂອງ <b>${esc(empById(b.dataset.pin).name)}</b> ຈະໃຊ້ບໍ່ໄດ້ທັນທີ.</p>`,
     onOk: async () => { const r = await api("setPin", { id: b.dataset.pin }); showPins([r]); return false; } }));
@@ -811,7 +921,7 @@ Object.assign(ERR, { no_pin: "ພະແນກນີ້ຍັງບໍ່ໄດ�
   unknown_action: "hr-api ຍັງບໍ່ໄດ້ deploy ເວີຊັນໃໝ່ — ກະລຸນາ deploy ກ່ອນ" });
 async function hpost(url, body) {
   setNet("busy"); let j;
-  try { const r = await fetch(url, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) }); j = await r.json(); }
+  try { j = await post(url, "text/plain;charset=utf-8", JSON.stringify(body), READ_ACTIONS.has(body.action)); }
   catch { setNet("off"); const e = new Error(ERR.network); e.code = "network"; throw e; }
   setNet("ok");
   if (!j.ok) { const e = new Error(ERR[j.error] || ("ຜິດພາດ: " + j.error)); e.code = j.error; e.data = j; throw e; }
@@ -1320,7 +1430,7 @@ const TAPI = API.replace("/hr-api", "/trucks-api");
 const T = { cfg: null, staff: [], me: null, today: null, entries: [] };
 async function tapi(action, data = {}) {
   setNet("busy"); let j;
-  try { const r = await fetch(TAPI, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action, token: S.token, ...data }) }); j = await r.json(); }
+  try { j = await post(TAPI, "application/json", JSON.stringify({ action, token: S.token, ...data }), READ_ACTIONS.has(action)); }
   catch { setNet("off"); const e = new Error("ເຊື່ອມຕໍ່ອິນເຕີເນັດບໍ່ໄດ້ — ກວດເນັດແລ້ວລອງໃໝ່"); e.code = "network"; throw e; }
   setNet("ok");
   if (!j.ok) { const e = new Error(j.message || ERR[j.error] || ("ຜິດພາດ: " + j.error)); e.code = j.error; e.data = j; throw e; }
@@ -1331,17 +1441,51 @@ const tVeh = (id) => (T.cfg?.vehicles || []).find((v) => v.id === id);
 const tVehName = (id) => tVeh(id)?.name || id;
 const addD = (s, n) => { const d = new Date(s + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 function tTier(q, t) { if (!(q > 0)) return 0; let r = 0; for (const x of t || []) if (q >= x[0]) r = x[1]; return r; }
+// next tier above q: units still needed + extra pay. perUnit = small trucks (q × rate); big trucks get one rate per round
+function tNext(q, t, perUnit) {
+  q = num(q); const nx = (t || []).find((x) => x[0] > q);
+  if (!(q > 0) || !nx) return null;
+  const cur = tTier(q, t);
+  return { more: nx[0] - q, rate: nx[1], gain: perUnit ? nx[0] * nx[1] - q * cur : nx[1] - cur };
+}
+// tier ladder + "N more to next tier" nudge, shown live in the entry form to push volume
+function tLadder(e) {
+  const cfg = T.cfg, big = tVeh(e.veh)?.type === "big", n = (e.crew || []).filter(Boolean).length;
+  const nudge = (pre, q, t, perUnit = true) => {
+    const x = tNext(q, t, perUnit);
+    if (x) return `<div class="tl-n">${pre}ອີກ ${fmt(x.more)} ຕຸກ ຂຶ້ນຂັ້ນ ${fmt(x.rate)} → +${fmt(x.gain)} ₭${n > 1 ? ` (+${fmt(x.gain / n)}/ຄົນ)` : ""}</div>`;
+    return num(q) > 0 && t.length ? `<div class="tl-n" style="color:var(--ok);background:var(--ok2)">${pre}ຂັ້ນສູງສຸດແລ້ວ</div>` : "";
+  };
+  const ladder = (label, t, q, nudges) => {
+    if (!(t || []).length) return "";
+    const act = t.reduce((a, x, i) => (num(q) >= x[0] ? i : a), -1);
+    return `<div><div class="sm mut" style="font-weight:500">ຂັ້ນ ${label}</div><div class="tl-r">${t.map(([f, r], i) =>
+      `<span class="tl-s${i === act ? " on" : ""}"><b>${fmt(r)}</b>${fmt(f)}${t[i + 1] ? "–" + fmt(t[i + 1][0] - 1) : "+"}</span>`).join("")}</div>${nudges}</div>`;
+  };
+  if (big) {
+    const rs = (e.rounds || []).map(num);
+    const r = ladder("ຕໍ່ຮອບ (ກີບ/ຮອບ)", cfg.bigTiers, Math.max(0, ...rs), rs.map((q, i) => (q > 0 ? nudge(`ຮອບ ${i + 1}: `, q, cfg.bigTiers, false) : "")).join(""));
+    if (!(num(e.hh) > 0 || num(e.org) > 0)) return r;
+    return r + (num(e.hh) > 0 ? ladder("ຄົວເຮືອນ (ກີບ/ຕຸກ)", cfg.hhTiers, e.hh, nudge("", e.hh, cfg.hhTiers || [])) : "")
+      + (num(e.org) > 0 ? ladder("ອົງກອນ (ກີບ/ຕຸກ)", cfg.orgTiers, e.org, nudge("", e.org, cfg.orgTiers || [])) : "");
+  }
+  return ladder("ຄົວເຮືອນ (ກີບ/ຕຸກ)", cfg.hhTiers, e.hh, nudge("", e.hh, cfg.hhTiers || []))
+    + (num(e.org) > 0 ? ladder("ອົງກອນ (ກີບ/ຕຸກ)", cfg.orgTiers, e.org, nudge("", e.org, cfg.orgTiers || [])) : "");
+}
+// [field, label, default rate] — pack = company customers; packSelf* = customers the crew found themselves
+const T_FLAT = [["glass", "ຂວດແກ້ວ", 1500], ["m250", "250ml", 350], ["pack", "ແພັກ ບໍລິສັດ", 350], ["packSelf", "ແພັກ ລູກຄ້າຫາເອງ", 2000], ["packSelf2", "ແພັກ 2L ລູກຄ້າຫາເອງ", 1500]];
+const T_ERP = ["hh", "org", "glass", "m250", "pack"]; // fields ERP fills on small trucks; big trucks get only rounds
 function tCalc(e) {
   const cfg = T.cfg, big = tVeh(e.veh)?.type === "big", lines = []; let total = 0, qty = 0;
-  if (big) (e.rounds || []).forEach((q, i) => { q = num(q); if (q > 0) { const r = tTier(q, cfg.bigTiers); lines.push([`ຮອບ ${i + 1}: ${fmt(q)} ຕຸກ`, r]); total += r; qty += q; } });
-  else [["hh", "ຄົວເຮືອນ", cfg.hhTiers], ["org", "ອົງກອນ", cfg.orgTiers]].forEach(([k, l, t]) => { const q = num(e[k]), r = tTier(q, t); if (q > 0) { lines.push([`${l} ${fmt(q)} × ${fmt(r)}`, q * r]); total += q * r; qty += q; } });
-  [["glass", "ຂວດແກ້ວ"], ["m250", "250ml"], ["pack", "ນ້ຳແພັກ"]].forEach(([k, l]) => { const q = num(e[k]), r = num(cfg.flat?.[k]); if (q > 0) { lines.push([`${l} ${fmt(q)} × ${fmt(r)}`, q * r]); total += q * r; qty += q; } });
+  if (big) (e.rounds || []).forEach((q, i) => { q = num(q); if (q > 0) { const r = tTier(q, cfg.bigTiers), pl = (e.places?.[i] || "").trim(); lines.push([`ຮອບ ${i + 1}${pl ? ` (${pl})` : ""}: ${fmt(q)} ຕຸກ`, r]); total += r; qty += q; } });
+  [["hh", "ຄົວເຮືອນ", cfg.hhTiers], ["org", "ອົງກອນ", cfg.orgTiers]].forEach(([k, l, t]) => { const q = num(e[k]), r = tTier(q, t); if (q > 0) { lines.push([`${l} ${fmt(q)} × ${fmt(r)}`, q * r]); total += q * r; qty += q; } });
+  T_FLAT.forEach(([k, l, d]) => { const q = num(e[k]), r = num(cfg.flat?.[k] ?? d); if (q > 0) { lines.push([`${l} ${fmt(q)} × ${fmt(r)}`, q * r]); total += q * r; qty += q; } });
   const adj = num(e.adj); if (adj) { lines.push(["ປັບເພີ່ມ/ຫັກ", adj]); total += adj; }
   const crew = (e.crew || []).filter(Boolean);
   return { total, per: crew.length ? total / crew.length : 0, qty, lines, big, crew };
 }
-const TQ = { hh: "ຄົວເຮືອນ", org: "ອົງກອນ", glass: "ແກ້ວ", m250: "250ml", pack: "ແພັກ" };
-const tQty = (e) => { const r = (e.rounds || []).filter((x) => num(x) > 0); const s = Object.keys(TQ).filter((k) => num(e[k])).map((k) => `${TQ[k]} ${fmt(e[k])}`); if (r.length) s.unshift("ຮອບ " + r.map(fmt).join("/")); return s.join(" · ") || "—"; };
+const TQ = { hh: "ຄົວເຮືອນ", org: "ອົງກອນ", glass: "ແກ້ວ", m250: "250ml", pack: "ແພັກບໍລິສັດ", packSelf: "ແພັກຫາເອງ", packSelf2: "ແພັກ2Lຫາເອງ" };
+const tQty = (e) => { const r = (e.rounds || []).map((x, i) => (num(x) > 0 ? fmt(x) + (e.places?.[i] ? ` (${e.places[i]})` : "") : "")).filter(Boolean); const s = Object.keys(TQ).filter((k) => num(e[k])).map((k) => `${TQ[k]} ${fmt(e[k])}`); if (r.length) s.unshift("ຮອບ " + r.join(" / ")); return s.join(" · ") || "—"; };
 const tShare = (e) => num(e.total) / Math.max(1, (e.crew || []).filter(Boolean).length);
 const TST = { approved: ["ອະນຸມັດ", "p-ok"], pending: ["ລໍຖ້າ", "p-warn"] };
 // pay month M ← round (M-1)/startDay … M/(startDay-1)
@@ -1350,11 +1494,34 @@ function tPeriod(month, sd) {
   if (sd <= 1) return { start: month + "-01", end: new Date(Date.UTC(y, mo, 0)).toISOString().slice(0, 10) };
   return { start: new Date(Date.UTC(y, mo - 2, sd)).toISOString().slice(0, 10), end: new Date(Date.UTC(y, mo - 1, sd - 1)).toISOString().slice(0, 10) };
 }
+// weekly payouts: Mon–Sun weeks clipped to the pay period (same split as the old vari-trucks app)
+function tWeeks(p) { const o = []; for (let s = p.start; s <= p.end;) { let e = addD(s, (7 - new Date(s + "T00:00:00Z").getUTCDay()) % 7); if (e > p.end) e = p.end; o.push([s, e]); s = addD(e, 1); } return o; }
+function tShares(list, f, t) {
+  const by = {};
+  for (const e of list) { if (e.date < f || e.date > t) continue;
+    for (const n of (e.crew || []).filter(Boolean)) { const o = by[n] || (by[n] = { nick: n, ap: 0, pe: 0, days: 0 }); o[e.status === "approved" ? "ap" : "pe"] += tShare(e); o.days++; } }
+  Object.values(by).forEach((o) => { o.ap = Math.round(o.ap); o.pe = Math.round(o.pe); });
+  return by;
+}
+// paid marks live in trucks.payroll[period start].people[nick].paidW[weekStart] = { amt, at }
+const tPaidSum = (pr, nick) => Object.values(pr?.[nick]?.paidW || {}).reduce((a, x) => a + num(x.amt), 0);
+const tWeekly = (nick) => (T.cfg.weeklyPay || []).includes(nick);
+// changes: { nick: { amt, at } | null }. Re-reads before writing so other people's marks are kept.
+// shortcut: two admins saving the same period at the same instant can still overwrite each other; move to a server-side merge if that happens
+async function tSetPaid(period, wk, changes) {
+  const people = (await tapi("payroll.get", { period })).people || {};
+  for (const [n, rec] of Object.entries(changes)) {
+    const o = people[n] = { ...(people[n] || {}) }; o.paidW = { ...(o.paidW || {}) };
+    if (rec) o.paidW[wk] = rec; else delete o.paidW[wk];
+  }
+  await tapi("payroll.set", { period, people });
+}
 function tPayMonth(date, sd) { sd = num(sd) || 21; const [y, mo, d] = date.split("-").map(Number); return new Date(Date.UTC(y, mo - 1 + (sd > 1 && d >= sd ? 1 : 0), 1)).toISOString().slice(0, 7); }
 
 function tEntryForm(cur, onDone) {
   const admin = T.me.role === "admin", cfg = T.cfg, back = num(cfg.driverBackDays);
-  const e = cur ? JSON.parse(JSON.stringify(cur)) : { date: T.today || curDate(), veh: T.me.veh || cfg.vehicles[0]?.id, crew: [], rounds: [null, null, null, null], damages: [], note: "" };
+  const e = cur ? JSON.parse(JSON.stringify(cur)) : { date: T.today || curDate(), veh: T.me.veh || cfg.vehicles[0]?.id, crew: [], rounds: [null, null, null, null], places: ["", "", "", ""], damages: [], note: "" };
+  e.places = [0, 1, 2, 3].map((i) => e.places?.[i] || "");
   const drivers = T.staff.filter((s) => s.active && s.role !== "admin");
   const vehCrew = (v) => drivers.filter((s) => s.veh === v).map((s) => s.nick);
   if (!cur) e.crew = admin ? vehCrew(e.veh) : [T.me.nick];
@@ -1364,7 +1531,7 @@ function tEntryForm(cur, onDone) {
   const canDel = cur && (admin || (cur.status !== "approved" && (cur.crew || []).includes(T.me.nick)));
   dialog({ title: cur ? `${dmy(e.date)} · ${tVehName(e.veh)}` : "ບັນທຶກການສົ່ງ", ok: "ບັນທຶກ", body: `<div class="grid" style="gap:12px">
     ${cur && cur.status === "approved" ? `<div class="warn-box">ລາຍງານນີ້ອະນຸມັດແລ້ວ — ແກ້ແລ້ວຈະປ່ຽນເງິນຂອງທີມ</div>` : ""}
-    ${erpLock ? `<div class="warn-box">ຈຳນວນມາຈາກ ERP — ທ່ານແກ້ໄດ້ສະເພາະທີມ ແລະ ໝາຍເຫດ</div>` : ""}
+    ${erpLock ? `<div class="warn-box">ຈຳນວນທີ່ມາຈາກ ERP ແກ້ບໍ່ໄດ້ — ຊ່ອງອື່ນ (ທີມ, ແພັກລູກຄ້າຫາເອງ, ສະຖານທີ່, ໝາຍເຫດ) ແກ້ໄດ້</div>` : ""}
     <div class="grid g2">
       <label>ວັນທີ${cur ? `<input value="${esc(dmy(e.date))}" disabled>` : admin ? `<input type="date" id="td" value="${esc(e.date)}">` : `<select id="td">${dates.map((d) => `<option value="${d}">${dmy(d)}${d === T.today ? " (ມື້ນີ້)" : ""}</option>`).join("")}</select>`}</label>
       <label>ລົດ<select id="tv" ${cur ? "disabled" : ""}>${cfg.vehicles.map((v) => `<option value="${esc(v.id)}" ${v.id === e.veh ? "selected" : ""}>${esc(v.name)}</option>`).join("")}</select></label>
@@ -1373,7 +1540,7 @@ function tEntryForm(cur, onDone) {
     <div id="tqf" class="grid" style="gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,120px),1fr))"></div>
     ${admin ? `<div class="grid g2"><label>ປັບເພີ່ມ/ຫັກ (₭)<input id="ta" inputmode="numeric" value="${esc(e.adj ?? "")}"></label><label>ສະຖານະ<select id="ts"><option value="approved">ອະນຸມັດເລີຍ</option><option value="pending" ${cur && cur.status === "pending" ? "selected" : ""}>ລໍຖ້າ</option></select></label></div>` : ""}
     <label>ໝາຍເຫດ<input id="tn" maxlength="200" value="${esc(e.note || "")}"></label>
-    <div id="tpv" class="card grid" style="background:#FBFAF7;padding:12px;gap:4px"></div>
+    <div id="tpv" class="card grid" style="background:var(--line2);box-shadow:none;padding:12px;gap:8px"></div>
     ${canDel ? `<button type="button" class="sm" id="tdel" style="justify-self:start;color:var(--acc)">ລຶບລາຍງານນີ້</button>` : ""}</div>`,
     onOpen: (r) => {
       const nv = (s) => { s = String(s).trim().replace(/,/g, ""); return s === "" ? null : Number(s); };
@@ -1381,16 +1548,17 @@ function tEntryForm(cur, onDone) {
         if (!cur) { e.veh = val(r, "tv"); e.date = val(r, "td"); }
         $$("[data-q]", r).forEach((i) => { e[i.dataset.q] = nv(i.value); });
         $$("[data-rd]", r).forEach((i) => { e.rounds[+i.dataset.rd] = nv(i.value); });
+        $$("[data-pl]", r).forEach((i) => { e.places[+i.dataset.pl] = i.value.trim(); });
         e.crew = $$("[data-crew]", r).filter((c) => c.checked).map((c) => c.dataset.crew);
         if (admin) e.adj = nv(val(r, "ta")); e.note = val(r, "tn");
       };
       const preview = () => {
         read(); const c = tCalc(e), w = [];
         if (c.big) e.rounds.forEach((q, i) => { if (num(q) > num(cfg.warnRound)) w.push(`ຮອບ ${i + 1} = ${fmt(q)} ສູງກວ່າປົກກະຕິ`); });
-        else Object.keys(TQ).forEach((k) => { if (num(e[k]) > num(cfg.warnDaily)) w.push(`${TQ[k]} ${fmt(e[k])} ສູງກວ່າປົກກະຕິ (${fmt(cfg.warnDaily)})`); });
+        Object.keys(TQ).forEach((k) => { if (num(e[k]) > num(cfg.warnDaily)) w.push(`${TQ[k]} ${fmt(e[k])} ສູງກວ່າປົກກະຕິ (${fmt(cfg.warnDaily)})`); });
         if (!c.crew.length) w.push("ຍັງບໍ່ໄດ້ເລືອກທີມ — ຈະບໍ່ມີໃຜໄດ້ເງິນ");
         if ([...Object.keys(TQ).map((k) => e[k]), ...e.rounds].some((q) => num(q) > num(cfg.hardCap))) w.push(`ເກີນ ${fmt(cfg.hardCap)} — ກວດຄືນ`);
-        $("#tpv", r).innerHTML = `${c.lines.map(([l, v]) => `<div class="row sm" style="justify-content:space-between"><span>${esc(l)}</span><span class="num">${fmt(v)}</span></div>`).join("") || `<div class="sm mut">ໃສ່ຈຳນວນເພື່ອຄິດໄລ່</div>`}
+        $("#tpv", r).innerHTML = `${tLadder(e)}${c.lines.map(([l, v]) => `<div class="row sm" style="justify-content:space-between"><span>${esc(l)}</span><span class="num">${fmt(v)}</span></div>`).join("") || `<div class="sm mut">ໃສ່ຈຳນວນເພື່ອຄິດໄລ່</div>`}
           <div class="row" style="justify-content:space-between;border-top:1px solid var(--line);padding-top:6px;margin-top:2px"><b>ລວມ</b><b class="num">${fmt(c.total)} ₭</b></div>
           <div class="row sm" style="justify-content:space-between"><span>ຕໍ່ຄົນ (${c.crew.length} ຄົນ)</span><b class="num" style="color:var(--pri)">${fmt(c.per)} ₭</b></div>
           ${w.map((x) => `<div class="warn-box" style="margin-top:4px">${esc(x)}</div>`).join("")}`;
@@ -1405,11 +1573,14 @@ function tEntryForm(cur, onDone) {
         });
       };
       const drawQty = () => {
-        const big = tVeh(e.veh)?.type === "big", dis = erpLock ? "disabled" : "";
-        if (big) { e.hh = e.org = null; } else e.rounds = [null, null, null, null];
-        const inp = (attr, l, v) => `<label>${esc(l)}<input ${attr} type="text" inputmode="numeric" value="${esc(v ?? "")}" ${dis} style="text-align:right;font-variant-numeric:tabular-nums"></label>`;
-        $("#tqf", r).innerHTML = (big ? [0, 1, 2, 3].map((i) => inp(`data-rd="${i}"`, `ຮອບ ${i + 1} (ຕຸກ)`, e.rounds[i])) : [inp('data-q="hh"', "ຄົວເຮືອນ 18L", e.hh), inp('data-q="org"', "ອົງກອນ 18L", e.org)])
-          .concat([["glass", "ຂວດແກ້ວ"], ["m250", "250ml"], ["pack", "ນ້ຳແພັກ"]].map(([k, l]) => inp(`data-q="${k}"`, l, e[k]))).join("");
+        const big = tVeh(e.veh)?.type === "big";
+        if (!big) { e.rounds = [null, null, null, null]; e.places = ["", "", "", ""]; }
+        // drivers can't change what ERP supplied: rounds on big trucks, sales counts on small ones
+        const lock = (k) => (erpLock && (k === "rd" ? big : !big && T_ERP.includes(k)) ? "disabled" : "");
+        const inp = (attr, l, v, k) => `<label>${esc(l)}<input ${attr} type="text" inputmode="numeric" value="${esc(v ?? "")}" ${lock(k)} style="text-align:right;font-variant-numeric:tabular-nums"></label>`;
+        $("#tqf", r).innerHTML = (big ? [0, 1, 2, 3].map((i) => `<div class="grid" style="gap:4px">${inp(`data-rd="${i}"`, `ຮອບ ${i + 1} (ຕຸກ)`, e.rounds[i], "rd")}<input data-pl="${i}" maxlength="60" placeholder="ສົ່ງທີ່ໃສ ເຊັ່ນ ສາຂາ…" value="${esc(e.places[i])}" aria-label="ສະຖານທີ່ຮອບ ${i + 1}"></div>`) : [])
+          .concat([inp('data-q="hh"', "ຄົວເຮືອນ 18L", e.hh, "hh"), inp('data-q="org"', "ອົງກອນ 18L", e.org, "org")])
+          .concat(T_FLAT.map(([k, l]) => inp(`data-q="${k}"`, l, e[k], k))).join("");
         $$("input", $("#tqf", r)).forEach((i) => i.addEventListener("input", preview));
       };
       $("#tv", r).addEventListener("change", () => { e.veh = val(r, "tv"); if (admin && !touched) e.crew = vehCrew(e.veh); else read(); drawCrew(); drawQty(); preview(); });
@@ -1423,7 +1594,7 @@ function tEntryForm(cur, onDone) {
       r._read();
       try {
         const j = await tapi("save", { base: cur ? cur.updatedAt || "" : "", status: admin ? val(r, "ts") : undefined,
-          entry: { date: e.date, veh: e.veh, crew: e.crew, hh: e.hh, org: e.org, glass: e.glass, m250: e.m250, pack: e.pack, rounds: e.rounds, adj: e.adj, note: e.note, damages: e.damages || [] } });
+          entry: { date: e.date, veh: e.veh, crew: e.crew, hh: e.hh, org: e.org, glass: e.glass, m250: e.m250, pack: e.pack, packSelf: e.packSelf, packSelf2: e.packSelf2, rounds: e.rounds, places: e.places, adj: e.adj, note: e.note, damages: e.damages || [] } });
         toast(`ບັນທຶກແລ້ວ · ${fmt(j.entry.total)} ₭`); onDone && onDone(j.entry);
       } catch (x) {
         if (x.code === "conflict" && x.data?.current) { toast("ມີລາຍງານຂອງລົດນີ້ມື້ນີ້ແລ້ວ — ເປີດລາຍງານເດີມໃຫ້", true); setTimeout(() => tEntryForm(x.data.current, onDone), 30); return; }
@@ -1435,7 +1606,9 @@ function tEntryForm(cur, onDone) {
 async function tabTrucks(m) {
   try { await tBoot(); } catch (e) { m.innerHTML = `<div class="err-box">${esc(e.message)}</div>`; return; }
   const p = tPeriod(S.month, T.cfg.periodStartDay);
-  const [ej, dp] = await Promise.all([tapi("entries", { from: p.start, to: p.end }), tapi("hr.driverPay", { month: S.month })]);
+  const [ej, dp, pj] = await Promise.all([tapi("entries", { from: p.start, to: p.end }), tapi("hr.driverPay", { month: S.month }), tapi("payroll.get", { period: p.start })]);
+  const pr = pj.people || {}, wks = tWeeks(p);
+  const wk = wks.find((w) => w[0] === S.cache.twk) || wks.find((w) => T.today >= w[0] && T.today <= w[1]) || wks[wks.length - 1];
   const list = ej.entries.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : a.veh < b.veh ? -1 : 1));
   const flt = S.cache.tf || "all", vf = S.cache.tveh || "";
   const noCrew = (e) => !(e.crew || []).filter(Boolean).length;
@@ -1443,6 +1616,18 @@ async function tabTrucks(m) {
   const pend = list.filter((e) => e.status !== "approved"), pendOk = pend.filter((e) => !noCrew(e)), nc = list.filter(noCrew);
   const sum = (a) => a.reduce((s, e) => s + num(e.total), 0), unl = dp.rows.filter((r) => !r.empId && (r.approved || r.pending));
   const fb = (k, l, n) => `<button class="sm ${flt === k ? "pri" : ""}" data-tf="${k}">${esc(l)}${n != null ? ` (${n})` : ""}</button>`;
+  const dm = (d) => d.slice(8) + "/" + d.slice(5, 7);
+  const ws = Object.values(tShares(list, wk[0], wk[1])).sort((a, b) => tWeekly(b.nick) - tWeekly(a.nick) || b.ap + b.pe - a.ap - a.pe);
+  const paidOf = (n) => pr[n]?.paidW?.[wk[0]];
+  const due = (o) => (tWeekly(o.nick) ? o.ap - num(paidOf(o.nick)?.amt) : 0);
+  const owed = ws.filter((o) => due(o) > 0);
+  const wStatus = (o) => {
+    const pd = paidOf(o.nick), d = due(o);
+    if (!tWeekly(o.nick)) return pd ? `<span class="pill p-ok">ຈ່າຍແລ້ວ ${fmt(pd.amt)}</span>` : `<span class="pill">ຕັດຍອດທ້າຍເດືອນ</span>`;
+    if (d > 0) return `<span class="pill p-warn">${pd ? "ຄ້າງເພີ່ມ" : "ຍັງບໍ່ຈ່າຍ"} ${fmt(d)}</span> <button class="sm pri" data-wpay="${esc(o.nick)}">ຈ່າຍແລ້ວ</button>`;
+    if (pd) return `<span class="pill p-ok">ຈ່າຍແລ້ວ ${esc(dm(pd.at))}</span> <button class="sm" data-wun="${esc(o.nick)}">ຍົກເລີກ</button>`;
+    return `<span class="pill">ລໍຖ້າອະນຸມັດ</span>`;
+  };
   m.innerHTML = `<div class="grid" style="gap:14px">
     <div class="row"><div style="flex:1;min-width:220px"><h2>ລົດຂົນສົ່ງ</h2><div class="sm mut">ຮອບ ${esc(dmy(p.start))} – ${esc(dmy(p.end))} → ເຂົ້າເງິນເດືອນ ${esc(monthLabel(S.month))}</div></div>
       <button id="tnew" class="pri">+ ບັນທຶກການສົ່ງ</button><button id="tapv" ${pendOk.length ? "" : "disabled"}>ອະນຸມັດທີ່ລໍຖ້າ (${pendOk.length})</button><button id="tlnk">ຜູກຊື່ ↔ ພະນັກງານ</button><button id="tpay">ດຶງເຂົ້າເງິນເດືອນ</button></div>
@@ -1461,14 +1646,35 @@ async function tabTrucks(m) {
       <tbody>${shown.length ? shown.map((e) => `<tr><td class="num" style="text-align:left">${esc(dmy(e.date))}</td><td>${esc(tVehName(e.veh))}</td><td>${noCrew(e) ? `<span class="pill p-bad">ບໍ່ມີທີມ</span>` : esc(e.crew.join(", "))}</td><td class="sm">${esc(tQty(e))}${e.note ? `<div class="xs mut" style="max-width:260px;white-space:normal">${esc(e.note)}</div>` : ""}</td>
         <td class="num b">${fmt(e.total)}</td><td class="num">${noCrew(e) ? "—" : fmt(tShare(e))}</td><td style="white-space:nowrap">${pill(TST, e.status === "approved" ? "approved" : "pending")}${e.source === "erp" ? ` <span class="pill">ERP</span>` : ""}</td>
         <td style="white-space:nowrap"><button class="sm" data-te="${esc(e.id)}">ແກ້ໄຂ</button> <button class="sm" data-tt="${esc(e.id)}">${e.status === "approved" ? "ຖອນອະນຸມັດ" : "ອະນຸມັດ"}</button></td></tr>`).join("") : `<tr><td colspan="8" class="empty">ບໍ່ມີລາຍງານ</td></tr>`}</tbody></table></div></section>
+    <section class="card grid" style="gap:10px">
+      <div class="row"><h3 style="flex:1;min-width:140px">ຈ່າຍເງິນຍອດລາຍອາທິດ</h3>${owed.length ? `<button class="sm pri" id="wall">ຈ່າຍທີ່ຄ້າງທັງໝົດ (${owed.length} ຄົນ · ${fmt(owed.reduce((a, o) => a + due(o), 0))} ₭)</button>` : ""}</div>
+      <div class="row" style="gap:4px">${wks.map((w) => `<button class="sm ${w === wk ? "pri" : ""}" data-wk="${w[0]}">${dm(w[0])}–${dm(w[1])}</button>`).join("")}</div>
+      <div class="sm mut">ໝາຍ ✓ ລາຍອາທິດ = ຄົນທີ່ຮັບເງິນທຸກອາທິດ. ຄົນອື່ນຕັດຍອດທ້າຍເດືອນ (ດຶງເຂົ້າເງິນເດືອນ). ຈ່າຍໄດ້ສະເພາະຍອດທີ່ອະນຸມັດແລ້ວ — ຍອດທີ່ຈ່າຍລາຍອາທິດແລ້ວຈະຖືກຫັກອອກຕອນດຶງເຂົ້າເງິນເດືອນ.</div>
+      <div class="tw"><table><thead><tr><th>ຊື່ຫຼິ້ນ</th><th>ລາຍອາທິດ</th><th class="num">ມື້</th><th class="num">ອະນຸມັດ (₭)</th><th class="num">ລໍຖ້າ (₭)</th><th>ສະຖານະ</th></tr></thead>
+      <tbody>${ws.length ? ws.map((o) => `<tr><td class="b">${esc(o.nick)}</td><td><input type="checkbox" data-wgrp="${esc(o.nick)}" ${tWeekly(o.nick) ? "checked" : ""} style="width:auto;min-height:0" aria-label="ຈ່າຍລາຍອາທິດ ${esc(o.nick)}"></td><td class="num">${o.days}</td><td class="num b">${fmt(o.ap)}</td><td class="num" style="color:var(--warn)">${o.pe ? fmt(o.pe) : "—"}</td><td style="white-space:nowrap">${wStatus(o)}</td></tr>`).join("") : `<tr><td colspan="6" class="empty">ບໍ່ມີລາຍງານໃນອາທິດນີ້</td></tr>`}</tbody></table></div></section>
     <section class="card grid" style="gap:10px"><h3>ສະຫຼຸບຕໍ່ຄົນ · ຮອບນີ້</h3>
-      <div class="tw"><table><thead><tr><th>ຊື່ຫຼິ້ນ</th><th>ພະນັກງານ HR</th><th class="num">ລາຍງານ</th><th class="num">ອະນຸມັດ (₭)</th><th class="num">ລໍຖ້າ (₭)</th></tr></thead>
-      <tbody>${dp.rows.length ? dp.rows.slice().sort((a, b) => b.approved + b.pending - a.approved - a.pending).map((r) => `<tr><td class="b">${esc(r.nick)}</td><td>${r.empId ? `${esc(r.name)} <span class="xs mut">${esc(r.emp_code)}</span>` : `<span class="pill p-bad">ບໍ່ໄດ້ຜູກ</span>`}</td><td class="num">${r.days}</td><td class="num b">${fmt(r.approved)}</td><td class="num" style="color:var(--warn)">${r.pending ? fmt(r.pending) : "—"}</td></tr>`).join("") : `<tr><td colspan="5" class="empty">ບໍ່ມີ</td></tr>`}</tbody></table></div></section></div>`;
+      <div class="tw"><table><thead><tr><th>ຊື່ຫຼິ້ນ</th><th>ພະນັກງານ HR</th><th class="num">ລາຍງານ</th><th class="num">ອະນຸມັດ (₭)</th><th class="num">ລໍຖ້າ (₭)</th><th class="num">ຈ່າຍລາຍອາທິດແລ້ວ</th><th class="num">ເຫຼືອເຂົ້າເງິນເດືອນ</th></tr></thead>
+      <tbody>${dp.rows.length ? dp.rows.slice().sort((a, b) => b.approved + b.pending - a.approved - a.pending).map((r) => `<tr><td class="b">${esc(r.nick)}</td><td>${r.empId ? `${esc(r.name)} <span class="xs mut">${esc(r.emp_code)}</span>` : `<span class="pill p-bad">ບໍ່ໄດ້ຜູກ</span>`}</td><td class="num">${r.days}</td><td class="num b">${fmt(r.approved)}</td><td class="num" style="color:var(--warn)">${r.pending ? fmt(r.pending) : "—"}</td><td class="num">${tPaidSum(pr, r.nick) ? fmt(tPaidSum(pr, r.nick)) : "—"}</td><td class="num b">${fmt(r.approved - tPaidSum(pr, r.nick))}</td></tr>`).join("") : `<tr><td colspan="7" class="empty">ບໍ່ມີ</td></tr>`}</tbody></table></div></section></div>`;
   const byId = (id) => list.find((e) => e.id === id);
   $("#tnew").onclick = () => tEntryForm(null, renderTab);
   $("#tlnk").onclick = tLinks; $("#tpay").onclick = tPullPay;
   $("#tvf").onchange = () => { S.cache.tveh = $("#tvf").value; renderTab(); };
   $$("[data-tf]").forEach((b) => b.onclick = () => { S.cache.tf = b.dataset.tf; renderTab(); });
+  $$("[data-wk]").forEach((b) => b.onclick = () => { S.cache.twk = b.dataset.wk; renderTab(); });
+  const wLabel = `${dmy(wk[0])} – ${dmy(wk[1])}`, stamp = () => ({ at: T.today || curDate() });
+  $$("[data-wpay]").forEach((b) => b.onclick = () => { const o = ws.find((x) => x.nick === b.dataset.wpay);
+    dialog({ title: `ຈ່າຍ ${o.nick} ${fmt(o.ap)} ₭?`, ok: "ຈ່າຍແລ້ວ", body: `<p class="sm">ອາທິດ ${esc(wLabel)}${paidOf(o.nick) ? ` · ເຄີຍຈ່າຍ ${fmt(paidOf(o.nick).amt)} ₭ → ຈ່າຍເພີ່ມ <b>${fmt(due(o))} ₭</b>` : ""}</p>`,
+      onOk: async () => { await tSetPaid(p.start, wk[0], { [o.nick]: { amt: o.ap, ...stamp() } }); toast("ບັນທຶກການຈ່າຍແລ້ວ"); renderTab(); } }); });
+  $$("[data-wun]").forEach((b) => b.onclick = () => dialog({ title: `ຍົກເລີກການຈ່າຍຂອງ ${b.dataset.wun}?`, danger: true, ok: "ຍົກເລີກການຈ່າຍ", body: `<p class="sm">ອາທິດ ${esc(wLabel)} ຈະກັບເປັນ "ຍັງບໍ່ຈ່າຍ"</p>`,
+    onOk: async () => { await tSetPaid(p.start, wk[0], { [b.dataset.wun]: null }); toast("ຍົກເລີກແລ້ວ"); renderTab(); } }));
+  $("#wall") && ($("#wall").onclick = () => dialog({ title: `ຈ່າຍ ${owed.length} ຄົນ · ອາທິດ ${wLabel}?`, ok: "ຈ່າຍແລ້ວທັງໝົດ",
+    body: `<div class="grid" style="gap:4px">${owed.map((o) => `<div class="row sm" style="justify-content:space-between"><span>${esc(o.nick)}</span><b class="num">${fmt(due(o))} ₭</b></div>`).join("")}</div>`,
+    onOk: async () => { await tSetPaid(p.start, wk[0], Object.fromEntries(owed.map((o) => [o.nick, { amt: o.ap, ...stamp() }]))); toast(`ບັນທຶກການຈ່າຍ ${owed.length} ຄົນ`); renderTab(); } }));
+  $$("[data-wgrp]").forEach((c) => c.onchange = async () => {
+    const n = c.dataset.wgrp, set = new Set(T.cfg.weeklyPay || []); c.checked ? set.add(n) : set.delete(n);
+    c.disabled = true;
+    try { const j = await tapi("config.save", { config: { ...T.cfg, weeklyPay: [...set] } }); T.cfg = j.config; renderTab(); } catch (x) { c.checked = !c.checked; c.disabled = false; fail(x); }
+  });
   $$("[data-te]").forEach((b) => b.onclick = () => tEntryForm(byId(b.dataset.te), renderTab));
   $$("[data-tt]").forEach((b) => b.onclick = async () => {
     const e = byId(b.dataset.tt); if (e.status !== "approved" && noCrew(e)) return toast("ເລືອກທີມກ່ອນອະນຸມັດ (ກົດ ແກ້ໄຂ)", true);
@@ -1500,24 +1706,27 @@ async function tLinks() {
 async function tPullPay() {
   try {
     const [dp, mj] = await Promise.all([tapi("hr.driverPay", { month: S.month }), loadMonth()]);
+    const pr = (await tapi("payroll.get", { period: dp.period.start })).people || {};
     if (!mj.rows.length) throw new Error(`${monthLabel(S.month)} ຍັງບໍ່ໄດ້ເປີດເດືອນ — ເປີດກ່ອນໃນແຖບ ຄິດໄລ່ຜົນຕອບແທນ`);
     const by = {};
-    dp.rows.forEach((r) => { if (!r.empId) return; const o = by[r.empId] || (by[r.empId] = { empId: r.empId, name: r.name, code: r.emp_code, nicks: [], days: 0, approved: 0, pending: 0 }); o.nicks.push(r.nick); o.days += r.days; o.approved += r.approved; o.pending += r.pending; });
+    dp.rows.forEach((r) => { if (!r.empId) return; const o = by[r.empId] || (by[r.empId] = { empId: r.empId, name: r.name, code: r.emp_code, nicks: [], days: 0, approved: 0, pending: 0 }); o.nicks.push(r.nick); o.days += r.days; o.approved += r.approved; o.pending += r.pending; o.paid = (o.paid || 0) + tPaidSum(pr, r.nick); });
+    // weekly payouts already handed over are not paid again through salary
+    Object.values(by).forEach((o) => { o.net = o.approved - o.paid; });
     const rows = Object.values(by).map((o) => ({ ...o, row: mj.rows.find((x) => x.emp_id === o.empId) })).sort((a, b) => b.approved - a.approved);
-    const can = (o) => o.row && !o.row.locked && num(o.row.driver_pay) !== o.approved;
+    const can = (o) => o.row && !o.row.locked && num(o.row.driver_pay) !== o.net;
     const unl = dp.rows.filter((r) => !r.empId && r.approved), pendT = dp.rows.reduce((a, r) => a + r.pending, 0);
     const why = (o) => !o.row ? `<span class="pill p-bad">ບໍ່ຢູ່ໃນເດືອນນີ້</span>` : o.row.locked ? `<span class="pill">ປິດເດືອນ</span>` : !can(o) ? `<span class="pill p-ok">ກົງກັນແລ້ວ</span>` : "";
     dialog({ title: `ດຶງເງິນໂຊເຟີ → ${monthLabel(S.month)}`, wide: true, ok: rows.some(can) ? "ອັບເດດທີ່ເລືອກ" : "", cancel: "ປິດ", body: `
-      <p class="sm mut">ຮອບ ${esc(dmy(dp.period.start))} – ${esc(dmy(dp.period.end))}. ນັບສະເພາະລາຍງານທີ່ <b>ອະນຸມັດແລ້ວ</b>, ແບ່ງເທົ່າກັນໃນທີມ. ຈະແທນຄ່າ "${esc(F.driver_pay)}" ເດີມ.</p>
+      <p class="sm mut">ຮອບ ${esc(dmy(dp.period.start))} – ${esc(dmy(dp.period.end))}. ນັບສະເພາະລາຍງານທີ່ <b>ອະນຸມັດແລ້ວ</b>, ແບ່ງເທົ່າກັນໃນທີມ, ຫັກຍອດທີ່ຈ່າຍລາຍອາທິດແລ້ວ. ຈະແທນຄ່າ "${esc(F.driver_pay)}" ເດີມ.</p>
       ${pendT ? `<div class="warn-box">ຍັງມີ ${fmt(pendT)} ₭ ລໍຖ້າອະນຸມັດ — ບໍ່ລວມໃນນີ້</div>` : ""}
       ${unl.length ? `<div class="warn-box" style="margin-top:6px">ບໍ່ໄດ້ຜູກ: ${unl.map((r) => `${esc(r.nick)} ${fmt(r.approved)}`).join(", ")} ₭ — ຈະບໍ່ເຂົ້າເງິນເດືອນ</div>` : ""}
       ${dp.unassigned ? `<div class="warn-box" style="margin-top:6px">${dp.unassigned} ລາຍງານບໍ່ມີທີມ — ບໍ່ມີໃຜໄດ້ເງິນຈາກລາຍງານເຫຼົ່ານີ້</div>` : ""}
-      ${rows.length ? `<div class="tw" style="margin-top:10px"><table><thead><tr><th><input type="checkbox" id="pa" checked style="width:auto;min-height:0"></th><th>ພະນັກງານ</th><th>ຊື່ຫຼິ້ນ</th><th class="num">ລາຍງານ</th><th class="num">ປັດຈຸບັນ</th><th class="num">ໃໝ່</th><th></th></tr></thead><tbody>
-      ${rows.map((o) => `<tr><td>${can(o) ? `<input type="checkbox" data-pk="${esc(o.empId)}" checked style="width:auto;min-height:0">` : ""}</td><td>${esc(o.name)} <span class="xs mut">${esc(o.code)}</span></td><td>${esc(o.nicks.join(", "))}</td><td class="num">${o.days}</td><td class="num">${o.row ? fmt(o.row.driver_pay) : "—"}</td><td class="num b">${fmt(o.approved)}</td><td>${why(o)}</td></tr>`).join("")}</tbody></table></div>` : `<div class="empty">ບໍ່ມີເງິນໂຊເຟີທີ່ອະນຸມັດໃນຮອບນີ້</div>`}`,
+      ${rows.length ? `<div class="tw" style="margin-top:10px"><table><thead><tr><th><input type="checkbox" id="pa" checked style="width:auto;min-height:0"></th><th>ພະນັກງານ</th><th>ຊື່ຫຼິ້ນ</th><th class="num">ລາຍງານ</th><th class="num">ອະນຸມັດ</th><th class="num">ຈ່າຍລາຍອາທິດແລ້ວ</th><th class="num">ປັດຈຸບັນ</th><th class="num">ໃໝ່</th><th></th></tr></thead><tbody>
+      ${rows.map((o) => `<tr><td>${can(o) ? `<input type="checkbox" data-pk="${esc(o.empId)}" checked style="width:auto;min-height:0">` : ""}</td><td>${esc(o.name)} <span class="xs mut">${esc(o.code)}</span></td><td>${esc(o.nicks.join(", "))}</td><td class="num">${o.days}</td><td class="num">${fmt(o.approved)}</td><td class="num">${o.paid ? fmt(o.paid) : "—"}</td><td class="num">${o.row ? fmt(o.row.driver_pay) : "—"}</td><td class="num b">${fmt(o.net)}</td><td>${why(o)}</td></tr>`).join("")}</tbody></table></div>` : `<div class="empty">ບໍ່ມີເງິນໂຊເຟີທີ່ອະນຸມັດໃນຮອບນີ້</div>`}`,
       onOpen: (r) => { $("#pa", r) && ($("#pa", r).onchange = (e) => $$("[data-pk]", r).forEach((c) => c.checked = e.target.checked)); },
       onOk: async (r) => {
         const pick = $$("[data-pk]", r).filter((c) => c.checked).map((c) => c.dataset.pk); let n = 0;
-        for (const o of rows.filter((x) => pick.includes(x.empId) && can(x))) { await api("monthSave", { month: S.month, emp_id: o.empId, version: o.row.version, patch: { driver_pay: o.approved } }); n++; }
+        for (const o of rows.filter((x) => pick.includes(x.empId) && can(x))) { await api("monthSave", { month: S.month, emp_id: o.empId, version: o.row.version, patch: { driver_pay: o.net } }); n++; }
         toast(`ອັບເດດເງິນໂຊເຟີ ${n} ຄົນ`); renderTab();
       } });
   } catch (e) { fail(e); }
@@ -1627,6 +1836,9 @@ async function tabSettings(m) {
       ${chk("unpaidLeaveKillsBonus", "ລາບໍ່ຮັບເງິນເດືອນ → ເສຍໂບນັດບໍ່ຂາດງານ (ເຈົ້າຂອງຢືນຢັນ)")}${chk("lateKillsBonus", "ມາຊ້າ/ລືມສະແກນ → ເສຍໂບນັດບໍ່ຂາດງານ")}${chk("lateRoundHalfHour", "ປັດນາທີມາຊ້າລວມຂຶ້ນເປັນເຄິ່ງຊົ່ວໂມງ")}
       <h3>ເວລາເຮັດວຽກ</h3><div class="grid g4"><label>ເລີ່ມ<input type="time" id="s_st" value="${esc(s.shift.start)}"></label><label>ເລີກ<input type="time" id="s_en" value="${esc(s.shift.end)}"></label><label>ຜ່ອນຜັນມາຊ້າ (ນາທີ)<input type="number" id="s_gr" value="${esc(s.shift.grace)}"></label></div>
       <div class="row sm">${days.map((d, i) => `<label style="display:flex;gap:6px;align-items:center;color:var(--ink)"><input type="checkbox" data-wd="${i}" ${s.shift.workdays.includes(i) ? "checked" : ""} style="width:auto;min-height:0">${d}</label>`).join("")}</div>
+      <h3>ຕຳແໜ່ງສະຖານທີ່ <span class="sm mut" style="font-weight:400">ສະແກນເຂົ້າ-ອອກໄດ້ສະເພາະໃນລັດສະໝີ · ປ່ອຍວ່າງ = ບໍ່ຈຳກັດ</span></h3>
+      <div class="grid g4"><label>Latitude<input type="number" step="any" id="s_la" placeholder="ເຊັ່ນ 17.9757" value="${esc(s.site?.lat ?? "")}"></label><label>Longitude<input type="number" step="any" id="s_lo" placeholder="ເຊັ່ນ 102.6331" value="${esc(s.site?.lng ?? "")}"></label><label>ລັດສະໝີ (ແມັດ)<input type="number" id="s_ra" min="20" max="5000" value="${esc(s.site?.radius ?? 100)}"></label></div>
+      <div class="row"><button type="button" id="s_here">ໃຊ້ຕຳແໜ່ງປັດຈຸບັນ</button><a id="s_map" target="_blank" rel="noopener" class="sm"></a></div>
       <h3>ອື່ນໆ</h3><div class="grid g4"><label>ເງິນຝາກ: ຄົບກີ່ເດືອນ<input type="number" id="s_dm" value="${esc(s.deposit.refundMonths)}"></label><label>ເງິນຝາກ: ຄືນກີ່ເທົ່າ<input type="number" step="0.1" id="s_dx" value="${esc(s.deposit.multiplier)}"></label>
         <label>ລາປ່ວຍເກີນ N ວັນຕ້ອງແນບໃບແພດ (ຫວ່າງ = ບໍ່ບັງຄັບ)<input type="number" id="s_sk" value="${esc(s.sickDocAfterDays ?? "")}"></label><label>ເກັບພິກັດ GPS (ເດືອນ)<input type="number" id="s_gp" value="${esc(s.gpsRetentionMonths)}"></label></div>
       <div class="row sm"><label style="display:flex;gap:6px;align-items:center;color:var(--ink)"><input type="checkbox" id="h_wp" ${s.hideFields.water_pack ? "checked" : ""} style="width:auto;min-height:0">ເຊື່ອງ ນ້ຳແພັກ</label><label style="display:flex;gap:6px;align-items:center;color:var(--ink)"><input type="checkbox" id="h_dp" ${s.hideFields.driver_pay ? "checked" : ""} style="width:auto;min-height:0">ເຊື່ອງ ເງິນໂຊເຟີ</label></div>
@@ -1642,12 +1854,21 @@ async function tabSettings(m) {
   const bindLt = () => $$("[data-ltdel]").forEach((b) => b.onclick = () => b.closest("tr").remove());
   bindLt();
   $("#lta").onclick = () => { $("#ltb").insertAdjacentHTML("beforeend", ltRow({ k: "", name: "", quota: 0, color: "#5B6B70", paid: true, active: true })); bindLt(); };
+  const mapLink = () => { const la = $("#s_la").value, lo = $("#s_lo").value, a = $("#s_map");
+    a.textContent = la && lo ? "ເບິ່ງໃນແຜນທີ່ ↗" : ""; a.href = la && lo ? `https://www.google.com/maps?q=${encodeURIComponent(la)},${encodeURIComponent(lo)}` : "#"; };
+  ["s_la", "s_lo"].forEach((id) => $("#" + id).addEventListener("input", mapLink)); mapLink();
+  $("#s_here").onclick = async () => { const b = $("#s_here"); b.disabled = true; const p = await getPos(); b.disabled = false;
+    if (!p) return toast("ເອົາຕຳແໜ່ງບໍ່ໄດ້ — ອະນຸຍາດ GPS ໃນ browser ແລ້ວລອງໃໝ່", true);
+    $("#s_la").value = p.lat.toFixed(6); $("#s_lo").value = p.lng.toFixed(6); mapLink(); toast(`ໄດ້ຕຳແໜ່ງແລ້ວ (ຄາດເຄື່ອນ ±${p.accuracy} ມ) — ກົດ ບັນທຶກການຕັ້ງຄ່າ`); };
   $("#ssv").onclick = async () => {
     try {
+      const la = $("#s_la").value.trim(), lo = $("#s_lo").value.trim();
+      if (!la !== !lo) throw new Error("ໃສ່ທັງ Latitude ແລະ Longitude ຫຼື ປ່ອຍວ່າງທັງສອງ");
+      if (la && (Math.abs(+la) > 90 || Math.abs(+lo) > 180)) throw new Error("Latitude ຕ້ອງຢູ່ -90 ຫາ 90 (ລາວ ປະມານ 14–22) · Longitude ປະມານ 100–108 — ອາດໃສ່ສະລັບກັນ");
       const rates = {}; $$("[data-rate]").forEach((i) => rates[i.dataset.rate] = i.type === "checkbox" ? i.checked : num(i.value));
       const leaveTypes = $$("#ltb tr").map((tr) => ({ k: $("[data-lk]", tr).value.trim(), name: $("[data-ln]", tr).value.trim(), quota: num($("[data-lq]", tr).value), color: $("[data-lc]", tr).value, paid: $("[data-lp]", tr).checked, active: $("[data-la]", tr).checked }));
       const body = { rates, leaveTypes, shift: { start: $("#s_st").value, end: $("#s_en").value, grace: num($("#s_gr").value), workdays: $$("[data-wd]").filter((c) => c.checked).map((c) => +c.dataset.wd) },
-        deposit: { refundMonths: num($("#s_dm").value), multiplier: num($("#s_dx").value) }, sickDocAfterDays: $("#s_sk").value === "" ? null : num($("#s_sk").value), gpsRetentionMonths: num($("#s_gp").value),
+        deposit: { refundMonths: num($("#s_dm").value), multiplier: num($("#s_dx").value) }, sickDocAfterDays: $("#s_sk").value === "" ? null : num($("#s_sk").value), gpsRetentionMonths: num($("#s_gp").value), site: la ? { lat: +la, lng: +lo, radius: num($("#s_ra").value) || 100 } : null,
         hideFields: { water_pack: $("#h_wp").checked, driver_pay: $("#h_dp").checked }, depts: $("#s_dp").value.split("\n"), positions: $("#s_ps").value.split("\n") };
       await api("settingsSave", { settings: body }); toast("ບັນທຶກແລ້ວ");
     } catch (e) { fail(e); }
