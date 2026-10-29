@@ -257,7 +257,7 @@ const ERR = {
   leave_type_in_use: "ປະເພດລານີ້ຖືກໃຊ້ແລ້ວ ລຶບບໍ່ໄດ້ — ໃຫ້ປິດໃຊ້ງານແທນ", has_approver: "ພະນັກງານຄົນນີ້ມີຫົວໜ້າ — ໃຫ້ຍື່ນລາປົກກະຕິ",
   import_errors: "ມີແຖວຜິດ — ບໍ່ໄດ້ນຳເຂົ້າ", bad_request: "ຂໍ້ມູນບໍ່ຖືກຕ້ອງ", too_large: "ຂໍ້ມູນໃຫຍ່ເກີນ", server_error: "ເຊີບເວີຂັດຂ້ອງ — ລອງໃໝ່",
 };
-const errMsg = (j) => (ERR[j.error] || ("ຜິດພາດ: " + j.error)) + (j.field ? ` (${j.field})` : "") + (j.dist != null ? ` — ຫ່າງ ${fmt(j.dist)} ມ (ອະນຸຍາດ ${fmt(j.radius)} ມ)` : "") + (j.docNo ? ` — ${j.docNo}` : "");
+const errMsg = (j) => (ERR[j.error] || ("ຜິດພາດ: " + j.error)) + (j.field ? ` (${j.field})` : "") + (j.dist != null ? ` — ${j.site ? `ໃກ້ສຸດ: ${j.site} · ` : ""}ຫ່າງ ${fmt(j.dist)} ມ (ອະນຸຍາດ ${fmt(j.radius)} ມ)` : "") + (j.docNo ? ` — ${j.docNo}` : "");
 
 /* ---------- state + api ---------- */
 const S = { role: null, token: null, payToken: null, tab: "home", month: SS.get("hr_month") || curMonth(), dept: "", me: null, cache: {} };
@@ -812,7 +812,7 @@ async function tabEmps(m) {
     <div class="mut sm">${list.length} ຄົນ</div>
     <div class="tw"><table class="et"><thead><tr><th>ພະນັກງານ</th>${pay ? `<th class="num">ເງິນເດືອນ</th>` : ""}<th>ບັນຊີ</th><th>PIN</th><th></th></tr></thead>
     <tbody>${list.length ? list.map((e) => `<tr style="${e.active ? "" : "opacity:.5"}">
-      <td><div class="ep">${avatar(S.cache.photos?.[e.id], e.name, 38)}<div><div class="b">${esc(e.name)}${e.active ? "" : ` <span class="pill">ອອກແລ້ວ</span>`}</div><div class="xs mut">${esc(e.emp_code)} · ${esc(e.position || "—")}${multiDept ? ` · ${esc(e.dept || "")}` : ""}</div><div class="xs mut">👔 ${esc(e.approver_name || "ບໍ່ມີຫົວໜ້າ")}${e.delegate_name ? ` · ແທນ: ${esc(e.delegate_name)} ຮອດ ${esc(dmy(e.delegate_until))}` : ""}</div></div></div></td>
+      <td><div class="ep">${avatar(S.cache.photos?.[e.id], e.name, 38)}<div><div class="b">${esc(e.name)}${e.active ? "" : ` <span class="pill">ອອກແລ້ວ</span>`}</div><div class="xs mut">${esc(e.emp_code)} · ${esc(e.position || "—")}${multiDept ? ` · ${esc(e.dept || "")}` : ""}</div><div class="xs mut">👔 ${esc(e.approver_name || "ບໍ່ມີຫົວໜ້າ")}${e.delegate_name ? ` · ແທນ: ${esc(e.delegate_name)} ຮອດ ${esc(dmy(e.delegate_until))}` : ""}${(e.scan_sites || []).length && (S.cache.settings?.sites || []).length ? ` · 📍 ${esc(S.cache.settings.sites.filter((t) => e.scan_sites.includes(t.id)).map((t) => t.name).join(", ") || "ທຸກບ່ອນ")}` : ""}</div></div></div></td>
       ${pay ? `<td class="num"><div class="b">${fmt(e.base_salary)}</div><div class="xs mut">ປສ ${fmt(e.sso_base)} · ທີມ ${fmt(e.team_deposit)}</div></td>` : ""}
       <td class="sm">${esc(e.bank)} <span data-acc="${esc(e.id)}">${esc(e.account_no || "—")}</span>${e.has_account && pay ? ` <button class="sm ib" data-rev="${esc(e.id)}" title="ສະແດງເລກບັນຊີເຕັມ" aria-label="ສະແດງເລກບັນຊີເຕັມ">👁</button>` : ""}</td>
       <td>${e.has_pin ? `<span class="pill p-ok">✓ ມີ</span>` : `<span class="pill p-warn">ບໍ່ມີ</span>`}</td>
@@ -852,11 +852,13 @@ function empForm(e) {
     <label>ຖານຄ່າຈ້າງປະກັນສັງຄົມ (₭)<input id="e_sso" type="number" min="0" value="${esc(x.sso_base ?? 0)}"><span class="xs" id="e_ssov"></span></label><label>ເງິນຝາກທີມຂົນສົ່ງ/ເດືອນ (₭)<input id="e_dep" type="number" min="0" value="${esc(x.team_deposit ?? 0)}"></label>
     <label>ທະນາຄານ<input id="e_bank" value="${esc(x.bank)}"></label><label>ຊື່ເຈົ້າຂອງບັນຊີ<input id="e_an" value="${esc(x.account_name)}"></label>
     <label>ເລກບັນຊີ${e && e.has_account ? " (ປະວ່າງໄວ້ = ບໍ່ປ່ຽນ)" : ""}<input id="e_acc" inputmode="numeric" autocomplete="off"></label><label>ວັນເລີ່ມວຽກ<input id="e_sd" type="date" value="${esc(x.start_date || "")}"></label>
-    <label>ວັນສິ້ນສຸດ<input id="e_ed" type="date" value="${esc(x.end_date || "")}"></label><label>ສະຖານະ<select id="e_act"><option value="1">ເຮັດວຽກ</option><option value="0" ${x.active ? "" : "selected"}>ປິດໃຊ້ງານ</option></select></label></div>`,
+    <label>ວັນສິ້ນສຸດ<input id="e_ed" type="date" value="${esc(x.end_date || "")}"></label><label>ສະຖານະ<select id="e_act"><option value="1">ເຮັດວຽກ</option><option value="0" ${x.active ? "" : "selected"}>ປິດໃຊ້ງານ</option></select></label></div>
+    ${(s.sites || []).length ? `<div class="grid" style="gap:6px;margin-top:10px"><div class="sm" style="font-weight:500">📍 ສະແກນໄດ້ທີ່ <span class="xs mut" style="font-weight:400">ບໍ່ຕິກ = ທຸກບ່ອນ</span></div><div class="row">${s.sites.map((t) => `<label style="display:flex;gap:6px;align-items:center;color:var(--ink)"><input type="checkbox" data-esite="${esc(t.id)}" ${(x.scan_sites || []).includes(t.id) ? "checked" : ""} style="width:auto;min-height:0">${esc(t.name)}</label>`).join("")}</div></div>` : ""}`,
     onOpen: (r) => { const u = () => $("#e_ssov", r).textContent = "ປະກັນສັງຄົມ = " + fmt(num($("#e_sso", r).value) * num(s.rates?.ssoRate ?? 0.055)) + " ₭/ເດືອນ"; $("#e_sso", r).oninput = u; u(); },
     onOk: async (r) => {
       const emp = { id: e?.id, version: e?.version, emp_code: val(r, "e_code"), name: val(r, "e_name"), dept: val(r, "e_dept"), position: val(r, "e_pos"), base_salary: num(val(r, "e_base")), work_days: num(val(r, "e_wd")) || 26,
         sso_base: num(val(r, "e_sso")), team_deposit: num(val(r, "e_dep")), bank: val(r, "e_bank"), account_name: val(r, "e_an"), start_date: val(r, "e_sd") || null, end_date: val(r, "e_ed") || null, active: val(r, "e_act") === "1" };
+      if ((s.sites || []).length) emp.scan_sites = $$("[data-esite]", r).filter((c) => c.checked).map((c) => c.dataset.esite);
       if (!emp.id || val(r, "e_acc")) emp.account_no = val(r, "e_acc");
       if (emp.emp_code === emp.name) throw new Error("ລະຫັດພະນັກງານຕ້ອງບໍ່ແມ່ນຊື່");
       await api("empUpsert", { emp }); toast("ບັນທຶກແລ້ວ"); renderTab();
@@ -2221,9 +2223,9 @@ async function tabSettings(m) {
       ${chk("unpaidLeaveKillsBonus", "ລາບໍ່ຮັບເງິນເດືອນ → ເສຍໂບນັດບໍ່ຂາດງານ (ເຈົ້າຂອງຢືນຢັນ)")}${chk("lateKillsBonus", "ມາຊ້າ/ລືມສະແກນ → ເສຍໂບນັດບໍ່ຂາດງານ")}${chk("lateRoundHalfHour", "ປັດນາທີມາຊ້າລວມຂຶ້ນເປັນເຄິ່ງຊົ່ວໂມງ")}
       <h3>ເວລາເຮັດວຽກ</h3><div class="grid g4"><label>ເລີ່ມ<input type="time" id="s_st" value="${esc(s.shift.start)}"></label><label>ເລີກ<input type="time" id="s_en" value="${esc(s.shift.end)}"></label><label>ຜ່ອນຜັນມາຊ້າ (ນາທີ)<input type="number" id="s_gr" value="${esc(s.shift.grace)}"></label></div>
       <div class="row sm">${days.map((d, i) => `<label style="display:flex;gap:6px;align-items:center;color:var(--ink)"><input type="checkbox" data-wd="${i}" ${s.shift.workdays.includes(i) ? "checked" : ""} style="width:auto;min-height:0">${d}</label>`).join("")}</div>
-      <h3>ຕຳແໜ່ງສະຖານທີ່ <span class="sm mut" style="font-weight:400">ສະແກນເຂົ້າ-ອອກໄດ້ສະເພາະໃນລັດສະໝີ · ປ່ອຍວ່າງ = ບໍ່ຈຳກັດ</span></h3>
-      <div class="grid g4"><label>Latitude<input type="number" step="any" id="s_la" placeholder="ເຊັ່ນ 17.9757" value="${esc(s.site?.lat ?? "")}"></label><label>Longitude<input type="number" step="any" id="s_lo" placeholder="ເຊັ່ນ 102.6331" value="${esc(s.site?.lng ?? "")}"></label><label>ລັດສະໝີ (ແມັດ)<input type="number" id="s_ra" min="20" max="5000" value="${esc(s.site?.radius ?? 100)}"></label></div>
-      <div class="row"><button type="button" id="s_here">ໃຊ້ຕຳແໜ່ງປັດຈຸບັນ</button><a id="s_map" target="_blank" rel="noopener" class="sm"></a></div>
+      <h3>📍 ສະຖານທີ່ສະແກນ <span class="sm mut" style="font-weight:400">ສະແກນໄດ້ເມື່ອຢູ່ໃນລັດສະໝີຂອງບ່ອນໃດບ່ອນໜຶ່ງ · ບໍ່ມີລາຍການ = ບໍ່ຈຳກັດ · ເລືອກບ່ອນຂອງແຕ່ລະຄົນໃນ ແກ້ໄຂພະນັກງານ</span></h3>
+      <div id="sites" class="grid" style="gap:8px">${(s.sites || []).map(siteRow).join("")}</div>
+      <div class="row"><button type="button" id="s_add">+ ເພີ່ມສະຖານທີ່</button><span class="xs mut">ໄປຢືນຢູ່ບ່ອນນັ້ນ ແລ້ວກົດ 📍 ໃຊ້ຕຳແໜ່ງນີ້ ຈະງ່າຍທີ່ສຸດ</span></div>
       <h3>ອື່ນໆ</h3><div class="grid g4"><label>ເງິນຝາກ: ຄົບກີ່ເດືອນ<input type="number" id="s_dm" value="${esc(s.deposit.refundMonths)}"></label><label>ເງິນຝາກ: ຄືນກີ່ເທົ່າ<input type="number" step="0.1" id="s_dx" value="${esc(s.deposit.multiplier)}"></label>
         <label>ລາປ່ວຍເກີນ N ວັນຕ້ອງແນບໃບແພດ (ຫວ່າງ = ບໍ່ບັງຄັບ)<input type="number" id="s_sk" value="${esc(s.sickDocAfterDays ?? "")}"></label><label>ເກັບພິກັດ GPS (ເດືອນ)<input type="number" id="s_gp" value="${esc(s.gpsRetentionMonths)}"></label></div>
       <div class="row sm"><label style="display:flex;gap:6px;align-items:center;color:var(--ink)"><input type="checkbox" id="h_wp" ${s.hideFields.water_pack ? "checked" : ""} style="width:auto;min-height:0">ເຊື່ອງ ນ້ຳແພັກ</label><label style="display:flex;gap:6px;align-items:center;color:var(--ink)"><input type="checkbox" id="h_dp" ${s.hideFields.driver_pay ? "checked" : ""} style="width:auto;min-height:0">ເຊື່ອງ ເງິນໂຊເຟີ</label></div>
@@ -2239,23 +2241,32 @@ async function tabSettings(m) {
   const bindLt = () => $$("[data-ltdel]").forEach((b) => b.onclick = () => b.closest("tr").remove());
   bindLt();
   $("#lta").onclick = () => { $("#ltb").insertAdjacentHTML("beforeend", ltRow({ k: "", name: "", quota: 0, color: "#5B6B70", paid: true, active: true })); bindLt(); };
-  const mapLink = () => { const la = $("#s_la").value, lo = $("#s_lo").value, a = $("#s_map");
-    a.textContent = la && lo ? "ເບິ່ງໃນແຜນທີ່ ↗" : ""; a.href = la && lo ? `https://www.google.com/maps?q=${encodeURIComponent(la)},${encodeURIComponent(lo)}` : "#"; };
-  ["s_la", "s_lo"].forEach((id) => $("#" + id).addEventListener("input", mapLink)); mapLink();
-  $("#s_here").onclick = async () => { const b = $("#s_here"); b.disabled = true; const p = await getPos(); b.disabled = false;
-    if (!p) return toast("ເອົາຕຳແໜ່ງບໍ່ໄດ້ — ອະນຸຍາດ GPS ໃນ browser ແລ້ວລອງໃໝ່", true);
-    $("#s_la").value = p.lat.toFixed(6); $("#s_lo").value = p.lng.toFixed(6); mapLink(); toast(`ໄດ້ຕຳແໜ່ງແລ້ວ (ຄາດເຄື່ອນ ±${p.accuracy} ມ) — ກົດ ບັນທຶກການຕັ້ງຄ່າ`); };
+  const bindSites = () => $$("[data-site]").forEach((row) => {
+    const la = $("[data-sla]", row), lo = $("[data-slo]", row), a = $("[data-smap]", row);
+    const link = () => { a.textContent = la.value && lo.value ? "ແຜນທີ່ ↗" : ""; a.href = la.value && lo.value ? `https://www.google.com/maps?q=${encodeURIComponent(la.value)},${encodeURIComponent(lo.value)}` : "#"; };
+    la.oninput = lo.oninput = link; link();
+    $("[data-sdel]", row).onclick = () => row.remove();
+    $("[data-shere]", row).onclick = async (ev) => { const b = ev.currentTarget; b.disabled = true; const p = await getPos(); b.disabled = false;
+      if (!p) return toast("ເອົາຕຳແໜ່ງບໍ່ໄດ້ — ອະນຸຍາດ GPS ໃນ browser ແລ້ວລອງໃໝ່", true);
+      la.value = p.lat.toFixed(6); lo.value = p.lng.toFixed(6); link(); toast(`ໄດ້ຕຳແໜ່ງແລ້ວ (ຄາດເຄື່ອນ ±${p.accuracy} ມ) — ກົດ ບັນທຶກການຕັ້ງຄ່າ`); };
+  });
+  bindSites();
+  $("#s_add").onclick = () => { $("#sites").insertAdjacentHTML("beforeend", siteRow({ radius: 100 })); bindSites(); $$("[data-sname]").pop().focus(); };
   $("#ssv").onclick = async () => {
     try {
-      const la = $("#s_la").value.trim(), lo = $("#s_lo").value.trim();
-      if (!la !== !lo) throw new Error("ໃສ່ທັງ Latitude ແລະ Longitude ຫຼື ປ່ອຍວ່າງທັງສອງ");
-      if (la && (Math.abs(+la) > 90 || Math.abs(+lo) > 180)) throw new Error("Latitude ຕ້ອງຢູ່ -90 ຫາ 90 (ລາວ ປະມານ 14–22) · Longitude ປະມານ 100–108 — ອາດໃສ່ສະລັບກັນ");
+      const sites = $$("[data-site]").map((row) => ({ id: row.dataset.site, name: $("[data-sname]", row).value.trim(), lat: $("[data-sla]", row).value.trim(), lng: $("[data-slo]", row).value.trim(), radius: num($("[data-sra]", row).value) || 100 }));
+      for (const x of sites) {
+        if (!x.name) throw new Error("ໃສ່ຊື່ສະຖານທີ່ໃຫ້ຄົບ");
+        if (!x.lat || !x.lng) throw new Error(`${x.name}: ໃສ່ Latitude ແລະ Longitude (ຫຼື ກົດ 📍 ໃຊ້ຕຳແໜ່ງນີ້)`);
+        if (Math.abs(+x.lat) > 90 || Math.abs(+x.lng) > 180) throw new Error(`${x.name}: Latitude ຕ້ອງຢູ່ -90 ຫາ 90 (ລາວ ປະມານ 14–22) · Longitude ປະມານ 100–108 — ອາດໃສ່ສະລັບກັນ`);
+        x.lat = +x.lat; x.lng = +x.lng;
+      }
       const rates = {}; $$("[data-rate]").forEach((i) => rates[i.dataset.rate] = i.type === "checkbox" ? i.checked : num(i.value));
       const leaveTypes = $$("#ltb tr").map((tr) => ({ k: $("[data-lk]", tr).value.trim(), name: $("[data-ln]", tr).value.trim(), quota: num($("[data-lq]", tr).value), color: $("[data-lc]", tr).value, paid: $("[data-lp]", tr).checked, active: $("[data-la]", tr).checked }));
       const body = { rates, leaveTypes, shift: { start: $("#s_st").value, end: $("#s_en").value, grace: num($("#s_gr").value), workdays: $$("[data-wd]").filter((c) => c.checked).map((c) => +c.dataset.wd) },
-        deposit: { refundMonths: num($("#s_dm").value), multiplier: num($("#s_dx").value) }, sickDocAfterDays: $("#s_sk").value === "" ? null : num($("#s_sk").value), gpsRetentionMonths: num($("#s_gp").value), site: la ? { lat: +la, lng: +lo, radius: num($("#s_ra").value) || 100 } : null,
+        deposit: { refundMonths: num($("#s_dm").value), multiplier: num($("#s_dx").value) }, sickDocAfterDays: $("#s_sk").value === "" ? null : num($("#s_sk").value), gpsRetentionMonths: num($("#s_gp").value), sites,
         hideFields: { water_pack: $("#h_wp").checked, driver_pay: $("#h_dp").checked }, depts: $("#s_dp").value.split("\n"), positions: $("#s_ps").value.split("\n") };
-      await api("settingsSave", { settings: body }); toast("ບັນທຶກແລ້ວ");
+      const sv = await api("settingsSave", { settings: body }); S.cache.settings = sv.settings; toast("ບັນທຶກແລ້ວ"); renderTab(true);
     } catch (e) { fail(e); }
   };
   $("#cpw").onclick = () => dialog({ title: "ປ່ຽນລະຫັດແອດມິນ", ok: "ປ່ຽນ", body: `<div class="grid" style="gap:10px"><label>ລະຫັດປັດຈຸບັນ<input type="password" id="c0"></label><label>ລະຫັດໃໝ່ (≥10)<input type="password" id="c1"></label><label>ຢືນຢັນ<input type="password" id="c2"></label></div>`,
@@ -2267,6 +2278,13 @@ async function tabSettings(m) {
     onOk: async () => { const x = await api("backupExport"); const b = new Blob([JSON.stringify(x.backup)], { type: "application/json" }); const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = `nany-hr-backup-${curDate()}.json`; a.click(); } });
   $("#al").onclick = async () => { try { const x = await api("auditLog", { limit: 300 }); $("#alv").innerHTML = `<div class="tw" style="max-height:420px"><table><thead><tr><th>ເວລາ</th><th>ຜູ້ເຮັດ</th><th>ການກະທຳ</th><th>ພະນັກງານ</th><th>ເດືອນ</th><th>ຊ່ອງ</th><th>ເກົ່າ → ໃໝ່</th></tr></thead><tbody>${x.rows.map((a) => `<tr><td class="num">${esc(fmtDT(a.at))}</td><td>${esc(a.actor)}</td><td>${esc(a.action)}</td><td>${esc(a.name || "")}</td><td>${esc(a.month || "")}</td><td>${esc(a.field || "")}</td><td class="xs">${a.field ? esc(a.old) + " → " + esc(a.new) : esc(a.detail ? JSON.stringify(a.detail) : "")}</td></tr>`).join("")}</tbody></table></div>`; } catch (e) { fail(e); } };
 }
+// id is kept so people's site choices survive renames; new rows get an id on the server
+const siteRow = (x) => `<div class="row" data-site="${esc(x.id || "")}" style="gap:6px;align-items:end;border:1px solid var(--line);border-radius:12px;padding:8px">
+  <label style="flex:2;min-width:140px">ຊື່<input data-sname maxlength="40" placeholder="ເຊັ່ນ ທີ່ສາງ, ໂຮງງານ" value="${esc(x.name || "")}"></label>
+  <label style="flex:1;min-width:110px">Latitude<input data-sla type="number" step="any" value="${esc(x.lat ?? "")}"></label>
+  <label style="flex:1;min-width:110px">Longitude<input data-slo type="number" step="any" value="${esc(x.lng ?? "")}"></label>
+  <label style="width:100px">ລັດສະໝີ (ມ)<input data-sra type="number" min="20" max="5000" value="${esc(x.radius ?? 100)}"></label>
+  <button type="button" class="sm" data-shere>📍 ໃຊ້ຕຳແໜ່ງນີ້</button><a data-smap target="_blank" rel="noopener" class="sm"></a><button type="button" class="sm ib" data-sdel aria-label="ລຶບສະຖານທີ່">✕</button></div>`;
 const ltRow = (t) => `<tr><td><input data-lk value="${esc(t.k)}" style="min-height:34px;width:110px"></td><td><input data-ln value="${esc(t.name)}" style="min-height:34px"></td><td><input data-lq type="number" step="0.5" value="${esc(t.quota)}" style="min-height:34px;width:80px"></td><td><input data-lc type="color" value="${esc(t.color)}" style="min-height:34px;width:56px;padding:2px"></td><td><input data-lp type="checkbox" ${t.paid !== false ? "checked" : ""} style="width:auto;min-height:0"></td><td><input data-la type="checkbox" ${t.active !== false ? "checked" : ""} style="width:auto;min-height:0"></td><td><button class="sm" data-ltdel>ລຶບ</button></td></tr>`;
 
 /* ---------- boot ---------- */
