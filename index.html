@@ -107,6 +107,7 @@ tr:last-child td{border-bottom:0}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));gap:12px}
 .tile{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:18px;min-height:110px;display:grid;place-items:center;gap:4px;padding:12px;font-weight:600}
 .tile .e{font-size:42px;line-height:1}
+.ann{border:1px solid var(--line);border-left:6px solid var(--pri);border-radius:14px;padding:12px;display:grid;gap:6px}.ann.urg{border-left-color:var(--acc);background:var(--acc2)}.ann .bd{white-space:pre-wrap;overflow-wrap:anywhere}.ack{min-height:56px;font-size:20px;font-weight:700;background:#16A34A;color:#fff;border:0;border-radius:14px}
 .ic{position:relative;display:inline-block;width:52px;height:52px;flex:none}.ic svg{width:52px;height:52px}
 .ic i{position:absolute;right:-4px;top:-4px;font-style:normal;font-size:18px;line-height:1}
 .ic em{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);font-style:normal;font-size:11px;font-weight:700;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:0 4px;line-height:15px;white-space:nowrap;color:var(--ink)}
@@ -257,7 +258,7 @@ let pollT = null, pollBusy = false;
 
 function setNet(st) { const n = $("#net"); if (n) { n.className = "net " + st; n.lastChild.textContent = st === "off" ? " ອອບລາຍ" : st === "busy" ? " ກຳລັງໂຫຼດ" : " ເຊື່ອມຕໍ່ແລ້ວ"; } }
 // ອ່ານຢ່າງດຽວ = ລອງໃໝ່ໄດ້ 3 ຄັ້ງ; ຂຽນ = ບໍ່ລອງໃໝ່ ແລະ ຄຳຂໍທີ່ຄືກັນທຸກຢ່າງທີ່ກຳລັງສົ່ງຢູ່ (ກົດຊ້ຳ) ໃຊ້ຄຳຂໍດຽວກັນ
-const READ_ACTIONS = new Set(["me", "employees", "settingsGet", "holidays", "monthGet", "attendanceBoard", "attendanceFlags", "attendanceMonthAdmin", "myAttendance", "myLeaves", "leavesAdmin", "leaveDoc", "leaveAttachment", "leaveQuote", "approvals", "payslipMonths", "payslip", "welfare", "status", "importProposals", "auditLog", "boot", "entries", "payroll.get", "hr.links", "hr.driverPay", "listDocs", "myProfile", "empProfile", "empPhotos"]);
+const READ_ACTIONS = new Set(["me", "employees", "settingsGet", "holidays", "monthGet", "attendanceBoard", "attendanceFlags", "attendanceMonthAdmin", "myAttendance", "myLeaves", "leavesAdmin", "leaveDoc", "leaveAttachment", "leaveQuote", "approvals", "payslipMonths", "payslip", "welfare", "status", "importProposals", "auditLog", "boot", "entries", "payroll.get", "hr.links", "hr.driverPay", "listDocs", "myProfile", "empProfile", "empPhotos", "annList"]);
 const inflight = new Map();
 function post(url, ct, body, read) {
   const key = url + body;
@@ -376,6 +377,21 @@ async function renderLogin(msg) {
 /* ---------- employee portal ---------- */
 function deviceHash() { let d = LS.get("hr_dev"); if (!d) { d = [...crypto.getRandomValues(new Uint8Array(12))].map((x) => x.toString(16).padStart(2, "0")).join(""); LS.set("hr_dev", d); } return d; }
 async function startEmp() { $("#app").innerHTML = `<div class="wrap"><div class="empty">ກຳລັງໂຫຼດ…</div></div>`; try { S.me = await api("me"); renderEmp(); } catch (e) { if (S.token) $("#app").innerHTML = `<div class="wrap"><div class="err-box">${esc(e.message)}</div><button onclick="startEmp()">ລອງໃໝ່</button></div>`; } }
+const annDay = (iso) => dmy(new Date(new Date(iso).getTime() + 7 * 3600e3).toISOString());
+const annHTML = (a, tail) => `<div class="ann ${a.urgent ? "urg" : ""}"><div class="b">${a.urgent ? "🚨 " : "📢 "}${a.pinned ? "📌 " : ""}${esc(a.title)}</div>${a.body ? `<div class="bd sm">${esc(a.body)}</div>` : ""}<div class="xs mut">${esc(annDay(a.created_at))}${a.until ? ` · ຮອດ ${esc(dmy(a.until))}` : ""}</div>${tail}</div>`;
+function annBoard() {
+  const el = $("#annb"), list = S.me.announcements || [];
+  if (!el) return;
+  el.hidden = !list.length;
+  const todo = list.filter((a) => !a.acked), done = list.filter((a) => a.acked);
+  el.innerHTML = `<div class="row" style="justify-content:space-between"><h2>📢 ແຈ້ງການ</h2>${todo.length ? `<span class="pill p-bad">ໃໝ່ ${todo.length}</span>` : `<span class="pill p-ok">✅ ອ່ານໝົດແລ້ວ</span>`}</div>
+    ${todo.map((a) => annHTML(a, `<button class="ack" data-ack="${esc(a.id)}">✅ ຮັບຊາບ</button>`)).join("")}
+    ${done.length ? `<details ${todo.length ? "" : "open"}><summary class="sm mut">ອ່ານແລ້ວ (${done.length})</summary><div class="grid" style="gap:8px;margin-top:8px">${done.map((a) => annHTML(a, `<div class="xs" style="color:var(--ok)">✅ ຮັບຊາບແລ້ວ</div>`)).join("")}</div></details>` : ""}`;
+  $$("[data-ack]", el).forEach((b) => b.onclick = async () => {
+    b.disabled = true;
+    try { await api("annAck", { id: b.dataset.ack }); list.find((a) => a.id === b.dataset.ack).acked = true; annBoard(); } catch (e) { b.disabled = false; toast(e.message); }
+  });
+}
 function renderEmp() {
   const m = S.me, e = m.emp, next = m.next;
   const tp = m.todayPunches.map((p) => `<span class="pill ${p.kind === "in" ? "p-pri" : "p-bad"}">${p.kind === "in" ? "ເຂົ້າ" : "ອອກ"} ${esc(fmtTime(p.at))}</span>`).join("");
@@ -383,6 +399,7 @@ function renderEmp() {
   <div class="top"><div class="wrap" style="max-width:720px"><div id="hav">${avatar(null, e.name, 48)}</div><div style="flex:1;min-width:0"><h1 class="hi">ສະບາຍດີ, ${esc(e.name)}</h1><div class="sm mut">${esc(e.emp_code)} · ${esc(e.position || "")}</div></div>
     <span class="net" id="net"><i></i> ເຊື່ອມຕໍ່ແລ້ວ</span><button class="sm" id="hm">ຄູ່ມື</button><button class="sm" id="lo">ອອກ</button></div></div>
   <div class="wrap grid" style="max-width:720px;gap:14px">
+    <section class="card grid" style="gap:10px" id="annb" hidden></section>
     <section class="card grid" style="gap:12px">
       <button class="punch ${next === "out" ? "out" : ""}" id="pb"><span class="e" aria-hidden="true">${next === "out" ? "🏠👈" : "👉🏢"}</span><span>${next === "out" ? "ອອກວຽກ" : "ເຂົ້າວຽກ"}</span><small>ເວລາເຮັດວຽກ ${esc(m.settings.shift.start)}–${esc(m.settings.shift.end)} · ວັນທີ ${esc(dmy(m.today))}</small></button>
       <div class="row">${tp || `<span class="mut sm">📭 ມື້ນີ້ຍັງບໍ່ມີການສະແກນ</span>`}</div>
@@ -409,6 +426,7 @@ function renderEmp() {
   $("#tLeave").onclick = () => leaveForm(null); $("#tPay").onclick = openPayslips; $("#tMe").onclick = profileForm; $("#tMan").onclick = manualDialog;
   $("#tAtt").onclick = () => { $("#am").scrollIntoView({ behavior: "smooth", block: "center" }); $("#attb").click(); };
   $("#pfb").onclick = profileForm;
+  annBoard();
   api("myProfile").then((j) => setAvatars(j.photo, e.name)).catch(() => {});
   $("#nl").onclick = () => leaveForm(null);
   $("#alll").onclick = async () => { try { const j = await api("myLeaves"); $("#myl").innerHTML = leaveListHTML(j.requests); bindLeaveList($("#myl")); } catch (e) { fail(e); } };
@@ -639,8 +657,8 @@ function payslipHTML(r, month) {
 const printPayslips = (rows, month) => doPrint(rows.map((r) => payslipHTML(r, month)).join(""));
 
 /* ---------- HR app ---------- */
-const TABS_ADMIN = [["home", "ໜ້າຫຼັກ"], ["emps", "ພະນັກງານ"], ["work", "ຕິດຕາມການເຮັດວຽກ"], ["trucks", "ລົດຂົນສົ່ງ"], ["scan", "ສະແກນເຂົ້າ-ອອກ"], ["pay", "ຄິດໄລ່ຜົນຕອບແທນ"], ["leave", "ລາພັກ-ລາກິດ"], ["welfare", "ສະຫວັດດີການ"], ["summary", "ສະຫຼຸບປະຈຳເດືອນ"], ["links", "ລິ້ງວຽກ"], ["docs", "ເອກະສານ"], ["bills", "ຈ່າຍປະຈຳ"], ["jd", "ຕຳແໜ່ງ & JD"], ["settings", "ຕັ້ງຄ່າ"], ["manual", "ຄູ່ມື"]];
-const TABS_STAFF = [["home", "ໜ້າຫຼັກ"], ["scan", "ສະແກນເຂົ້າ-ອອກ"], ["leave", "ລາພັກ-ລາກິດ"], ["holidays", "ວັນພັກ"], ["links", "ລິ້ງວຽກ"], ["docs", "ເອກະສານ"], ["bills", "ຈ່າຍປະຈຳ"], ["jd", "ຕຳແໜ່ງ & JD"], ["manual", "ຄູ່ມື"]];
+const TABS_ADMIN = [["home", "ໜ້າຫຼັກ"], ["emps", "ພະນັກງານ"], ["work", "ຕິດຕາມການເຮັດວຽກ"], ["trucks", "ລົດຂົນສົ່ງ"], ["scan", "ສະແກນເຂົ້າ-ອອກ"], ["pay", "ຄິດໄລ່ຜົນຕອບແທນ"], ["leave", "ລາພັກ-ລາກິດ"], ["welfare", "ສະຫວັດດີການ"], ["summary", "ສະຫຼຸບປະຈຳເດືອນ"], ["links", "ລິ້ງວຽກ"], ["docs", "ເອກະສານ"], ["bills", "ຈ່າຍປະຈຳ"], ["jd", "ຕຳແໜ່ງ & JD"], ["news", "📢 ແຈ້ງການ"], ["settings", "ຕັ້ງຄ່າ"], ["manual", "ຄູ່ມື"]];
+const TABS_STAFF = [["home", "ໜ້າຫຼັກ"], ["scan", "ສະແກນເຂົ້າ-ອອກ"], ["leave", "ລາພັກ-ລາກິດ"], ["holidays", "ວັນພັກ"], ["links", "ລິ້ງວຽກ"], ["docs", "ເອກະສານ"], ["bills", "ຈ່າຍປະຈຳ"], ["jd", "ຕຳແໜ່ງ & JD"], ["news", "📢 ແຈ້ງການ"], ["manual", "ຄູ່ມື"]];
 const isAdmin = () => S.role === "admin";
 async function startHR() {
   try { const j = await api("employees"); S.cache.emps = j.employees; S.cache.settings = j.settings; } catch (e) { return; }
@@ -674,7 +692,7 @@ function stopPoll() { clearInterval(pollT); pollT = null; }
 async function renderTab(keep) {
   stopPoll();
   const m = $("#main"); if (!keep) m.innerHTML = `<div class="empty">ກຳລັງໂຫຼດ…</div>`;
-  try { await ({ home: tabHome, emps: tabEmps, work: tabWork, trucks: tabTrucks, scan: tabScan, pay: tabPay, leave: tabLeave, welfare: tabWelfare, summary: tabSummary, settings: tabSettings, holidays: tabHolidays, links: tabLinks, docs: tabDocs, bills: tabBills, jd: tabJd, manual: tabManual })[S.tab](m); }
+  try { await ({ home: tabHome, emps: tabEmps, work: tabWork, trucks: tabTrucks, scan: tabScan, pay: tabPay, leave: tabLeave, welfare: tabWelfare, summary: tabSummary, settings: tabSettings, holidays: tabHolidays, links: tabLinks, docs: tabDocs, bills: tabBills, jd: tabJd, news: tabNews, manual: tabManual })[S.tab](m); }
   catch (e) { if (S.token) m.innerHTML = `<div class="err-box">${esc(e.message)}</div>`; }
 }
 async function loadMonth() { const j = await api("monthGet", { month: S.month }); S.cache.month = j; return j; }
@@ -1944,12 +1962,14 @@ const MANUAL = [
   { who: "emp", t: "ອະນຸມັດໃບລາ (ສຳລັບຫົວໜ້າ)", s: ["ຖ້າທ່ານເປັນຫົວໜ້າ ຈະເຫັນສ່ວນ <b>ໃບລາລໍຖ້າອະນຸມັດ</b>", "ກວດໂຄວຕາທີ່ເຫຼືອ ແລ້ວກົດ <b>ອະນຸມັດ</b> ຫຼື <b>ປະຕິເສດ</b> (ປະຕິເສດຕ້ອງໃສ່ເຫດຜົນ)"] },
   { who: "emp", t: "ສະລິບເງິນເດືອນ", s: ["ກົດ <b>ເປີດ (ໃສ່ PIN)</b> ແລ້ວໃສ່ PIN ອີກເທື່ອ", "ເຫັນສະເພາະເດືອນທີ່ HR ປິດແລ້ວ — ຖ້າຍັງບໍ່ເຫັນ ແມ່ນ HR ຍັງບໍ່ທັນປິດເດືອນ"] },
   { who: "emp", t: "ຂໍ້ມູນສ່ວນຕົວ ແລະ ຮູບ", s: ["ກົດປຸ່ມໃນບັດ <b>ຂໍ້ມູນສ່ວນຕົວ</b> ເພື່ອໃສ່ເບີໂທ, ທີ່ຢູ່, ຜູ້ຕິດຕໍ່ສຸກເສີນ ແລະ ຮູບ", "ເຫັນສະເພາະທ່ານ ແລະ HR ເທົ່ານັ້ນ"] },
+  { who: "emp", t: "📢 ແຈ້ງການ", s: ["ແຈ້ງການໃໝ່ຈະຢູ່ <b>ເທິງສຸດ</b> ຂອງໜ້າຫຼັກ (🚨 = ດ່ວນ)", "ອ່ານແລ້ວກົດປຸ່ມຂຽວ <b>✅ ຮັບຊາບ</b> — HR ຈະຮູ້ວ່າທ່ານອ່ານແລ້ວ"] },
   { who: "drv", t: "ບັນທຶກການສົ່ງປະຈຳວັນ", s: ["ບັນທຶກໃນແອັບນີ້ເທົ່ານັ້ນ — <b>ຢ່າໃຊ້ໜ້າເກົ່າ</b> ບໍ່ດັ່ງນັ້ນຍອດຈະບໍ່ເຂົ້າເງິນເດືອນ", "ກົດ <b>+ ບັນທຶກການສົ່ງ</b> ທຸກມື້ຫຼັງສົ່ງແລ້ວ", "ໝາຍ <b>ທີມ</b> ທີ່ຂຶ້ນລົດ (ສູງສຸດ 6 ຄົນ) — ເງິນແບ່ງເທົ່າກັນ", "ແກ້ໄຂຍ້ອນຫຼັງໄດ້ສອງສາມມື້ ກ່ອນຜູ້ຈັດການອະນຸມັດ. ຈຳນວນທີ່ມາຈາກ ERP ແກ້ບໍ່ໄດ້"] },
   { who: "drv", t: "ລົດນ້ອຍ — ໃສ່ຈຳນວນ", s: ["<b>ຄົວເຮືອນ 18L</b> ແລະ <b>ອົງກອນ 18L</b> ຄິດຕາມຂັ້ນ", "<b>ຂວດແກ້ວ</b>, <b>250ml</b>", "<b>ແພັກ ບໍລິສັດ</b> = ລູກຄ້າຂອງບໍລິສັດ", "<b>ແພັກ ລູກຄ້າຫາເອງ</b> ແລະ <b>ແພັກ 2L ລູກຄ້າຫາເອງ</b> = ລູກຄ້າທີ່ທີມຫາມາເອງ (ໄດ້ຫຼາຍກວ່າ)"] },
   { who: "drv", t: "ລົດໃຫຍ່ 9041 — ໃສ່ຮອບ", s: ["ໃສ່ຈຳນວນຕຸກ <b>ແຕ່ລະຮອບ</b> (ສູງສຸດ 4 ຮອບ) ແລະ <b>ສົ່ງທີ່ໃສ</b> ໃຕ້ແຕ່ລະຮອບ", "ຖ້າຂາຍ 18L ໃຫ້ລູກຄ້າໂດຍກົງ ໃສ່ຊ່ອງ <b>ຄົວເຮືອນ</b> / <b>ອົງກອນ</b> — ຄິດເງິນເພີ່ມຈາກຄ່າຮອບ"] },
   { who: "drv", t: "ຂັ້ນຜົນຕອບແທນ ແລະ ຍອດຂອງຂ້ອຍ", s: ["ຕອນໃສ່ຈຳນວນ ຈະເຫັນຂັ້ນປັດຈຸບັນ ແລະ <b>ອີກ N ຕຸກ ຂຶ້ນຂັ້ນ…</b> ພ້ອມເງິນທີ່ຈະໄດ້ເພີ່ມ", "ໜ້າຫຼັກສະແດງຍອດ <b>ອະນຸມັດແລ້ວ</b> ແລະ <b>ລໍຖ້າອະນຸມັດ</b> ຂອງຮອບນີ້", "ເງິນຍອດຈ່າຍລາຍອາທິດ ຫຼື ທ້າຍເດືອນ ຕາມທີ່ຕົກລົງກັບຜູ້ຈັດການ"] },
   { who: "hr", t: "ພະນັກງານ ແລະ PIN", s: ["ແຖບ <b>ພະນັກງານ</b>: ເພີ່ມ/ແກ້ໄຂ, ນຳເຂົ້າ CSV", "<b>PIN</b> = ອອກ PIN ໃໝ່ (ສະແດງຄັ້ງດຽວ — ສົ່ງໃຫ້ພະນັກງານໂດຍກົງ)", "<b>ຫົວໜ້າ</b> = ຕັ້ງຜູ້ອະນຸມັດລາ. ພະນັກງານທີ່ບໍ່ມີຫົວໜ້າຂໍລາບໍ່ໄດ້", "<b>ຖອນເຄື່ອງ</b> = ອອກຈາກລະບົບທຸກເຄື່ອງ (ເຊັ່ນ ເສຍໂທລະສັບ)"] },
   { who: "hr", t: "ສະແກນເຂົ້າ-ອອກ", s: ["ແຖບ <b>ສະແກນເຂົ້າ-ອອກ</b>: ເບິ່ງກະດານມື້ນີ້ ແລະ ປະຕິທິນລາຍຄົນ", "ທຸງທີ່ຕ້ອງກວດ: ບໍ່ມີພິກັດ, GPS ບໍ່ແມ່ນ, ເຄື່ອງດຽວກັນຫຼາຍຄົນ", "<b>ເພີ່ມການສະແກນແທນ</b> / ລຶບ — ຕ້ອງໃສ່ເຫດຜົນທຸກຄັ້ງ (ບັນທຶກໃນ audit)"] },
+  { who: "hr", t: "📢 ແຈ້ງການ", s: ["ແຖບ <b>📢 ແຈ້ງການ</b>: ໃສ່ຫົວຂໍ້ ແລະ ລາຍລະອຽດ ແລ້ວກົດ <b>ປະກາດ</b>", "<b>🚨 ດ່ວນ</b> = ສີແດງ, <b>📌 ປັກໝຸດ</b> = ຢູ່ເທິງສຸດ, <b>ສະແດງຮອດ</b> = ຫາຍເອງຫຼັງວັນນັ້ນ", "ກົດ <b>ໃຜອ່ານແລ້ວ</b> ເພື່ອເບິ່ງວ່າໃຜຍັງບໍ່ທັນກົດຮັບຊາບ"] },
   { who: "hr", t: "ລາພັກ-ລາກິດ", s: ["ແຖບ <b>ລາພັກ-ລາກິດ</b>: ເບິ່ງໃບລາທັງໝົດ ແລະ ໂຄວຕາ", "<b>ບັນທຶກລາແທນພະນັກງານ</b> — ຍັງລໍໃຫ້ຫົວໜ້າອະນຸມັດ (HR ບໍ່ແມ່ນຜູ້ອະນຸມັດ)"] },
   { who: "hr", t: "ລົດຂົນສົ່ງ — ອະນຸມັດ ແລະ ຈ່າຍລາຍອາທິດ", s: ["ກວດລາຍງານປະຈຳວັນ ແລ້ວກົດ <b>ອະນຸມັດ</b> (ລາຍງານທີ່ບໍ່ມີທີມ ອະນຸມັດບໍ່ໄດ້)", "<b>ຜູກຊື່ ↔ ພະນັກງານ</b> ໃຫ້ຄົນຂັບທຸກຄົນ ບໍ່ດັ່ງນັ້ນເງິນບໍ່ເຂົ້າເງິນເດືອນ", "ສ່ວນ <b>ຈ່າຍເງິນຍອດລາຍອາທິດ</b>: ໝາຍ ✓ ຄົນທີ່ຮັບລາຍອາທິດ, ເລືອກອາທິດ, ກົດ <b>ຈ່າຍແລ້ວ</b> ຫຼັງຈ່າຍເງິນ", "ທ້າຍຮອບ ກົດ <b>ດຶງເຂົ້າເງິນເດືອນ</b> — ລະບົບຫັກຍອດທີ່ຈ່າຍລາຍອາທິດແລ້ວອອກໃຫ້ເອງ"], admin: true },
   { who: "hr", t: "ເງິນເດືອນປະຈຳເດືອນ", s: ["ເລືອກເດືອນຢູ່ດ້ານເທິງ", "<b>ເປີດເດືອນ</b> → <b>ນຳເຂົ້າຈາກການສະແກນ</b> (ມາຊ້າ, ຂາດ, ລືມສະແກນ, ລາບໍ່ຮັບເງິນ)", "ດຶງເງິນຍອດລົດຈາກແຖບ ລົດຂົນສົ່ງ → ກວດໃນ <b>ຄິດໄລ່ຜົນຕອບແທນ</b>", "ກວດຄົບແລ້ວ <b>ປິດເດືອນ</b> — ພະນັກງານຈຶ່ງເຫັນສະລິບ. ເປີດຄືນຕ້ອງໃສ່ເຫດຜົນ"], admin: true },
@@ -1971,6 +1991,38 @@ async function tabManual(m) {
 }
 function manualDialog() {
   dialog({ title: "ຄູ່ມືການນຳໃຊ້", wide: true, ok: "", cancel: "ປິດ", body: `<div class="grid" style="gap:14px">${manualHTML(["emp", "drv"])}</div>` });
+}
+async function tabNews(m) {
+  const j = await api("annList"), emps = (S.cache.emps || []).filter((e) => e.active), today = curDate();
+  const ed = S.cache.annEdit ? j.rows.find((a) => a.id === S.cache.annEdit) : null;
+  const ck = (id, l, on) => `<label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" id="${id}" ${on ? "checked" : ""} style="width:auto;min-height:0"> ${l}</label>`;
+  const acked = (a) => emps.filter((e) => a.acks.includes(e.id));
+  m.innerHTML = `<div class="grid" style="gap:14px">
+    <section class="card grid" style="gap:10px"><h2>${ed ? "✏️ ແກ້ໄຂແຈ້ງການ" : "📢 ປະກາດແຈ້ງການໃໝ່"}</h2><div class="mut sm">ພະນັກງານຈະເຫັນຢູ່ເທິງສຸດຂອງແອັບ ແລະ ກົດ <b>ຮັບຊາບ</b> — HR ເບິ່ງໄດ້ວ່າໃຜຍັງບໍ່ທັນອ່ານ</div>
+      <label>ຫົວຂໍ້<input id="an_t" maxlength="120" value="${esc(ed?.title || "")}" placeholder="ເຊັ່ນ ປະຊຸມທີມ ວັນຈັນ 8:00"></label>
+      <label>ລາຍລະອຽດ<textarea id="an_b" maxlength="2000">${esc(ed?.body || "")}</textarea></label>
+      <div class="row" style="gap:16px">${ck("an_u", "🚨 ດ່ວນ", ed?.urgent)}${ck("an_p", "📌 ປັກໝຸດໄວ້ເທິງ", ed?.pinned)}<label style="width:auto">ສະແດງຮອດ (ປ່ອຍວ່າງ = ຕະຫຼອດ)<input type="date" id="an_d" value="${esc(ed?.until || "")}" style="width:auto"></label></div>
+      ${ed ? ck("an_r", "ໃຫ້ທຸກຄົນກົດຮັບຊາບໃໝ່ (ເນື້ອໃນປ່ຽນຫຼາຍ)", false) : ""}
+      <div class="row"><button class="pri" id="an_s">${ed ? "ບັນທຶກ" : "📢 ປະກາດ"}</button>${ed ? `<button id="an_c">ຍົກເລີກ</button>` : ""}</div></section>
+    <section class="card grid" style="gap:10px"><h2>ແຈ້ງການທັງໝົດ</h2>
+      ${j.rows.length ? j.rows.map((a) => { const n = acked(a).length, old = a.until && a.until < today;
+        return annHTML(a, `<div class="row" style="justify-content:space-between"><span class="pill ${n >= emps.length ? "p-ok" : "p-warn"}">✅ ຮັບຊາບ ${n}/${emps.length}</span>${old ? `<span class="pill">ໝົດອາຍຸ</span>` : ""}<span class="row" style="gap:6px"><button class="sm" data-aw="${esc(a.id)}">ໃຜອ່ານແລ້ວ</button><button class="sm" data-ae="${esc(a.id)}">ແກ້ໄຂ</button><button class="sm" data-ad="${esc(a.id)}">ລຶບ</button></span></div>`); }).join("")
+        : `<div class="empty">ຍັງບໍ່ມີແຈ້ງການ</div>`}</section></div>`;
+  const done = (msg) => { S.cache.annEdit = null; toast(msg); refreshTab(); };
+  $("#an_s").onclick = async () => {
+    const t = $("#an_t").value.trim(); if (!t) return toast("ໃສ່ຫົວຂໍ້ກ່ອນ");
+    $("#an_s").disabled = true;
+    try { await api("annSave", { id: ed?.id, title: t, body: $("#an_b").value, urgent: $("#an_u").checked, pinned: $("#an_p").checked, until: $("#an_d").value || null, reack: !!$("#an_r")?.checked }); done(ed ? "ບັນທຶກແລ້ວ" : "ປະກາດແລ້ວ"); }
+    catch (e) { $("#an_s").disabled = false; fail(e); }
+  };
+  if (ed) $("#an_c").onclick = () => { S.cache.annEdit = null; refreshTab(); };
+  $$("[data-ae]", m).forEach((b) => b.onclick = () => { S.cache.annEdit = b.dataset.ae; renderTab(true); scrollTo(0, 0); });
+  $$("[data-ad]", m).forEach((b) => b.onclick = () => dialog({ title: "ລຶບແຈ້ງການນີ້?", danger: true, ok: "ລຶບ", onOk: async () => { await api("annDelete", { id: b.dataset.ad }); done("ລຶບແລ້ວ"); } }));
+  $$("[data-aw]", m).forEach((b) => b.onclick = () => {
+    const a = j.rows.find((x) => x.id === b.dataset.aw), yes = acked(a), no = emps.filter((e) => !a.acks.includes(e.id));
+    const names = (l) => l.map((e) => esc(e.name)).join(", ") || "—";
+    dialog({ title: a.title, body: `<h3>✅ ຮັບຊາບແລ້ວ (${yes.length})</h3><p class="sm">${names(yes)}</p><h3>⏳ ຍັງບໍ່ທັນ (${no.length})</h3><p class="sm">${names(no)}</p>`, ok: "", cancel: "ປິດ" });
+  });
 }
 async function holidayBlock(m, standalone) {
   const j = await api("holidays");
