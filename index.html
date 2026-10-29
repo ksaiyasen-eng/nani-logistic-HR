@@ -640,12 +640,18 @@ function renderShell() {
   $$("[data-tab]").forEach((b) => b.onclick = () => { S.tab = b.dataset.tab; $$("[data-tab]").forEach((x) => x.setAttribute("aria-selected", x === b)); renderTab(); });
   renderTab();
 }
+// reload the current tab in place after an action: old content stays until new is ready, then scroll comes back (page + inner tables)
+async function refreshTab() {
+  const y = scrollY, inner = $$("#main .tw").map((t) => t.scrollTop);
+  await renderTab(true);
+  scrollTo(0, y); $$("#main .tw").forEach((t, i) => { if (inner[i]) t.scrollTop = inner[i]; });
+}
 const inDept = (r) => !S.dept || (r.dept || "").trim() === S.dept;
 const empById = (id) => (S.cache.emps || []).find((e) => e.id === id);
 function stopPoll() { clearInterval(pollT); pollT = null; }
-async function renderTab() {
+async function renderTab(keep) {
   stopPoll();
-  const m = $("#main"); m.innerHTML = `<div class="empty">ກຳລັງໂຫຼດ…</div>`;
+  const m = $("#main"); if (!keep) m.innerHTML = `<div class="empty">ກຳລັງໂຫຼດ…</div>`;
   try { await ({ home: tabHome, emps: tabEmps, work: tabWork, trucks: tabTrucks, scan: tabScan, pay: tabPay, leave: tabLeave, welfare: tabWelfare, summary: tabSummary, settings: tabSettings, holidays: tabHolidays, links: tabLinks, docs: tabDocs, bills: tabBills, jd: tabJd, manual: tabManual })[S.tab](m); }
   catch (e) { if (S.token) m.innerHTML = `<div class="err-box">${esc(e.message)}</div>`; }
 }
@@ -1674,32 +1680,32 @@ async function tabTrucks(m) {
       <div class="tw"><table><thead><tr><th>ຊື່ຫຼິ້ນ</th><th>ພະນັກງານ HR</th><th class="num">ລາຍງານ</th><th class="num">ອະນຸມັດ (₭)</th><th class="num">ລໍຖ້າ (₭)</th><th class="num">ຈ່າຍລາຍອາທິດແລ້ວ</th><th class="num">ເຫຼືອເຂົ້າເງິນເດືອນ</th></tr></thead>
       <tbody>${dp.rows.length ? dp.rows.slice().sort((a, b) => b.approved + b.pending - a.approved - a.pending).map((r) => `<tr><td class="b">${esc(r.nick)}</td><td>${r.empId ? `${esc(r.name)} <span class="xs mut">${esc(r.emp_code)}</span>` : `<span class="pill p-bad">ບໍ່ໄດ້ຜູກ</span>`}</td><td class="num">${r.days}</td><td class="num b">${fmt(r.approved)}</td><td class="num" style="color:var(--warn)">${r.pending ? fmt(r.pending) : "—"}</td><td class="num">${tPaidSum(pr, r.nick) ? fmt(tPaidSum(pr, r.nick)) : "—"}</td><td class="num b">${fmt(r.approved - tPaidSum(pr, r.nick))}</td></tr>`).join("") : `<tr><td colspan="7" class="empty">ບໍ່ມີ</td></tr>`}</tbody></table></div></section></div>`;
   const byId = (id) => list.find((e) => e.id === id);
-  $("#tnew").onclick = () => tEntryForm(null, renderTab);
+  $("#tnew").onclick = () => tEntryForm(null, refreshTab);
   $("#tlnk").onclick = tLinks; $("#tpay").onclick = tPullPay;
-  $("#tvf").onchange = () => { S.cache.tveh = $("#tvf").value; renderTab(); };
-  $$("[data-tf]").forEach((b) => b.onclick = () => { S.cache.tf = b.dataset.tf; renderTab(); });
-  $$("[data-wk]").forEach((b) => b.onclick = () => { S.cache.twk = b.dataset.wk; renderTab(); });
+  $("#tvf").onchange = () => { S.cache.tveh = $("#tvf").value; refreshTab(); };
+  $$("[data-tf]").forEach((b) => b.onclick = () => { S.cache.tf = b.dataset.tf; refreshTab(); });
+  $$("[data-wk]").forEach((b) => b.onclick = () => { S.cache.twk = b.dataset.wk; refreshTab(); });
   const wLabel = `${dmy(wk[0])} – ${dmy(wk[1])}`, stamp = () => ({ at: T.today || curDate() });
   $$("[data-wpay]").forEach((b) => b.onclick = () => { const o = ws.find((x) => x.nick === b.dataset.wpay);
     dialog({ title: `ຈ່າຍ ${o.nick} ${fmt(o.ap)} ₭?`, ok: "ຈ່າຍແລ້ວ", body: `<p class="sm">ອາທິດ ${esc(wLabel)}${paidOf(o.nick) ? ` · ເຄີຍຈ່າຍ ${fmt(paidOf(o.nick).amt)} ₭ → ຈ່າຍເພີ່ມ <b>${fmt(due(o))} ₭</b>` : ""}</p>`,
-      onOk: async () => { await tSetPaid(p.start, wk[0], { [o.nick]: { amt: o.ap, ...stamp() } }); toast("ບັນທຶກການຈ່າຍແລ້ວ"); renderTab(); } }); });
+      onOk: async () => { await tSetPaid(p.start, wk[0], { [o.nick]: { amt: o.ap, ...stamp() } }); toast("ບັນທຶກການຈ່າຍແລ້ວ"); refreshTab(); } }); });
   $$("[data-wun]").forEach((b) => b.onclick = () => dialog({ title: `ຍົກເລີກການຈ່າຍຂອງ ${b.dataset.wun}?`, danger: true, ok: "ຍົກເລີກການຈ່າຍ", body: `<p class="sm">ອາທິດ ${esc(wLabel)} ຈະກັບເປັນ "ຍັງບໍ່ຈ່າຍ"</p>`,
-    onOk: async () => { await tSetPaid(p.start, wk[0], { [b.dataset.wun]: null }); toast("ຍົກເລີກແລ້ວ"); renderTab(); } }));
+    onOk: async () => { await tSetPaid(p.start, wk[0], { [b.dataset.wun]: null }); toast("ຍົກເລີກແລ້ວ"); refreshTab(); } }));
   $("#wall") && ($("#wall").onclick = () => dialog({ title: `ຈ່າຍ ${owed.length} ຄົນ · ອາທິດ ${wLabel}?`, ok: "ຈ່າຍແລ້ວທັງໝົດ",
     body: `<div class="grid" style="gap:4px">${owed.map((o) => `<div class="row sm" style="justify-content:space-between"><span>${esc(o.nick)}</span><b class="num">${fmt(due(o))} ₭</b></div>`).join("")}</div>`,
-    onOk: async () => { await tSetPaid(p.start, wk[0], Object.fromEntries(owed.map((o) => [o.nick, { amt: o.ap, ...stamp() }]))); toast(`ບັນທຶກການຈ່າຍ ${owed.length} ຄົນ`); renderTab(); } }));
+    onOk: async () => { await tSetPaid(p.start, wk[0], Object.fromEntries(owed.map((o) => [o.nick, { amt: o.ap, ...stamp() }]))); toast(`ບັນທຶກການຈ່າຍ ${owed.length} ຄົນ`); refreshTab(); } }));
   $$("[data-wgrp]").forEach((c) => c.onchange = async () => {
     const n = c.dataset.wgrp, set = new Set(T.cfg.weeklyPay || []); c.checked ? set.add(n) : set.delete(n);
     c.disabled = true;
-    try { const j = await tapi("config.save", { config: { ...T.cfg, weeklyPay: [...set] } }); T.cfg = j.config; renderTab(); } catch (x) { c.checked = !c.checked; c.disabled = false; fail(x); }
+    try { const j = await tapi("config.save", { config: { ...T.cfg, weeklyPay: [...set] } }); T.cfg = j.config; refreshTab(); } catch (x) { c.checked = !c.checked; c.disabled = false; fail(x); }
   });
-  $$("[data-te]").forEach((b) => b.onclick = () => tEntryForm(byId(b.dataset.te), renderTab));
+  $$("[data-te]").forEach((b) => b.onclick = () => tEntryForm(byId(b.dataset.te), refreshTab));
   $$("[data-tt]").forEach((b) => b.onclick = async () => {
     const e = byId(b.dataset.tt); if (e.status !== "approved" && noCrew(e)) return toast("ເລືອກທີມກ່ອນອະນຸມັດ (ກົດ ແກ້ໄຂ)", true);
-    b.disabled = true; try { await tapi("approve", { ids: [e.id], status: e.status === "approved" ? "pending" : "approved" }); renderTab(); } catch (x) { b.disabled = false; fail(x); }
+    b.disabled = true; try { await tapi("approve", { ids: [e.id], status: e.status === "approved" ? "pending" : "approved" }); refreshTab(); } catch (x) { b.disabled = false; fail(x); }
   });
   $("#tapv").onclick = () => dialog({ title: `ອະນຸມັດ ${pendOk.length} ລາຍງານ?`, ok: "ອະນຸມັດ", body: `<p class="sm">ລວມ <b>${fmt(sum(pendOk))} ₭</b>. ລາຍງານທີ່ບໍ່ມີທີມ (${pend.length - pendOk.length}) ຈະບໍ່ຖືກອະນຸມັດ.</p>`,
-    onOk: async () => { const j = await tapi("approve", { ids: pendOk.map((e) => e.id) }); toast(`ອະນຸມັດ ${j.entries.length} ລາຍງານ`); renderTab(); } });
+    onOk: async () => { const j = await tapi("approve", { ids: pendOk.map((e) => e.id) }); toast(`ອະນຸມັດ ${j.entries.length} ລາຍງານ`); refreshTab(); } });
 }
 async function tLinks() {
   try {
