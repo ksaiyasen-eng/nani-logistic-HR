@@ -960,7 +960,7 @@ async function tabPay(m) {
   const r = rows.find((x) => x.emp_id === sel);
   if (!r) { m.innerHTML = `<div class="empty">ບໍ່ມີພະນັກງານໃນພະແນກນີ້</div>`; return; }
   const fld = (f) => hide[f] ? "" : `<label>${esc(F[f])}<input class="cell" style="width:100%" data-f="${f}" value="${esc(r[f] ?? "")}" inputmode="decimal" ${r.locked ? "disabled" : ""}></label>`;
-  m.innerHTML = `<div class="grid" style="gap:12px"><div class="row"><select id="pe" style="max-width:360px">${rows.map((x) => `<option value="${esc(x.emp_id)}" ${x.emp_id === sel ? "selected" : ""}>${esc(x.emp_code)} · ${esc(x.name)}</option>`).join("")}</select><span style="flex:1"></span>${r.locked ? `<span class="pill p-bad">ປິດເດືອນແລ້ວ</span>` : ""}${hide.driver_pay || r.locked ? "" : `<button id="pdr">ດຶງເງິນໂຊເຟີ</button>`}<button id="pp" class="pri">ພິມສະລິບ</button></div>
+  m.innerHTML = `<div class="grid" style="gap:12px"><div class="row"><select id="pe" style="max-width:360px">${rows.map((x) => `<option value="${esc(x.emp_id)}" ${x.emp_id === sel ? "selected" : ""}>${esc(x.emp_code)} · ${esc(x.name)}</option>`).join("")}</select><span style="flex:1"></span>${r.locked ? `<span class="pill p-bad">ປິດເດືອນແລ້ວ</span>` : ""}${hide.driver_pay || r.locked ? "" : `<button id="pdr">ດຶງເງິນໂຊເຟີ</button>`}${r.locked ? "" : `<button id="pml">🍚 ຕັ້ງຄ່າອາຫານ</button>`}<button id="pp" class="pri">ພິມສະລິບ</button></div>
     <div data-row="${esc(r.emp_id)}" class="grid g2">
       <section class="card grid" style="gap:8px"><h3>ລາຍຮັບ</h3>${PAY_INC.map(fld).join("")}</section>
       <section class="card grid" style="gap:8px"><h3>ຫັກກ່ອນອາກອນ</h3>${PAY_DED.map(fld).join("")}<h3>ຫັກຫຼັງອາກອນ</h3>${PAY_POST.map(fld).join("")}<label>${F.note}<input class="cell" style="width:100%;text-align:left" data-f="note" value="${esc(r.note ?? "")}" ${r.locked ? "disabled" : ""}></label></section>
@@ -970,6 +970,29 @@ async function tabPay(m) {
   $("#pe").onchange = () => { S.cache.payEmp = $("#pe").value; renderTab(); };
   $("#pp").onclick = () => printPayslips([r], S.month);
   $("#pdr") && ($("#pdr").onclick = tPullPay);
+  $("#pml") && ($("#pml").onclick = () => mealDialog(j));
+}
+// HR ticks who gets meal allowance (head office); ticked = meal rate (+ optionally no morning/no-absence bonus), unticked = no meal
+function mealDialog(j) {
+  const rows = j.rows.filter((r) => !r.locked);
+  dialog({ title: "🍚 ຕັ້ງຄ່າອາຫານ · " + monthLabel(S.month), ok: "ບັນທຶກ", body: `
+    <label>ຄ່າອາຫານ (₭/ເດືອນ)<input type="number" id="ml_a" value="${esc(rows.find((r) => num(r.meal_allowance))?.meal_allowance || 500000)}"></label>
+    <label style="display:flex;gap:8px;align-items:center;color:var(--ink);margin:8px 0"><input type="checkbox" id="ml_b" checked style="width:auto;min-height:0"> ຄົນທີ່ຕິກ: ເງິນມາເຊົ້າ ແລະ ໂບນັດບໍ່ຂາດງານ = 0</label>
+    <p class="sm mut">ຕິກຄົນທີ່ໄດ້ຄ່າອາຫານ (ສຳນັກງານໃຫຍ່). ຄົນທີ່ບໍ່ຕິກ ຈະບໍ່ໄດ້ຄ່າອາຫານ</p>
+    <div class="grid" style="gap:6px;max-height:50vh;overflow:auto">${rows.map((r) => `<label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" data-ml="${esc(r.emp_id)}" ${num(r.meal_allowance) ? "checked" : ""} style="width:auto;min-height:0"> ${esc(r.emp_code)} · ${esc(r.name)} <span class="xs mut">${esc(r.position || "")}</span></label>`).join("")}</div>`,
+    onOk: async (d) => {
+      const amt = num($("#ml_a", d).value), zero = $("#ml_b", d).checked;
+      if (amt <= 0) throw new Error("ໃສ່ຈຳນວນຄ່າອາຫານ");
+      let n = 0;
+      for (const c of $$("[data-ml]", d)) {
+        const r = rows.find((x) => x.emp_id === c.dataset.ml), patch = {};
+        if (c.checked) { if (num(r.meal_allowance) !== amt) patch.meal_allowance = amt; if (zero) { if (num(r.morning_bonus)) patch.morning_bonus = 0; if (num(r.no_absence_bonus)) patch.no_absence_bonus = 0; } }
+        else if (num(r.meal_allowance)) patch.meal_allowance = 0;
+        if (!Object.keys(patch).length) continue;
+        await api("monthSave", { month: S.month, emp_id: r.emp_id, version: r.version, patch }); n++;
+      }
+      toast(`ອັບເດດ ${n} ຄົນ`); refreshTab();
+    } });
 }
 
 /* ---------- Staff Hub: ລິ້ງວຽກ · ເອກະສານ · ຈ່າຍປະຈຳ · JD (PIN ພະແນກ, ຂໍ້ມູນຢູ່ edge function `api` + Drive) ---------- */
