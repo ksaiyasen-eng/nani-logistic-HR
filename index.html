@@ -107,6 +107,7 @@ tr:last-child td{border-bottom:0}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));gap:12px}
 .tile{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:18px;min-height:110px;display:grid;place-items:center;gap:4px;padding:12px;font-weight:600}
 .tile .e{font-size:42px;line-height:1}
+.et .ep{display:flex;gap:10px;align-items:center;min-width:200px}.et .ep .b{white-space:nowrap}.et td.sm{white-space:nowrap}.et button{white-space:nowrap}.ib{min-width:36px;padding-inline:8px}
 .ann{border:1px solid var(--line);border-left:6px solid var(--pri);border-radius:14px;padding:12px;display:grid;gap:6px}.ann.urg{border-left-color:var(--acc);background:var(--acc2)}.ann .bd{white-space:pre-wrap;overflow-wrap:anywhere}.ack{min-height:56px;font-size:20px;font-weight:700;background:#16A34A;color:#fff;border:0;border-radius:14px}
 .ic{position:relative;display:inline-block;width:52px;height:52px;flex:none}.ic svg{width:52px;height:52px}
 .ic i{position:absolute;right:-4px;top:-4px;font-style:normal;font-size:18px;line-height:1}
@@ -753,17 +754,19 @@ async function tabEmps(m) {
   const q = S.cache.q || "";
   const list = j.employees.filter(inDept).filter((e) => !q || (e.name + " " + e.emp_code).toLowerCase().includes(q.toLowerCase()));
   const nameCode = j.employees.filter((e) => e.emp_code.trim() === e.name.trim());
+  const pay = isAdmin(), multiDept = !S.dept && new Set(list.map((e) => e.dept || "")).size > 1;
   m.innerHTML = `<div class="grid" style="gap:12px">
     <div class="row"><input id="q" placeholder="ຄົ້ນຫາຊື່/ລະຫັດ" value="${esc(q)}" style="max-width:260px"><span style="flex:1"></span>
       <button id="ae" class="pri">+ ເພີ່ມພະນັກງານ</button><button id="ic">ນຳເຂົ້າ CSV</button><button id="xc">ສົ່ງອອກ CSV</button><button id="tc">ແມ່ແບບ CSV</button><button id="bp">ສ້າງ PIN ທີ່ຍັງບໍ່ມີ</button></div>
     ${nameCode.length ? `<div class="warn-box">${nameCode.length} ຄົນໃຊ້ຊື່ເປັນລະຫັດ — ກະລຸນາແກ້ເປັນລະຫັດພະນັກງານແທ້</div>` : ""}
-    <div class="tw"><table><thead><tr><th>ລະຫັດ</th><th>ຊື່</th><th>ພະແນກ</th><th>ຕຳແໜ່ງ</th><th class="num">ເງິນເດືອນ</th><th class="num">ຖານ ປສ</th><th class="num">ຝາກທີມ</th><th>ບັນຊີ</th><th>ຫົວໜ້າ</th><th>PIN</th><th></th></tr></thead>
-    <tbody>${list.length ? list.map((e) => `<tr style="${e.active ? "" : "opacity:.5"}"><td>${esc(e.emp_code)}</td><td class="b">${esc(e.name)}</td><td>${esc(e.dept)}</td><td>${esc(e.position)}</td>
-      <td class="num">${fmt(e.base_salary)}</td><td class="num">${fmt(e.sso_base)}</td><td class="num">${fmt(e.team_deposit)}</td>
-      <td class="sm">${esc(e.bank)} <span data-acc="${esc(e.id)}">${esc(e.account_no || "—")}</span>${e.has_account ? ` <button class="sm" data-rev="${esc(e.id)}">ສະແດງ</button>` : ""}</td>
-      <td class="sm">${esc(e.approver_name || "—")}${e.delegate_name ? `<div class="xs mut">ແທນ: ${esc(e.delegate_name)} ຮອດ ${esc(dmy(e.delegate_until))}</div>` : ""}</td>
-      <td>${e.has_pin ? `<span class="pill p-ok">ມີ</span>` : `<span class="pill">ບໍ່ມີ</span>`}</td>
-      <td style="white-space:nowrap"><button class="sm" data-pf="${esc(e.id)}">ຂໍ້ມູນສ່ວນຕົວ</button> <button class="sm" data-ed="${esc(e.id)}">ແກ້ໄຂ</button><button class="sm" data-ap="${esc(e.id)}">ຫົວໜ້າ</button> <button class="sm" data-pin="${esc(e.id)}">PIN</button> <button class="sm" data-rv="${esc(e.id)}">ຖອນເຄື່ອງ</button></td></tr>`).join("") : `<tr><td colspan="11" class="empty">ຍັງບໍ່ມີພະນັກງານ — ກົດ "ນຳເຂົ້າ CSV" ຫຼື "+ ເພີ່ມພະນັກງານ"</td></tr>`}</tbody></table></div></div>`;
+    <div class="mut sm">${list.length} ຄົນ</div>
+    <div class="tw"><table class="et"><thead><tr><th>ພະນັກງານ</th>${pay ? `<th class="num">ເງິນເດືອນ</th>` : ""}<th>ບັນຊີ</th><th>PIN</th><th></th></tr></thead>
+    <tbody>${list.length ? list.map((e) => `<tr style="${e.active ? "" : "opacity:.5"}">
+      <td><div class="ep">${avatar(S.cache.photos?.[e.id], e.name, 38)}<div><div class="b">${esc(e.name)}${e.active ? "" : ` <span class="pill">ອອກແລ້ວ</span>`}</div><div class="xs mut">${esc(e.emp_code)} · ${esc(e.position || "—")}${multiDept ? ` · ${esc(e.dept || "")}` : ""}</div><div class="xs mut">👔 ${esc(e.approver_name || "ບໍ່ມີຫົວໜ້າ")}${e.delegate_name ? ` · ແທນ: ${esc(e.delegate_name)} ຮອດ ${esc(dmy(e.delegate_until))}` : ""}</div></div></div></td>
+      ${pay ? `<td class="num"><div class="b">${fmt(e.base_salary)}</div><div class="xs mut">ປສ ${fmt(e.sso_base)} · ທີມ ${fmt(e.team_deposit)}</div></td>` : ""}
+      <td class="sm">${esc(e.bank)} <span data-acc="${esc(e.id)}">${esc(e.account_no || "—")}</span>${e.has_account && pay ? ` <button class="sm ib" data-rev="${esc(e.id)}" title="ສະແດງເລກບັນຊີເຕັມ" aria-label="ສະແດງເລກບັນຊີເຕັມ">👁</button>` : ""}</td>
+      <td>${e.has_pin ? `<span class="pill p-ok">✓ ມີ</span>` : `<span class="pill p-warn">ບໍ່ມີ</span>`}</td>
+      <td><div class="row" style="gap:6px;flex-wrap:nowrap;justify-content:flex-end"><button class="sm" data-ed="${esc(e.id)}">✏️ ແກ້ໄຂ</button><button class="sm" data-pf="${esc(e.id)}">👤 ຂໍ້ມູນ</button><button class="sm ib" data-more="${esc(e.id)}" title="ອື່ນໆ" aria-label="ອື່ນໆ: ຫົວໜ້າ, PIN, ຖອນເຄື່ອງ">⋯</button></div></td></tr>`).join("") : `<tr><td colspan="5" class="empty">ຍັງບໍ່ມີພະນັກງານ — ກົດ "ນຳເຂົ້າ CSV" ຫຼື "+ ເພີ່ມພະນັກງານ"</td></tr>`}</tbody></table></div></div>`;
   $("#q").oninput = debounce(() => { S.cache.q = $("#q").value; const p = $("#q").selectionStart; tabEmps(m).then(() => { const i = $("#q"); i.focus(); i.setSelectionRange(p, p); }); }, 400);
   $("#ae").onclick = () => empForm(null);
   $("#ic").onclick = () => csvImport("emp");
@@ -774,10 +777,16 @@ async function tabEmps(m) {
   $$("[data-rev]").forEach((b) => b.onclick = async () => { try { const r = await api("empReveal", { id: b.dataset.rev }); $(`[data-acc="${b.dataset.rev}"]`).textContent = r.account_no; b.remove(); } catch (e) { fail(e); } });
   $$("[data-ed]").forEach((b) => b.onclick = () => empForm(empById(b.dataset.ed)));
   $$("[data-pf]").forEach((b) => b.onclick = () => profileView(empById(b.dataset.pf)));
-  $$("[data-ap]").forEach((b) => b.onclick = () => approverForm(empById(b.dataset.ap)));
-  $$("[data-pin]").forEach((b) => b.onclick = () => dialog({ title: "ຕັ້ງ PIN ໃໝ່", ok: "ສ້າງ PIN ໃໝ່", danger: true, body: `<p>PIN ເກົ່າ ແລະ ທຸກເຄື່ອງທີ່ຈື່ໄວ້ຂອງ <b>${esc(empById(b.dataset.pin).name)}</b> ຈະໃຊ້ບໍ່ໄດ້ທັນທີ.</p>`,
+  $$("[data-more]").forEach((b) => b.onclick = () => { const e = empById(b.dataset.more);
+    dialog({ title: e.name, ok: "", cancel: "ປິດ", body: `<div class="grid" style="gap:8px"><button data-ap="${esc(e.id)}">👔 ຕັ້ງຫົວໜ້າຜູ້ອະນຸມັດລາ</button><button data-pin="${esc(e.id)}">🔑 ຕັ້ງ PIN ໃໝ່</button><button data-rv="${esc(e.id)}">📵 ຖອນທຸກເຄື່ອງ</button></div>` });
+    bindEmpActions($("#dlgB")); });
+  bindEmpActions(m);
+}
+function bindEmpActions(root) {
+  $$("[data-ap]", root).forEach((b) => b.onclick = () => approverForm(empById(b.dataset.ap)));
+  $$("[data-pin]", root).forEach((b) => b.onclick = () => dialog({ title: "ຕັ້ງ PIN ໃໝ່", ok: "ສ້າງ PIN ໃໝ່", danger: true, body: `<p>PIN ເກົ່າ ແລະ ທຸກເຄື່ອງທີ່ຈື່ໄວ້ຂອງ <b>${esc(empById(b.dataset.pin).name)}</b> ຈະໃຊ້ບໍ່ໄດ້ທັນທີ.</p>`,
     onOk: async () => { const r = await api("setPin", { id: b.dataset.pin }); showPins([r]); return false; } }));
-  $$("[data-rv]").forEach((b) => b.onclick = () => dialog({ title: "ຖອນທຸກເຄື່ອງ", ok: "ຖອນ", danger: true, body: `<p>${esc(empById(b.dataset.rv).name)} ຈະຕ້ອງເຂົ້າລະບົບໃໝ່ດ້ວຍ PIN ໃນທຸກເຄື່ອງ.</p>`, onOk: async () => { await api("revokeDevices", { id: b.dataset.rv }); toast("ຖອນແລ້ວ"); } }));
+  $$("[data-rv]", root).forEach((b) => b.onclick = () => dialog({ title: "ຖອນທຸກເຄື່ອງ", ok: "ຖອນ", danger: true, body: `<p>${esc(empById(b.dataset.rv).name)} ຈະຕ້ອງເຂົ້າລະບົບໃໝ່ດ້ວຍ PIN ໃນທຸກເຄື່ອງ.</p>`, onOk: async () => { await api("revokeDevices", { id: b.dataset.rv }); toast("ຖອນແລ້ວ"); } }));
 }
 function showPins(pins) {
   $("#dlgB").innerHTML = `<div class="warn-box">ສະແດງຄັ້ງດຽວ — ປິດໜ້າຕ່າງນີ້ແລ້ວຈະເບິ່ງອີກບໍ່ໄດ້</div>${pins.length ? `<div class="tw" style="margin-top:10px"><table><thead><tr><th>ລະຫັດ</th><th>ຊື່</th><th>PIN_ແຈກ</th></tr></thead><tbody>${pins.map((p) => `<tr><td>${esc(p.emp_code)}</td><td>${esc(p.name)}</td><td class="b" style="font-size:18px;letter-spacing:2px">${esc(p.pin)}</td></tr>`).join("")}</tbody></table></div>` : `<p>ທຸກຄົນມີ PIN ແລ້ວ</p>`}`;
