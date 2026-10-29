@@ -1828,15 +1828,79 @@ async function tabSummary(m) {
   const j = await loadMonth(); if (!j.rows.length) return openMonthBtn(m);
   const rows = j.rows.filter(inDept); const locked = j.rows.some((r) => r.locked);
   const tot = (f) => rows.reduce((a, r) => a + num(f(r)), 0);
-  m.innerHTML = `<div class="grid" style="gap:12px"><div class="row"><h2 style="flex:1">ສະຫຼຸບ ${esc(monthLabel(S.month))}</h2>${locked ? `<span class="pill p-bad">ປິດເດືອນແລ້ວ</span><button id="ul">ປົດລັອກ</button>` : `<button id="lk" class="pri">ປິດເດືອນ</button>`}<button id="sx">ສົ່ງອອກ CSV</button><button id="sp">ພິມສະລິບທັງໝົດ${S.dept ? " (" + esc(S.dept) + ")" : ""}</button></div>
+  m.innerHTML = `<div class="grid" style="gap:12px"><div class="row"><h2 style="flex:1">ສະຫຼຸບ ${esc(monthLabel(S.month))}</h2>${locked ? `<span class="pill p-bad">ປິດເດືອນແລ້ວ</span><button id="ul">ປົດລັອກ</button>` : `<button id="lk" class="pri">ປິດເດືອນ</button>`}<button id="sac">${S.cache.acc ? "🔒 ເຊື່ອງເລກບັນຊີ" : "🔓 ສະແດງເລກບັນຊີ"}</button><button id="sxl" class="pri">📊 ສົ່ງອອກ Excel</button><button id="sx">ສົ່ງອອກ CSV</button><button id="sp">ພິມສະລິບທັງໝົດ${S.dept ? " (" + esc(S.dept) + ")" : ""}</button></div>
     <div class="tw"><table><thead><tr><th>ລະຫັດ</th><th>ຊື່</th><th class="num">ລາຍຮັບ</th><th class="num">ຫັກກ່ອນອາກອນ</th><th class="num">ອາກອນ</th><th class="num">ຫັກຫຼັງອາກອນ</th><th class="num">ສຸດທິ</th><th>ບັນຊີ</th></tr></thead><tbody>
-    ${rows.map((r) => `<tr><td>${esc(r.emp_code)}</td><td>${esc(r.name)}</td><td class="num">${fmt(r.computed.income)}</td><td class="num">${fmt(r.computed.preTax)}</td><td class="num">${fmt(r.computed.tax)}</td><td class="num">${fmt(r.computed.postTax)}</td><td class="num b">${fmt(r.computed.net)}</td><td class="sm">${esc(r.bank)} ${esc(r.account_no || "—")}</td></tr>`).join("")}
+    ${rows.map((r) => `<tr><td>${esc(r.emp_code)}</td><td>${esc(r.name)}</td><td class="num">${fmt(r.computed.income)}</td><td class="num">${fmt(r.computed.preTax)}</td><td class="num">${fmt(r.computed.tax)}</td><td class="num">${fmt(r.computed.postTax)}</td><td class="num b">${fmt(r.computed.net)}</td><td class="sm" style="white-space:nowrap">${esc(r.bank)} ${S.cache.acc?.[r.emp_id] ? `<b class="num">${esc(S.cache.acc[r.emp_id])}</b> <button class="sm" data-cp="${esc(S.cache.acc[r.emp_id])}" aria-label="ສຳເນົາເລກບັນຊີ">📋</button>` : esc(r.account_no || "—")}</td></tr>`).join("")}
     <tr class="b"><td colspan="2">ລວມ ${rows.length} ຄົນ</td><td class="num">${fmt(tot((r) => r.computed.income))}</td><td class="num">${fmt(tot((r) => r.computed.preTax))}</td><td class="num">${fmt(tot((r) => r.computed.tax))}</td><td class="num">${fmt(tot((r) => r.computed.postTax))}</td><td class="num">${fmt(tot((r) => r.computed.net))}</td><td></td></tr></tbody></table></div>
     <div class="mut xs">ພະນັກງານເບິ່ງສະລິບຂອງຕົນເອງໄດ້ຫຼັງປິດເດືອນເທົ່ານັ້ນ. ປິດເດືອນ = ລັອກຕົວເລກ ແລະ ເກັບຜົນຄິດໄລ່ໄວ້.</div></div>`;
   $("#sx").onclick = () => downloadCSV(`payroll-${S.month}.csv`, [["ເດືອນ", "ລະຫັດ", "ຊື່", "ພະແນກ", ...Object.values(F), "ລາຍຮັບລວມ", "ຫັກກ່ອນອາກອນ", "ອາກອນ", "ຫັກຫຼັງອາກອນ", "ສຸດທິ"], ...rows.map((r) => [S.month, r.emp_code, r.name, r.dept, ...Object.keys(F).map((k) => r[k] ?? ""), r.computed.income, r.computed.preTax, Math.round(r.computed.tax), r.computed.postTax, Math.round(r.computed.net)])]);
   $("#sp").onclick = () => printPayslips(rows, S.month);
+  // full account numbers: fetched via empReveal (admin only, each one written to audit), kept in memory for this session only
+  const reveal = async () => { const acc = { ...(S.cache.acc || {}) };
+    for (const r of rows.filter((x) => x.has_account && !acc[x.emp_id])) acc[r.emp_id] = (await api("empReveal", { id: r.emp_id })).account_no;
+    S.cache.acc = acc; };
+  const warn = `<p class="sm">ລະບົບຈະບັນທຶກໃນ audit ວ່າແອດມິນເປີດເລກບັນຊີຂອງ ${rows.length} ຄົນ. ຢ່າຖ່າຍຮູບໜ້າຈໍ ຫຼື ສົ່ງຕໍ່ໃຫ້ຄົນອື່ນ.</p>`;
+  $("#sac").onclick = () => S.cache.acc ? (delete S.cache.acc, refreshTab())
+    : dialog({ title: "ສະແດງເລກບັນຊີເຕັມ?", ok: "ສະແດງ", body: warn, onOk: async () => { await reveal(); refreshTab(); } });
+  $$("[data-cp]").forEach((b) => b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.cp); toast("ສຳເນົາແລ້ວ " + b.dataset.cp); } catch { toast("ສຳເນົາບໍ່ໄດ້ — ເລືອກຕົວເລກແລ້ວສຳເນົາເອງ", true); } });
+  $("#sxl").onclick = () => dialog({ title: `ສົ່ງອອກ Excel · ${monthLabel(S.month)}`, ok: "ດາວໂຫຼດ", body: warn + `<div class="warn-box">ໄຟລ໌ມີເລກບັນຊີເຕັມ ແລະ ເງິນເດືອນ — ເກັບໄວ້ບ່ອນປອດໄພ, ລຶບຖິ້ມຫຼັງໂອນເງິນແລ້ວ</div>`,
+    onOk: async () => { await reveal(); await payrollXlsx(rows, S.month, S.cache.acc); refreshTab(); } });
   $("#lk") && ($("#lk").onclick = () => dialog({ title: "ປິດເດືອນ " + monthLabel(S.month), ok: "ປິດເດືອນ", body: `<p>ຈະແກ້ໄຂຕົວເລກເດືອນນີ້ບໍ່ໄດ້ ຈົນກວ່າຈະປົດລັອກ (ຕ້ອງມີເຫດຜົນ). ພະນັກງານຈະເຫັນສະລິບ.</p>`, onOk: async () => { await api("monthLock", { month: S.month, lock: true }); toast("ປິດເດືອນແລ້ວ"); renderTab(); } }));
   $("#ul") && ($("#ul").onclick = () => dialog({ title: "ປົດລັອກເດືອນ", danger: true, ok: "ປົດລັອກ", body: `<label>ເຫດຜົນ (ບັງຄັບ, ບັນທຶກ audit)<input id="ur"></label>`, onOk: async (r) => { await api("monthLock", { month: S.month, lock: false, reason: val(r, "ur") }); toast("ປົດລັອກແລ້ວ"); renderTab(); } }));
+}
+
+// minimal .xlsx writer (zip "stored" + inline strings): no outside script, so the page's strict CSP stays as is
+const CRC_T = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
+const crc32 = (b) => { let c = -1; for (const x of b) c = CRC_T[(c ^ x) & 255] ^ (c >>> 8); return (c ^ -1) >>> 0; };
+function zipStore(files) {
+  const enc = new TextEncoder(), out = [], cen = []; let off = 0;
+  for (const [name, text] of files) {
+    const n = enc.encode(name), d = enc.encode(text), c = crc32(d);
+    const h = new DataView(new ArrayBuffer(30)); h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true);
+    h.setUint32(14, c, true); h.setUint32(18, d.length, true); h.setUint32(22, d.length, true); h.setUint16(26, n.length, true);
+    out.push(new Uint8Array(h.buffer), n, d);
+    const z = new DataView(new ArrayBuffer(46)); z.setUint32(0, 0x02014b50, true); z.setUint16(4, 20, true); z.setUint16(6, 20, true); z.setUint16(8, 0x0800, true);
+    z.setUint32(16, c, true); z.setUint32(20, d.length, true); z.setUint32(24, d.length, true); z.setUint16(28, n.length, true); z.setUint32(42, off, true);
+    cen.push(new Uint8Array(z.buffer), n); off += 30 + n.length + d.length;
+  }
+  const size = cen.reduce((a, x) => a + x.length, 0), e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, size, true); e.setUint32(16, off, true);
+  return new Blob([...out, ...cen, new Uint8Array(e.buffer)], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+}
+// sheets: [{ name, cols: [widths], rows: [[cell]] }], cell = { t: "s"|"n", v, money?, bold? }
+function xlsxBlob(sheets) {
+  const x = (v) => String(v ?? "").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const col = (i) => (i >= 26 ? col(Math.floor(i / 26) - 1) : "") + String.fromCharCode(65 + (i % 26));
+  const NS = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"', RNS = 'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
+  const sheetXml = (sh) => `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet ${NS}><cols>${sh.cols.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join("")}</cols><sheetData>${
+    sh.rows.map((r, ri) => `<row r="${ri + 1}">${r.map((c, ci) => { const ref = col(ci) + (ri + 1), st = c.bold ? ' s="2"' : c.money ? ' s="1"' : "";
+      return c.t === "n" ? `<c r="${ref}"${st}><v>${Number(c.v) || 0}</v></c>` : `<c r="${ref}"${st} t="inlineStr"><is><t xml:space="preserve">${x(c.v)}</t></is></c>`; }).join("")}</row>`).join("")}</sheetData></worksheet>`;
+  const files = [
+    ["[Content_Types].xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join("")}</Types>`],
+    ["_rels/.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`],
+    ["xl/workbook.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook ${NS} ${RNS}><sheets>${sheets.map((sh, i) => `<sheet name="${x(sh.name).slice(0, 31)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join("")}</sheets></workbook>`],
+    ["xl/_rels/workbook.xml.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((_, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join("")}<Relationship Id="rId${sheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`],
+    ["xl/styles.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet ${NS}><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="3" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`],
+    ...sheets.map((sh, i) => [`xl/worksheets/sheet${i + 1}.xml`, sheetXml(sh)]),
+  ];
+  return zipStore(files);
+}
+function payrollSheets(rows, acc) {
+  const money = (v) => ({ t: "n", v: Math.round(num(v)), money: true });
+  const text = (v) => ({ t: "s", v }); // account numbers stay text: no 1.2E+15, no lost leading zeros
+  const head = (a) => a.map((v) => ({ t: "s", v, bold: true }));
+  return [
+    { name: "ຈ່າຍເງິນເດືອນ", cols: [6, 15, 26, 18, 9, 26, 22, 14], rows: [head(["ລຳດັບ", "ລະຫັດ", "ຊື່", "ພະແນກ", "ທະນາຄານ", "ຊື່ບັນຊີ", "ເລກບັນຊີ", "ສຸດທິ (₭)"]),
+      ...rows.map((r, i) => [{ t: "n", v: i + 1 }, text(r.emp_code), text(r.name), text(r.dept), text(r.bank), text(r.account_name || r.name), text(acc?.[r.emp_id] || ""), money(r.computed.net)]),
+      [text(""), text(""), { t: "s", v: `ລວມ ${rows.length} ຄົນ`, bold: true }, text(""), text(""), text(""), text(""), money(rows.reduce((a, r) => a + num(r.computed.net), 0))]] },
+    { name: "ລາຍລະອຽດ", cols: [15, 26, 18, ...Object.keys(F).map(() => 14), 14, 14, 14, 14, 14], rows: [head(["ລະຫັດ", "ຊື່", "ພະແນກ", ...Object.values(F), "ລາຍຮັບລວມ", "ຫັກກ່ອນອາກອນ", "ອາກອນ", "ຫັກຫຼັງອາກອນ", "ສຸດທິ"]),
+      ...rows.map((r) => [text(r.emp_code), text(r.name), text(r.dept), ...Object.keys(F).map((k) => typeof r[k] === "number" ? money(r[k]) : text(r[k])),
+        money(r.computed.income), money(r.computed.preTax), money(r.computed.tax), money(r.computed.postTax), money(r.computed.net)])] },
+  ];
+}
+function payrollXlsx(rows, month, acc) {
+  const a = document.createElement("a"); a.href = URL.createObjectURL(xlsxBlob(payrollSheets(rows, acc)));
+  a.download = `payroll-${month}${S.dept ? "-" + S.dept : ""}.xlsx`; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
 
 /* settings */
