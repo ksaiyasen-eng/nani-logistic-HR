@@ -48,6 +48,28 @@ th{text-align:left;font-weight:600;color:var(--mut);font-size:12px;padding:10px;
 td{padding:8px 10px;border-bottom:1px solid var(--line2);vertical-align:middle}
 tr:last-child td{border-bottom:0}
 .pill{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;background:var(--line2);color:var(--mut);white-space:nowrap}
+.org{overflow-x:auto;padding:4px 0 8px}
+.org ul{display:flex;justify-content:center;padding:22px 0 0;margin:0;position:relative}
+.org>ul{padding-top:0;min-width:max-content}
+.org li{list-style:none;position:relative;padding:22px 5px 0;display:flex;flex-direction:column;align-items:center}
+.org>ul>li{padding-top:0}
+.org li::before,.org li::after{content:"";position:absolute;top:0;right:50%;width:50%;height:22px;border-top:2px solid var(--line)}
+.org li::after{right:auto;left:50%;border-left:2px solid var(--line)}
+.org li:only-child::before,.org li:only-child::after{display:none}
+.org li:first-child::before,.org li:last-child::after{border:0}
+.org li:last-child::before{border-right:2px solid var(--line);border-radius:0 8px 0 0}
+.org li:first-child::after{border-radius:8px 0 0 0}
+.org>ul>li::before,.org>ul>li::after{display:none}
+.org ul ul::before{content:"";position:absolute;top:0;left:50%;height:22px;border-left:2px solid var(--line)}
+.org li:only-child{padding-top:22px}
+.oc{display:grid;gap:8px;justify-items:center;width:150px;min-height:0;height:auto;padding:12px 10px;border-radius:16px;border:1px solid var(--line);background:var(--card);text-align:center;font-weight:400}
+.oc b{font-size:13px;line-height:1.35}
+.oc.top{background:var(--pri2);border-color:var(--pri)}
+.oc.empty{border-style:dashed}
+.oc-ppl{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.oc-ppl>span{display:grid;justify-items:center;gap:2px;width:48px}
+.oc-ppl small{font-size:11px;max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+.oc-n{font-size:11px;color:var(--mut)}
 .tl-r{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
 .tl-s{border:1px solid var(--line);border-radius:10px;padding:4px 10px;font-size:12px;color:var(--mut);text-align:center;line-height:1.3;font-variant-numeric:tabular-nums}
 .tl-s b{display:block;font-size:14px;color:var(--ink)}.tl-s.on{border-color:var(--warn);background:var(--warn2)}.tl-s.on b{color:var(--warn)}
@@ -235,7 +257,7 @@ let pollT = null, pollBusy = false;
 
 function setNet(st) { const n = $("#net"); if (n) { n.className = "net " + st; n.lastChild.textContent = st === "off" ? " ອອບລາຍ" : st === "busy" ? " ກຳລັງໂຫຼດ" : " ເຊື່ອມຕໍ່ແລ້ວ"; } }
 // ອ່ານຢ່າງດຽວ = ລອງໃໝ່ໄດ້ 3 ຄັ້ງ; ຂຽນ = ບໍ່ລອງໃໝ່ ແລະ ຄຳຂໍທີ່ຄືກັນທຸກຢ່າງທີ່ກຳລັງສົ່ງຢູ່ (ກົດຊ້ຳ) ໃຊ້ຄຳຂໍດຽວກັນ
-const READ_ACTIONS = new Set(["me", "employees", "settingsGet", "holidays", "monthGet", "attendanceBoard", "attendanceFlags", "attendanceMonthAdmin", "myAttendance", "myLeaves", "leavesAdmin", "leaveDoc", "leaveAttachment", "leaveQuote", "approvals", "payslipMonths", "payslip", "welfare", "status", "importProposals", "auditLog", "boot", "entries", "payroll.get", "hr.links", "hr.driverPay", "listDocs", "myProfile", "empProfile"]);
+const READ_ACTIONS = new Set(["me", "employees", "settingsGet", "holidays", "monthGet", "attendanceBoard", "attendanceFlags", "attendanceMonthAdmin", "myAttendance", "myLeaves", "leavesAdmin", "leaveDoc", "leaveAttachment", "leaveQuote", "approvals", "payslipMonths", "payslip", "welfare", "status", "importProposals", "auditLog", "boot", "entries", "payroll.get", "hr.links", "hr.driverPay", "listDocs", "myProfile", "empProfile", "empPhotos"]);
 const inflight = new Map();
 function post(url, ct, body, read) {
   const key = url + body;
@@ -441,7 +463,7 @@ const PF = [["phone", "ເບີໂທ", "tel"], ["address", "ທີ່ຢູ່
   ["emergency_name", "ຜູ້ຕິດຕໍ່ສຸກເສີນ", "text"], ["emergency_relation", "ຄວາມສຳພັນ", "text"], ["emergency_phone", "ເບີໂທຜູ້ຕິດຕໍ່ສຸກເສີນ", "tel"], ["id_no", "ເລກບັດປະຈຳຕົວ / ໜັງສືຜ່ານແດນ", "text"]];
 const avatar = (src, name, size = 56) => src
   ? `<img src="${esc(src)}" alt="${esc(name)}" width="${size}" height="${size}" style="border-radius:50%;object-fit:cover;display:block">`
-  : `<div aria-hidden="true" style="width:${size}px;height:${size}px;border-radius:50%;background:var(--pri2);color:var(--pri);display:grid;place-items:center;font-weight:700;font-size:${Math.round(size / 2.4)}px">${esc(String(name || "?").trim().charAt(0))}</div>`;
+  : `<div aria-hidden="true" style="width:${size}px;height:${size}px;border-radius:50%;background:var(--pri2);color:var(--pri);display:grid;place-items:center;font-weight:700;font-size:${Math.round(size / 2.4)}px">${esc(String(name || "?").replace(/^\s*(ທ້າວ|ນາງ|ທ|ນ)\.?\s+/, "").trim().charAt(0) || "?")}</div>`; // skip the ທ./ນ. title so each circle shows a real initial
 const setAvatars = (photo, name) => { if ($("#pfav")) $("#pfav").innerHTML = avatar(photo, name); if ($("#hav")) $("#hav").innerHTML = avatar(photo, name, 48); };
 // ຫຍໍ້ຮູບເປັນ JPEG ≤ 320px ໃນເຄື່ອງ ກ່ອນສົ່ງ (ປະມານ 20–40 KB)
 async function photoData(file) {
@@ -1325,10 +1347,14 @@ async function tabJd(m) {
   await hubLoad(); const st = H.st, adm = hAdmin(), hrAdm = isAdmin(), pj = posJd();
   const positions = [...new Set([...(S.cache.settings?.positions || []), ...(S.cache.emps || []).filter((e) => e.active).map((e) => (e.position || "").trim())].filter(Boolean))];
   const unmapped = positions.filter((p) => !jdOfPos(p));
-  const parentOf = (j) => { const r = (j.reportsTo || "").trim(); if (!r) return null; const p = st.jds.find((x) => x.id !== j.id && x.title && (r === x.title || r.includes(x.title))); return p ? p.id : null; };
+  const parentOf = (j) => { const r = (j.reportsTo || "").trim(); if (!r) return null; const o = st.jds.filter((x) => x.id !== j.id && x.title), p = o.find((x) => r === x.title) || o.find((x) => r.includes(x.title)) || o.find((x) => x.title.includes(r)); return p ? p.id : null; };
   const kids = {}; st.jds.forEach((j) => { const p = parentOf(j) || "_root"; (kids[p] = kids[p] || []).push(j); });
-  const tree = (pid, depth) => (kids[pid] || []).map((j) => { const ppl = empsOfJd(j.id); return `<li style="display:grid;gap:6px"><button class="sm" data-tjd="${esc(j.id)}" style="justify-self:start;text-align:left;height:auto;padding:6px 12px;display:grid;gap:0"><span>${esc(j.title)}</span><span class="xs mut" style="font-weight:400">${ppl.length ? ppl.map((e) => esc(e.name)).join(", ") : "ຍັງບໍ່ມີຄົນ"}</span></button>
-    ${depth < 6 && kids[j.id] ? `<ul style="list-style:none;margin:0 0 0 12px;padding-left:14px;border-left:2px solid var(--line);display:grid;gap:6px">${tree(j.id, depth + 1)}</ul>` : ""}</li>`; }).join("");
+  const firstName = (n) => String(n || "").replace(/^\s*(ທ້າວ|ນາງ|ທ|ນ)\.?\s+/, "").split(/\s+/)[0];
+  const node = (j, depth) => { const ppl = empsOfJd(j.id);
+    return `<button type="button" class="oc ${depth ? "" : "top"} ${ppl.length ? "" : "empty"}" data-tjd="${esc(j.id)}"><b>${esc(j.title)}</b>
+      ${ppl.length ? `<span class="oc-ppl">${ppl.map((e) => `<span title="${esc(e.name)}">${avatar(S.cache.photos?.[e.id] || null, e.name, 44)}<small>${esc(firstName(e.name))}</small></span>`).join("")}</span>`
+        : `<small class="mut">👤 ຍັງບໍ່ມີຄົນ</small>`}<span class="oc-n">${ppl.length ? ppl.length + " ຄົນ" : ""}</span></button>`; };
+  const tree = (pid, depth) => (kids[pid] || []).map((j) => `<li>${node(j, depth)}${depth < 6 && kids[j.id] ? `<ul>${tree(j.id, depth + 1)}</ul>` : ""}</li>`).join("");
   const card = (j, i) => {
     const ppl = empsOfJd(j.id), dps = deptsOfJd(j.id), steps = st.workflow.map((w, k) => ({ w, k })).filter((x) => x.w.jdId === j.id), bl = (H.bills?.data.items || []).filter((x) => x.ownerJd === j.id && x.active !== false);
     return `<details id="jd-${esc(j.id)}" class="card" style="padding:0" ${H.open[j.id] ? "open" : ""} data-jdd="${esc(j.id)}">
@@ -1364,7 +1390,7 @@ async function tabJd(m) {
       <div class="row" style="justify-content:space-between"><span class="xs mut">ສີເຫຼືອງ = ລະບົບເດົາຈາກຊື່ຕຳແໜ່ງທີ່ກົງກັບຊື່ JD — ກວດແລ້ວກົດບັນທຶກ</span><button class="pri sm" data-pjs>ບັນທຶກການຜູກ</button></div></section>` : ""}
     ${st.settings.authority || st.settings.remark ? `<section class="card grid sm" style="gap:6px">${st.settings.authority ? `<div><b>ອຳນາດຕັດສິນໃຈ:</b> ${esc(st.settings.authority)}</div>` : ""}${st.settings.remark ? `<div class="mut">${esc(st.settings.remark)}</div>` : ""}</section>` : ""}
     <div class="grid g2" style="align-items:start">
-      <section class="card grid" style="gap:10px"><h3>ຜັງອົງກອນ</h3><ul style="list-style:none;margin:0;padding:0;display:grid;gap:6px">${tree("_root", 0) || `<li class="mut sm">ຍັງບໍ່ມີ JD</li>`}</ul><div class="xs mut">ສ້າງຈາກ "ລາຍງານຕໍ່" ຂອງແຕ່ລະ JD · ຊື່ຄົນມາຈາກ HR</div></section>
+      <section class="card grid" style="gap:10px;grid-column:1/-1"><h3>🏢 ຜັງອົງກອນ</h3><div class="org">${tree("_root", 0) ? `<ul>${tree("_root", 0)}</ul>` : `<div class="mut sm">ຍັງບໍ່ມີ JD</div>`}</div><div class="xs mut">ແຕະກ່ອງເພື່ອເບິ່ງ JD · ສ້າງຈາກ "ລາຍງານຕໍ່" ຂອງແຕ່ລະ JD · ຊື່ ແລະ ຮູບມາຈາກ HR · ເລື່ອນຊ້າຍ-ຂວາໄດ້ຖ້າຜັງກວ້າງ</div></section>
       <section class="card grid" style="gap:10px"><div class="row"><h3 style="flex:1">ຂັ້ນຕອນວຽກ</h3>${adm ? `<button class="sm" data-wadd>+ ຂັ້ນຕອນ</button>` : ""}</div>
         <ol class="sm" style="margin:0;padding-left:22px;display:grid;gap:8px">${st.workflow.map((w) => { const j = jdBy(w.jdId); return `<li><div class="row" style="gap:6px;align-items:flex-start;flex-wrap:nowrap"><div style="flex:1">${w.who ? `<b>${esc(w.who)}</b> — ` : ""}${esc(w.what)}${w.decision ? ` <span class="pill p-warn">ຈຸດຕັດສິນໃຈ</span>` : ""}${j ? ` <button class="sm" data-tjd="${esc(j.id)}">${esc(j.title)}</button>` : ""}</div>${adm ? `<button class="sm" data-wed="${esc(w.id)}">ແກ້</button>` : ""}</div></li>`; }).join("")}</ol>
         ${st.settings.workflowRule ? `<div class="xs mut">${esc(st.settings.workflowRule)}</div>` : ""}</section></div>
@@ -1388,6 +1414,11 @@ async function tabJd(m) {
     catch (x) { e.target.disabled = false; fail(x); }
   });
   if (H.jumpJd) { const id = H.jumpJd; H.jumpJd = null; setTimeout(() => jump(id, false), 30); }
+  // wide charts start centred on the top box; people scroll sideways to see the rest
+  const oc = $(".org", m); if (oc) oc.scrollLeft = (oc.scrollWidth - oc.clientWidth) / 2;
+  // photos load once per session (HR only), then the chart redraws in place
+  if (!S.cache.photos) { S.cache.photos = {}; const ids = (S.cache.emps || []).filter((e) => e.active && jdOfPos(e.position)).map((e) => e.id);
+    if (ids.length) api("empPhotos", { ids }).then((r) => { S.cache.photos = r.photos || {}; if (S.tab === "jd" && Object.keys(S.cache.photos).length) refreshTab(); }).catch(() => {}); }
 }
 function editJd(id) {
   const j = id ? jdBy(id) : null, g2t = (g) => (g || []).map((x) => (x.heading ? "# " + x.heading + "\n" : "") + (x.items || []).join("\n")).join("\n");
