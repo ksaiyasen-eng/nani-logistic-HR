@@ -231,6 +231,9 @@ const F = {
   no_absence_override: "ໂບນັດກຳນົດເອງ (₭)", meal_allowance: "ຄ່າອາຫານ (₭/ເດືອນ)", meal_off_days: "ວັນບໍ່ໄດ້ຄ່າອາຫານ (ຂາດ+ລາ)", social_security: "ປະກັນສັງຄົມ", team_deposit: "ເງິນຝາກທີມຂົນສົ່ງ", advance: "ເບີກລ່ວງໜ້າ",
   damage_comp: "ຊົດເຊີຍຄວາມເສຍຫາຍ", honesty_ins: "ປະກັນຄວາມຊື່ສັດ", other_ded: "ຫັກອື່ນໆ", note: "ໝາຍເຫດ",
 };
+// ເງິນໂຊເຟີແຍກຕາມຜະລິດຕະພັນ (hr-api DRIVER_ITEMS); driver_pay = ຜົນລວມ
+const DI = { rounds: "ຄ່າຮອບລົດໃຫຍ່", hh: "ຄ່າສົ່ງ ຄົວເຮືອນ", org: "ຄ່າສົ່ງ ອົງກອນ", glass: "ຄ່າສົ່ງ ຂວດແກ້ວ", m250: "ຄ່າສົ່ງ 250ml", pack: "ຄ່າສົ່ງ ແພັກບໍລິສັດ", packSelf: "ຄ່າສົ່ງ ແພັກຫາເອງ", packSelf2: "ຄ່າສົ່ງ ແພັກ2Lຫາເອງ", adj: "ປັບເພີ່ມ/ຫັກ (ລົດ)", other: "ເງິນໂຊເຟີອື່ນໆ", weekly: "ຫັກຈ່າຍລາຍອາທິດແລ້ວ" };
+const diList = (it) => Object.keys(DI).filter((k) => num(it?.[k])).map((k) => [DI[k], it[k]]);
 const ST = { ok: ["ປົກກະຕິ", "p-ok"], late: ["ມາຊ້າ", "p-warn"], missing_punch: ["ລືມສະແກນ", "p-warn"], absent: ["ຂາດ", "p-bad"], leave: ["ລາ", "p-pri"], holiday: ["ວັນພັກ", ""], off: ["ວັນອາທິດ", ""], pending: ["ຍັງບໍ່ເຂົ້າ", ""], na: ["—", ""] };
 const LST = { pending: ["ລໍຖ້າພິຈາລະນາ", "p-warn"], approved: ["ອະນຸມັດ", "p-ok"], rejected: ["ປະຕິເສດ", "p-bad"], cancelled: ["ຍົກເລີກ", ""] };
 const FLAG = { no_location: "ບໍ່ມີພິກັດ", low_accuracy: "GPS ບໍ່ແມ່ນ", shared_device: "ເຄື່ອງດຽວກັນຫຼາຍຄົນ" };
@@ -694,7 +697,7 @@ async function printLeave(id) {
 }
 function payslipHTML(r, month) {
   const c = r.computed; const line = (k, v) => `<tr><td>${esc(k)}</td><td class="num">${fmt(v)}</td></tr>`;
-  const inc = [["ເງິນເດືອນພື້ນຖານ", r.base_salary], [F.morning_bonus, r.morning_bonus], [F.water_pack, r.water_pack], [F.produce_bottle, r.produce_bottle], [F.produce_glass, r.produce_glass], ["OT", c.otPay], [F.driver_pay, r.driver_pay], [F.no_absence_bonus, c.noAbsence], ["ຄ່າອາຫານ", c.meal]].filter((x) => num(x[1]));
+  const inc = [["ເງິນເດືອນພື້ນຖານ", r.base_salary], [F.morning_bonus, r.morning_bonus], [F.water_pack, r.water_pack], [F.produce_bottle, r.produce_bottle], [F.produce_glass, r.produce_glass], ["OT", c.otPay], ...(r.driver_items ? diList(r.driver_items) : [[F.driver_pay, r.driver_pay]]), [F.no_absence_bonus, c.noAbsence], ["ຄ່າອາຫານ", c.meal]].filter((x) => num(x[1]));
   const pre = [["ລືມສະແກນ", c.dedForgot], ["ມາຊ້າ", c.dedLate], ["ຂາດງານ", c.dedAbsent], ["ລາບໍ່ຮັບເງິນ", c.dedUnpaid], [F.team_deposit, r.team_deposit], [F.social_security, r.social_security]].filter((x) => num(x[1]));
   const post = [[F.advance, r.advance], [F.damage_comp, r.damage_comp], [F.honesty_ins, r.honesty_ins], [F.other_ded, r.other_ded]].filter((x) => num(x[1]));
   return `<div class="doc pb"><div style="display:flex;justify-content:space-between;border-bottom:2px solid #000;padding-bottom:8px"><div><div style="font-size:20px;font-weight:700">Nany Logistic</div><div>ສະລິບເງິນເດືອນ ${esc(monthLabel(month))}</div></div><div style="text-align:right">${esc(r.name)}<br>${esc(r.emp_code)} · ${esc(r.position || "")}</div></div>
@@ -953,11 +956,12 @@ async function tabWork(m) {
 function bindCells(root, j) {
   const pend = {}, timers = {};
   $$("input.cell", root).forEach((inp) => inp.addEventListener("input", () => {
-    const tr = inp.closest("[data-row]"), id = tr.dataset.row, row = j.rows.find((r) => r.emp_id === id), f = inp.dataset.f;
+    const tr = inp.closest("[data-row]"), id = tr.dataset.row, row = j.rows.find((r) => r.emp_id === id), di = inp.dataset.di, f = di ? "driver_items" : inp.dataset.f;
     const v = inp.value.trim().replace(/,/g, "");
     if (v !== "" && !Number.isFinite(Number(v)) && f !== "note") { inp.style.borderColor = "var(--acc)"; return; }
     inp.style.borderColor = "";
-    const nv = f === "note" ? v : (v === "" ? (["ot_pay_override", "no_absence_override"].includes(f) ? null : 0) : Number(v));
+    let nv = f === "note" ? v : (v === "" ? (["ot_pay_override", "no_absence_override"].includes(f) ? null : 0) : Number(v));
+    if (di) { nv = { ...row.driver_items, [di]: nv }; row.driver_pay = Object.values(nv).reduce((a, x) => a + num(x), 0); }
     row[f] = nv; (pend[id] ||= {})[f] = nv;
     const c = computeRow(row, j.rates); row.computed = c;
     $$("[data-c]", tr).forEach((td) => td.textContent = fmt(c[td.dataset.c]));
@@ -1020,14 +1024,16 @@ async function tabPay(m) {
   const sel = S.cache.payEmp && rows.find((r) => r.emp_id === S.cache.payEmp) ? S.cache.payEmp : rows[0]?.emp_id;
   const r = rows.find((x) => x.emp_id === sel);
   if (!r) { m.innerHTML = `<div class="empty">ບໍ່ມີພະນັກງານໃນພະແນກນີ້</div>`; return; }
-  const fld = (f) => hide[f] ? "" : `<label>${esc(F[f])}<input class="cell" style="width:100%" data-f="${f}" value="${esc(r[f] ?? "")}" inputmode="decimal" ${r.locked ? "disabled" : ""}></label>`;
+  const diFld = () => `<fieldset class="grid" style="gap:6px;border:1px solid var(--line);border-radius:10px;padding:8px 10px"><legend class="sm">${esc(F.driver_pay)} · ລວມ <b id="dpt">${fmt(r.driver_pay)}</b></legend>
+    ${Object.keys(DI).filter((k) => num(r.driver_items[k]) || k === "other").map((k) => `<label class="sm">${esc(DI[k])}<input class="cell" style="width:100%" data-di="${k}" value="${esc(r.driver_items[k] ?? "")}" inputmode="decimal" ${r.locked ? "disabled" : ""}></label>`).join("")}</fieldset>`;
+  const fld = (f) => hide[f] ? "" : f === "driver_pay" && r.driver_items ? diFld() : `<label>${esc(F[f])}<input class="cell" style="width:100%" data-f="${f}" value="${esc(r[f] ?? "")}" inputmode="decimal" ${r.locked ? "disabled" : ""}></label>`;
   m.innerHTML = `<div class="grid" style="gap:12px"><div class="row"><select id="pe" style="max-width:360px">${rows.map((x) => `<option value="${esc(x.emp_id)}" ${x.emp_id === sel ? "selected" : ""}>${esc(x.emp_code)} · ${esc(x.name)}</option>`).join("")}</select><span style="flex:1"></span>${r.locked ? `<span class="pill p-bad">ປິດເດືອນແລ້ວ</span>` : ""}${hide.driver_pay || r.locked ? "" : `<button id="pdr">ດຶງເງິນໂຊເຟີ</button>`}${r.locked ? "" : `<button id="pml">🍚 ຕັ້ງຄ່າອາຫານ</button><button id="padv">💸 ດຶງເງິນເບີກ</button>`}<button id="pp" class="pri">ພິມສະລິບ</button></div>
     <div data-row="${esc(r.emp_id)}" class="grid g2">
       <section class="card grid" style="gap:8px"><h3>ລາຍຮັບ</h3>${PAY_INC.map(fld).join("")}</section>
       <section class="card grid" style="gap:8px"><h3>ຫັກກ່ອນອາກອນ</h3>${PAY_DED.map(fld).join("")}<h3>ຫັກຫຼັງອາກອນ</h3>${PAY_POST.map(fld).join("")}<label>${F.note}<input class="cell" style="width:100%;text-align:left" data-f="note" value="${esc(r.note ?? "")}" ${r.locked ? "disabled" : ""}></label></section>
       <section class="card grid" style="gap:6px;align-content:start" id="pc"></section><span data-s></span></div></div>`;
   const out = () => { const c = r.computed; $("#pc").innerHTML = `<h3>ຜົນການຄິດໄລ່</h3>${[["OT", c.otPay], ["ໂບນັດບໍ່ຂາດງານ (ຫຼັງກົດ)", c.noAbsence], ["ຄ່າອາຫານ (ຫຼັງຫັກວັນຂາດ/ລາ)", c.meal], ["ລາຍຮັບລວມ", c.income], ["ຫັກຂາດງານ", c.dedAbsent], ["ຫັກລາບໍ່ຮັບເງິນ", c.dedUnpaid], ["ຫັກມາຊ້າ", c.dedLate], ["ຫັກລືມສະແກນ", c.dedForgot], ["ຫັກກ່ອນອາກອນລວມ", c.preTax], ["ເງິນໄດ້ກ່ອນອາກອນ", c.taxable], ["ອາກອນ", c.tax], ["ຫັກຫຼັງອາກອນ", c.postTax]].map(([l, v]) => `<div class="row sm" style="justify-content:space-between"><span>${esc(l)}</span><span class="num">${fmt(v)}</span></div>`).join("")}<div class="row" style="justify-content:space-between;border-top:2px solid var(--ink);padding-top:8px"><b>ສຸດທິ</b><b class="num" style="font-size:22px">${fmt(c.net)}</b></div>`; };
-  out(); bindCells(m, j); $("[data-row]", m).addEventListener("rowchange", () => { if ($("#pc")) out(); });
+  out(); bindCells(m, j); $("[data-row]", m).addEventListener("rowchange", () => { if ($("#pc")) out(); if ($("#dpt")) $("#dpt").textContent = fmt(r.driver_pay); });
   $("#pe").onchange = () => { S.cache.payEmp = $("#pe").value; renderTab(); };
   $("#pp").onclick = () => printPayslips([r], S.month);
   $("#pdr") && ($("#pdr").onclick = tPullPay);
@@ -1976,24 +1982,26 @@ async function tPullPay() {
     const pr = (await tapi("payroll.get", { period: dp.period.start })).people || {};
     if (!mj.rows.length) throw new Error(`${monthLabel(S.month)} ຍັງບໍ່ໄດ້ເປີດເດືອນ — ເປີດກ່ອນໃນແຖບ ຄິດໄລ່ຜົນຕອບແທນ`);
     const by = {};
-    dp.rows.forEach((r) => { if (!r.empId) return; const o = by[r.empId] || (by[r.empId] = { empId: r.empId, name: r.name, code: r.emp_code, nicks: [], days: 0, approved: 0, pending: 0 }); o.nicks.push(r.nick); o.days += r.days; o.approved += r.approved; o.pending += r.pending; o.paid = (o.paid || 0) + tPaidSum(pr, r.nick); });
-    // weekly payouts already handed over are not paid again through salary
-    Object.values(by).forEach((o) => { o.net = o.approved - o.paid; });
+    dp.rows.forEach((r) => { if (!r.empId) return; const o = by[r.empId] || (by[r.empId] = { empId: r.empId, name: r.name, code: r.emp_code, nicks: [], days: 0, approved: 0, pending: 0, items: {} }); o.nicks.push(r.nick); o.days += r.days; o.approved += r.approved; o.pending += r.pending; o.paid = (o.paid || 0) + tPaidSum(pr, r.nick);
+      for (const k in r.parts || {}) o.items[k] = (o.items[k] || 0) + r.parts[k]; });
+    // weekly payouts already handed over are not paid again through salary: one negative line, so the product lines stay whole
+    Object.values(by).forEach((o) => { o.net = o.approved - o.paid; if (o.paid) o.items.weekly = -o.paid; });
+    const itKey = (it) => JSON.stringify(Object.keys(DI).filter((k) => num(it?.[k])).map((k) => [k, num(it[k])]));
     const rows = Object.values(by).map((o) => ({ ...o, row: mj.rows.find((x) => x.emp_id === o.empId) })).sort((a, b) => b.approved - a.approved);
-    const can = (o) => o.row && !o.row.locked && num(o.row.driver_pay) !== o.net;
+    const can = (o) => o.row && !o.row.locked && (num(o.row.driver_pay) !== o.net || itKey(o.row.driver_items) !== itKey(o.items));
     const unl = dp.rows.filter((r) => !r.empId && r.approved), pendT = dp.rows.reduce((a, r) => a + r.pending, 0);
     const why = (o) => !o.row ? `<span class="pill p-bad">ບໍ່ຢູ່ໃນເດືອນນີ້</span>` : o.row.locked ? `<span class="pill">ປິດເດືອນ</span>` : !can(o) ? `<span class="pill p-ok">ກົງກັນແລ້ວ</span>` : "";
     dialog({ title: `ດຶງເງິນໂຊເຟີ → ${monthLabel(S.month)}`, wide: true, ok: rows.some(can) ? "ອັບເດດທີ່ເລືອກ" : "", cancel: "ປິດ", body: `
-      <p class="sm mut">ຮອບ ${esc(dmy(dp.period.start))} – ${esc(dmy(dp.period.end))}. ນັບສະເພາະລາຍງານທີ່ <b>ອະນຸມັດແລ້ວ</b>, ແບ່ງເທົ່າກັນໃນທີມ, ຫັກຍອດທີ່ຈ່າຍລາຍອາທິດແລ້ວ. ຈະແທນຄ່າ "${esc(F.driver_pay)}" ເດີມ.</p>
+      <p class="sm mut">ຮອບ ${esc(dmy(dp.period.start))} – ${esc(dmy(dp.period.end))}. ນັບສະເພາະລາຍງານທີ່ <b>ອະນຸມັດແລ້ວ</b>, ແບ່ງເທົ່າກັນໃນທີມ, ຫັກຍອດທີ່ຈ່າຍລາຍອາທິດແລ້ວ. ຈະແທນຄ່າ "${esc(F.driver_pay)}" ເດີມ ແລະ ແຍກເປັນແຕ່ລະຜະລິດຕະພັນໃນສະລິບ.</p>
       ${pendT ? `<div class="warn-box">ຍັງມີ ${fmt(pendT)} ₭ ລໍຖ້າອະນຸມັດ — ບໍ່ລວມໃນນີ້</div>` : ""}
       ${unl.length ? `<div class="warn-box" style="margin-top:6px">ບໍ່ໄດ້ຜູກ: ${unl.map((r) => `${esc(r.nick)} ${fmt(r.approved)}`).join(", ")} ₭ — ຈະບໍ່ເຂົ້າເງິນເດືອນ</div>` : ""}
       ${dp.unassigned ? `<div class="warn-box" style="margin-top:6px">${dp.unassigned} ລາຍງານບໍ່ມີທີມ — ບໍ່ມີໃຜໄດ້ເງິນຈາກລາຍງານເຫຼົ່ານີ້</div>` : ""}
       ${rows.length ? `<div class="tw" style="margin-top:10px"><table><thead><tr><th><input type="checkbox" id="pa" checked style="width:auto;min-height:0"></th><th>ພະນັກງານ</th><th>ຊື່ຫຼິ້ນ</th><th class="num">ລາຍງານ</th><th class="num">ອະນຸມັດ</th><th class="num">ຈ່າຍລາຍອາທິດແລ້ວ</th><th class="num">ປັດຈຸບັນ</th><th class="num">ໃໝ່</th><th></th></tr></thead><tbody>
-      ${rows.map((o) => `<tr><td>${can(o) ? `<input type="checkbox" data-pk="${esc(o.empId)}" checked style="width:auto;min-height:0">` : ""}</td><td>${esc(o.name)} <span class="xs mut">${esc(o.code)}</span></td><td>${esc(o.nicks.join(", "))}</td><td class="num">${o.days}</td><td class="num">${fmt(o.approved)}</td><td class="num">${o.paid ? fmt(o.paid) : "—"}</td><td class="num">${o.row ? fmt(o.row.driver_pay) : "—"}</td><td class="num b">${fmt(o.net)}</td><td>${why(o)}</td></tr>`).join("")}</tbody></table></div>` : `<div class="empty">ບໍ່ມີເງິນໂຊເຟີທີ່ອະນຸມັດໃນຮອບນີ້</div>`}`,
+      ${rows.map((o) => `<tr><td>${can(o) ? `<input type="checkbox" data-pk="${esc(o.empId)}" checked style="width:auto;min-height:0">` : ""}</td><td>${esc(o.name)} <span class="xs mut">${esc(o.code)}</span><div class="xs mut" style="white-space:normal">${diList(o.items).map(([l, v]) => `${esc(l)} ${fmt(v)}`).join(" · ")}</div></td><td>${esc(o.nicks.join(", "))}</td><td class="num">${o.days}</td><td class="num">${fmt(o.approved)}</td><td class="num">${o.paid ? fmt(o.paid) : "—"}</td><td class="num">${o.row ? fmt(o.row.driver_pay) : "—"}</td><td class="num b">${fmt(o.net)}</td><td>${why(o)}</td></tr>`).join("")}</tbody></table></div>` : `<div class="empty">ບໍ່ມີເງິນໂຊເຟີທີ່ອະນຸມັດໃນຮອບນີ້</div>`}`,
       onOpen: (r) => { $("#pa", r) && ($("#pa", r).onchange = (e) => $$("[data-pk]", r).forEach((c) => c.checked = e.target.checked)); },
       onOk: async (r) => {
         const pick = $$("[data-pk]", r).filter((c) => c.checked).map((c) => c.dataset.pk); let n = 0;
-        for (const o of rows.filter((x) => pick.includes(x.empId) && can(x))) { await api("monthSave", { month: S.month, emp_id: o.empId, version: o.row.version, patch: { driver_pay: o.net } }); n++; }
+        for (const o of rows.filter((x) => pick.includes(x.empId) && can(x))) { await api("monthSave", { month: S.month, emp_id: o.empId, version: o.row.version, patch: { driver_items: o.items } }); n++; }
         toast(`ອັບເດດເງິນໂຊເຟີ ${n} ຄົນ`); renderTab();
       } });
   } catch (e) { fail(e); }
