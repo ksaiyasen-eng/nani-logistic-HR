@@ -1690,6 +1690,17 @@ function tCalc(e) {
   return { total, per: crew.length ? total / crew.length : 0, qty, lines, big, crew, P };
 }
 const TQ = { hh: "ຄົວເຮືອນ", org: "ອົງກອນ", glass: "ແກ້ວ", m250: "250ml", pack: "ແພັກບໍລິສັດ", packSelf: "ແພັກຫາເອງ", packSelf2: "ແພັກ2Lຫາເອງ" };
+// per-truck product totals of the listed reports (follows the truck/status filters), so counts can be checked against the warehouse
+function tProdSum(es) {
+  if (!es.length) return "";
+  const ks = Object.keys(TQ).filter((k) => es.some((e) => num(e[k]))), by = {};
+  for (const e of es) { const o = by[e.veh] ||= { n: 0, total: 0 }; o.n++; o.total += num(e.total); ks.forEach((k) => o[k] = (o[k] || 0) + num(e[k])); }
+  const all = { n: es.length, total: es.reduce((s, e) => s + num(e.total), 0) }; ks.forEach((k) => all[k] = Object.values(by).reduce((s, o) => s + o[k], 0));
+  const tr = (name, o, b) => `<tr${b ? ` class="b" style="border-top:2px solid var(--line)"` : ""}><td${b ? "" : ` class="b"`}>${esc(name)}</td><td class="num">${o.n}</td>${ks.map((k) => `<td class="num">${o[k] ? fmt(o[k]) : "—"}</td>`).join("")}<td class="num b">${fmt(o.total)}</td></tr>`;
+  const vs = Object.keys(by).sort((a, b) => tVehName(a).localeCompare(tVehName(b)));
+  return `<div class="tw"><table><thead><tr><th>ສະຫຼຸບຕາມລົດ</th><th class="num">ລາຍງານ</th>${ks.map((k) => `<th class="num">${esc(TQ[k])}</th>`).join("")}<th class="num">ຄ່າຄອມ</th></tr></thead>
+    <tbody>${vs.map((v) => tr(tVehName(v), by[v])).join("")}${vs.length > 1 ? tr("ລວມ", all, true) : ""}</tbody></table></div>`;
+}
 const tQty = (e) => { const r = (e.rounds || []).map((x, i) => (num(x) > 0 ? fmt(x) + (e.places?.[i] ? ` (${e.places[i]})` : "") : "")).filter(Boolean); const s = Object.keys(TQ).filter((k) => num(e[k])).map((k) => `${TQ[k]} ${fmt(e[k])}`); if (r.length) s.unshift("ຮອບ " + r.join(" / ")); return s.join(" · ") || "—"; };
 // partner truck: pay ÷ people who went, but the partner's own share isn't paid (same rule as core.js shareOf)
 const tPartner = (veh) => { const P = T.cfg?.partner; return P?.veh && P.veh === veh ? P : null; };
@@ -1850,6 +1861,7 @@ async function tabTrucks(m) {
     <section class="card grid" style="gap:10px">
       <div class="row"><h3 style="flex:1;min-width:140px">ລາຍງານປະຈຳວັນ</h3><select id="tvf" style="width:auto" aria-label="ລົດ"><option value="">ທຸກລົດ</option>${T.cfg.vehicles.map((v) => `<option value="${esc(v.id)}" ${v.id === vf ? "selected" : ""}>${esc(v.name)}</option>`).join("")}</select>
         <div class="row" style="gap:4px">${fb("all", "ທັງໝົດ")}${fb("pending", "ລໍຖ້າ", pend.length)}${fb("approved", "ອະນຸມັດ")}${fb("nocrew", "ບໍ່ມີທີມ", nc.length)}</div></div>
+      ${tProdSum(shown)}
       <div class="tw" style="max-height:60vh"><table><thead><tr><th>ວັນທີ</th><th>ລົດ</th><th>ທີມ</th><th>ຈຳນວນ</th><th class="num">ຄ່າຄອມ</th><th class="num">ຕໍ່ຄົນ</th><th>ສະຖານະ</th><th></th></tr></thead>
       <tbody>${shown.length ? shown.map((e) => `<tr><td class="num" style="text-align:left">${esc(dmy(e.date))}</td><td>${esc(tVehName(e.veh))}</td><td>${noCrew(e) ? `<span class="pill p-bad">ບໍ່ມີທີມ</span>` : esc(e.crew.join(", "))}</td><td class="sm">${esc(tQty(e))}${e.note ? `<div class="xs mut" style="max-width:260px;white-space:normal">${esc(e.note)}</div>` : ""}</td>
         <td class="num b">${fmt(e.total)}</td><td class="num">${noCrew(e) ? "—" : fmt(tShare(e))}</td><td style="white-space:nowrap">${pill(TST, e.status === "approved" ? "approved" : "pending")}${e.source === "erp" ? ` <span class="pill">ERP</span>` : ""}</td>
