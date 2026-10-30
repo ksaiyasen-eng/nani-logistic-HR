@@ -1687,13 +1687,13 @@ function tCalc(e) {
   T_FLAT.forEach(([k, l, d]) => { const q = num(e[k]), r = num(cfg.flat?.[k] ?? d); if (q > 0) { lines.push([`${l} ${fmt(q)} × ${fmt(r)}`, q * r]); total += q * r; qty += q; } });
   const adj = num(e.adj); if (adj) { lines.push(["ປັບເພີ່ມ/ຫັກ", adj]); total += adj; }
   const crew = (e.crew || []).filter(Boolean), P = tPartner(e.veh);
-  return { total, per: P ? total / P.div : crew.length ? total / crew.length : 0, qty, lines, big, crew, P };
+  return { total, per: crew.length ? total / crew.length : 0, qty, lines, big, crew, P };
 }
 const TQ = { hh: "ຄົວເຮືອນ", org: "ອົງກອນ", glass: "ແກ້ວ", m250: "250ml", pack: "ແພັກບໍລິສັດ", packSelf: "ແພັກຫາເອງ", packSelf2: "ແພັກ2Lຫາເອງ" };
 const tQty = (e) => { const r = (e.rounds || []).map((x, i) => (num(x) > 0 ? fmt(x) + (e.places?.[i] ? ` (${e.places[i]})` : "") : "")).filter(Boolean); const s = Object.keys(TQ).filter((k) => num(e[k])).map((k) => `${TQ[k]} ${fmt(e[k])}`); if (r.length) s.unshift("ຮອບ " + r.join(" / ")); return s.join(" · ") || "—"; };
-// partner truck: pay ÷ div always and the partner's part isn't paid (same rule as core.js shareOf)
-const tPartner = (veh) => { const P = T.cfg?.partner; return P?.veh && P.veh === veh ? { ...P, div: num(P.div) || 3 } : null; };
-const tShare = (e, nick) => { const P = tPartner(e.veh); if (P) return nick === P.nick ? 0 : num(e.total) / P.div; return num(e.total) / Math.max(1, (e.crew || []).filter(Boolean).length); };
+// partner truck: pay ÷ people who went, but the partner's own share isn't paid (same rule as core.js shareOf)
+const tPartner = (veh) => { const P = T.cfg?.partner; return P?.veh && P.veh === veh ? P : null; };
+const tShare = (e, nick) => (nick && tPartner(e.veh)?.nick === nick ? 0 : num(e.total) / Math.max(1, (e.crew || []).filter(Boolean).length));
 const TST = { approved: ["✅ ອະນຸມັດ", "p-ok"], pending: ["⏳ ລໍຖ້າ", "p-warn"] };
 // pay month M ← round (M-1)/startDay … M/(startDay-1)
 function tPeriod(month, sd) {
@@ -1767,7 +1767,7 @@ function tEntryForm(cur, onDone) {
         if ([...Object.keys(TQ).map((k) => e[k]), ...e.rounds].some((q) => num(q) > num(cfg.hardCap))) w.push(`ເກີນ ${fmt(cfg.hardCap)} — ກວດຄືນ`);
         $("#tpv", r).innerHTML = `${tLadder(e)}${c.lines.map(([l, v]) => `<div class="row sm" style="justify-content:space-between"><span>${esc(l)}</span><span class="num">${fmt(v)}</span></div>`).join("") || `<div class="sm mut">ໃສ່ຈຳນວນເພື່ອຄິດໄລ່</div>`}
           <div class="row" style="justify-content:space-between;border-top:1px solid var(--line);padding-top:6px;margin-top:2px"><b>ລວມ</b><b class="num">${fmt(c.total)} ₭</b></div>
-          <div class="row sm" style="justify-content:space-between"><span>${c.P ? `ຕໍ່ຄົນ (÷${c.P.div} · ${esc(c.P.nick)} ບໍ່ໄດ້ຍອດລາຍວັນ)` : `ຕໍ່ຄົນ (${c.crew.length} ຄົນ)`}</span><b class="num" style="color:var(--pri)">${fmt(c.per)} ₭</b></div>
+          <div class="row sm" style="justify-content:space-between"><span>ຕໍ່ຄົນ (${c.crew.length} ຄົນ${c.P && c.crew.includes(c.P.nick) ? ` · ${esc(c.P.nick)} ບໍ່ໄດ້ຍອດລາຍວັນ` : ""})</span><b class="num" style="color:var(--pri)">${fmt(c.per)} ₭</b></div>
           ${w.map((x) => `<div class="warn-box" style="margin-top:4px">${esc(x)}</div>`).join("")}`;
       };
       const drawCrew = () => {
@@ -1901,7 +1901,7 @@ async function tPartnerDlg(month, edit) {
     <div class="row" style="justify-content:space-between;border-top:1px solid var(--line);padding-top:6px"><b>ກຳໄລສຸດທິ</b><b class="num" style="color:${c.profit < 0 ? "var(--acc)" : "var(--ink)"}">${fmt(c.profit)} ₭</b></div>
     <div class="grid g2" style="gap:8px"><div class="kpi"><span class="mut sm">🤝 ${esc(P.nick)} (${num(P.pct)}%)</span><span class="v" style="color:var(--pri)">${fmt(c.partner)} ₭</span></div><div class="kpi"><span class="mut sm">🏢 ບໍລິສັດ (${100 - num(P.pct)}%)</span><span class="v">${fmt(c.company)} ₭</span></div></div>
     ${c0.pendDays ? `<div class="warn-box">ຍັງມີ ${c0.pendDays} ລາຍງານລໍຖ້າອະນຸມັດ (${fmt(c0.pending)} ₭) — ບໍ່ລວມໃນຍອດພະນັກງານ</div>` : ""}`;
-  const head = `<p class="sm mut">ຮອບ ${esc(dmy(j.period.start))} – ${esc(dmy(j.period.end))} · ຍອດລາຍວັນ ÷${num(P.div) || 3} ສະເໝີ, ${esc(P.nick)} ບໍ່ໄດ້ຍອດລາຍວັນ · ກຳໄລຫຼັງຫັກທຸກຢ່າງ ແບ່ງ ${num(P.pct)}/${100 - num(P.pct)}</p>`;
+  const head = `<p class="sm mut">ຮອບ ${esc(dmy(j.period.start))} – ${esc(dmy(j.period.end))} · ຍອດລາຍວັນຫານຕາມຈຳນວນຄົນທີ່ໄປ, ${esc(P.nick)} ບໍ່ໄດ້ຍອດລາຍວັນ · ກຳໄລຫຼັງຫັກທຸກຢ່າງ ແບ່ງ ${num(P.pct)}/${100 - num(P.pct)}</p>`;
   if (!edit) return dialog({ title: `🤝 ລົດຮ່ວມ ${P.veh} · ${monthLabel(month)}`, ok: "", cancel: "ປິດ", body: `<div class="grid" style="gap:8px">${head}
     ${j.saved ? result({ ...c0, salary: d.salary, fuel: d.fuel }, d.revenue) + (d.items.length ? `<div class="xs mut">ອື່ນໆ: ${d.items.map((x) => `${esc(x.label)} ${fmt(x.amt)}`).join(" · ")}</div>` : "") + (d.note ? `<div class="xs mut">${esc(d.note)}</div>` : "") : `<div class="mut sm">HR ຍັງບໍ່ໄດ້ໃສ່ຕົວເລກຂອງເດືອນນີ້</div>`}</div>` });
   const itemRow = (x = {}) => `<div class="row" style="gap:6px;flex-wrap:nowrap" data-it><input data-il maxlength="60" placeholder="ເຊັ່ນ ຊ່ອມ, ຢາງ, ປະກັນ" value="${esc(x.label || "")}" style="flex:2" aria-label="ລາຍການ"><input data-ia inputmode="numeric" placeholder="₭" value="${x.amt ? fmt(x.amt) : ""}" style="flex:1" aria-label="ຈຳນວນເງິນ"><button type="button" class="sm ib" data-ix aria-label="ລຶບລາຍການ">✕</button></div>`;
