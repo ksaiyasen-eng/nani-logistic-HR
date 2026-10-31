@@ -151,6 +151,7 @@ th,th.emp{background:#1C2330}
 .dlgbg{background:rgba(0,0,0,.6)}
 }
 @media print and (prefers-color-scheme:dark){body,.doc{background:#fff;color:#000}}
+@media (max-width:600px){.slipv .doc>div[style*="grid-template-columns"]{grid-template-columns:1fr!important}.slipv{padding:10px!important}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -667,7 +668,7 @@ async function openPayslips() {
       const open = async (m) => {
         const p = await api("payslip", { payToken: S.payToken, month: m }), row = { ...p.row, ...p.emp, computed: p.computed };
         $("#psl").innerHTML = `<div class="row" style="gap:6px;margin-bottom:10px">${j.months.map((x) => `<button class="sm ${x === m ? "pri" : ""}" data-ps="${esc(x)}">${esc(monthLabel(x))}</button>`).join("")}<span style="flex:1"></span><button class="sm" id="psp">🖨 ພິມ / PDF</button></div>
-          <div style="background:#fff;color:#000;padding:14px;border-radius:12px;overflow-x:auto">${payslipHTML(row, p.month)}</div>`;
+          <div class="slipv" style="background:#fff;color:#000;padding:14px;border-radius:12px;overflow-x:auto">${payslipHTML(row, p.month)}</div>`;
         $$("[data-ps]").forEach((b) => b.onclick = () => open(b.dataset.ps).catch(onErr));
         $("#psp").onclick = () => printPayslips([row], p.month);
       };
