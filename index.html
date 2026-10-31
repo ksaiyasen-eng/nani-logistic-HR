@@ -729,7 +729,8 @@ function renderShell() {
     <input type="month" id="mo" value="${esc(S.month)}" aria-label="ເດືອນ"><select id="dp" aria-label="ພະແນກ"><option value="">ທຸກພະແນກ</option>${depts.map((d) => `<option ${d === S.dept ? "selected" : ""}>${esc(d)}</option>`).join("")}</select>
     <span class="net" id="net"><i></i> ເຊື່ອມຕໍ່ແລ້ວ</span><button class="sm" id="lo">ອອກ</button></div></header>
     <main class="wrap" id="main"></main></div></div>`;
-  $("#mo").onchange = () => { S.month = $("#mo").value || curMonth(); SS.set("hr_month", S.month); renderTab(); };
+  // Safari's segmented month picker may fire only `input` (no `change`), so listen to both and reload once per real change
+  $("#mo").oninput = $("#mo").onchange = () => { const v = $("#mo").value; if (!/^\d{4}-\d{2}$/.test(v) || v === S.month) return; S.month = v; SS.set("hr_month", S.month); renderTab(); };
   $("#dp").onchange = () => { S.dept = $("#dp").value; renderTab(); };
   $("#lo").onclick = () => logout();
   $$("[data-tab]").forEach((b) => b.onclick = () => { S.tab = b.dataset.tab; $$("[data-tab]").forEach((x) => x.setAttribute("aria-selected", x === b)); renderTab(); });
