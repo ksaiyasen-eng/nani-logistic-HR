@@ -875,7 +875,8 @@ function empForm(e) {
       if ((s.sites || []).length) emp.scan_sites = $$("[data-esite]", r).filter((c) => c.checked).map((c) => c.dataset.esite);
       if (!emp.id || val(r, "e_acc")) emp.account_no = val(r, "e_acc");
       if (emp.emp_code === emp.name) throw new Error("ລະຫັດພະນັກງານຕ້ອງບໍ່ແມ່ນຊື່");
-      await api("empUpsert", { emp }); toast("ບັນທຶກແລ້ວ"); renderTab();
+      if (!emp.active && !emp.end_date) throw new Error("ກະລຸນາໃສ່ວັນສິ້ນສຸດ ເພື່ອເອົາອອກຈາກເດືອນຖັດໄປ");
+      const r2 = await api("empUpsert", { emp }); toast(r2.removed ? `ບັນທຶກແລ້ວ · ເອົາອອກຈາກ ${r2.removed} ເດືອນທີ່ເປີດໄວ້` : "ບັນທຶກແລ້ວ"); renderTab();
     } });
 }
 function approverForm(e) {
