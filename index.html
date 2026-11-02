@@ -1765,6 +1765,7 @@ function tEntryForm(cur, onDone) {
   const vehCrew = (v) => drivers.filter((s) => s.veh === v).map((s) => s.nick);
   if (!cur) e.crew = admin ? vehCrew(e.veh) : [T.me.nick];
   const erpLock = !admin && cur && cur.source === "erp";
+  const vehLock = cur || (!admin && cfg.partner?.nick === T.me.nick); // the partner reports only his own truck
   let touched = false;
   const dates = Array.from({ length: back + 1 }, (_, i) => addD(T.today, -i));
   const canDel = cur && (admin || (cur.status !== "approved" && (cur.crew || []).includes(T.me.nick)));
@@ -1773,7 +1774,7 @@ function tEntryForm(cur, onDone) {
     ${erpLock ? `<div class="warn-box">ຈຳນວນທີ່ມາຈາກ ERP ແກ້ບໍ່ໄດ້ — ຊ່ອງອື່ນ (ທີມ, ແພັກລູກຄ້າຫາເອງ, ສະຖານທີ່, ໝາຍເຫດ) ແກ້ໄດ້</div>` : ""}
     <div class="grid g2">
       <label>ວັນທີ${cur ? `<input value="${esc(dmy(e.date))}" disabled>` : admin ? `<input type="date" id="td" value="${esc(e.date)}">` : `<select id="td">${dates.map((d) => `<option value="${d}">${dmy(d)}${d === T.today ? " (ມື້ນີ້)" : ""}</option>`).join("")}</select>`}</label>
-      <label>ລົດ<select id="tv" ${cur ? "disabled" : ""}>${cfg.vehicles.map((v) => `<option value="${esc(v.id)}" ${v.id === e.veh ? "selected" : ""}>${esc(v.name)}</option>`).join("")}</select></label>
+      <label>ລົດ<select id="tv" ${vehLock ? "disabled" : ""}>${cfg.vehicles.map((v) => `<option value="${esc(v.id)}" ${v.id === e.veh ? "selected" : ""}>${esc(v.name)}</option>`).join("")}</select></label>
     </div>
     <div class="grid" style="gap:6px"><div class="sm mut" style="font-weight:500">ທີມ — ສູງສຸດ 6 ຄົນ, ແບ່ງເງິນເທົ່າກັນ</div><div id="tcr" style="display:flex;flex-wrap:wrap;gap:8px"></div></div>
     <div id="tqf" class="grid" style="gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,120px),1fr))"></div>
