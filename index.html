@@ -7,6 +7,8 @@
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://sfwsedtxdlummiqblufq.supabase.co https://script.google.com https://script.googleusercontent.com; img-src 'self' data: blob: https://sfwsedtxdlummiqblufq.supabase.co; frame-src https://sfwsedtxdlummiqblufq.supabase.co; base-uri 'none'; form-action 'none'">
 <title>Nany Logistic HR</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700&display=swap">
 <style>
@@ -325,6 +327,7 @@ const val = (root, id) => { const el = $("#" + id, root); return el ? el.value.t
 
 function logout(msg) {
   stopPoll();
+  pushSub().then((s) => s && api("pushUnsubscribe", { endpoint: s.endpoint }).then(() => s.unsubscribe())).catch(() => {}); // a shared phone must not keep getting this person's alerts
   if (S.role === "emp") LS.set("hr_emp_tok", null); else SS.set("hr_tok", null);
   S.role = S.token = S.payToken = S.me = null; S.cache = {}; T.cfg = null; T.entries = [];
   SS.set("hub_tok", null); H.bills = null; H.docs = {};
@@ -408,7 +411,7 @@ function renderEmp() {
   const tp = m.todayPunches.map((p) => `<span class="pill ${p.kind === "in" ? "p-pri" : "p-bad"}">${p.kind === "in" ? "ເຂົ້າ" : "ອອກ"} ${esc(fmtTime(p.at))}</span>`).join("");
   $("#app").innerHTML = `
   <div class="top"><div class="wrap" style="max-width:720px"><div id="hav">${avatar(null, e.name, 48)}</div><div style="flex:1;min-width:0"><h1 class="hi">ສະບາຍດີ, ${esc(e.name)}</h1><div class="sm mut">${esc(e.emp_code)} · ${esc(e.position || "")}</div></div>
-    <span class="net" id="net"><i></i> ເຊື່ອມຕໍ່ແລ້ວ</span><button class="sm" id="hm">ຄູ່ມື</button><button class="sm" id="lo">ອອກ</button></div></div>
+    <span class="net" id="net"><i></i> ເຊື່ອມຕໍ່ແລ້ວ</span><button class="sm" id="pushb" aria-label="ແຈ້ງເຕືອນ">🔔</button><button class="sm" id="hm">ຄູ່ມື</button><button class="sm" id="lo">ອອກ</button></div></div>
   <div class="wrap grid" style="max-width:720px;gap:14px">
     <section class="card grid" style="gap:10px" id="annb" hidden></section>
     <section class="card grid" style="gap:12px">
@@ -432,6 +435,7 @@ function renderEmp() {
     ${m.holidays.length ? `<section class="card"><h3>ວັນພັກທີ່ຈະມາເຖິງ</h3><div class="sm mut">${m.holidays.map((d) => esc(dmy(d))).join(" · ")}</div></section>` : ""}
     <div class="mut xs" style="text-align:center">ເກັບພິກັດ GPS ສະເພາະຕອນສະແກນ · HR ເທົ່ານັ້ນທີ່ເຫັນ · ເກັບ ${esc(m.settings.gpsRetentionMonths)} ເດືອນ</div>
   </div>`;
+  $("#pushb").onclick = pushDialog;
   $("#lo").onclick = () => dialog({ title: "ອອກຈາກລະບົບ?", body: `<p class="mut">ຄັ້ງຕໍ່ໄປຕ້ອງໃສ່ລະຫັດ ແລະ PIN ໃໝ່</p>`, ok: "ອອກ", onOk: () => logout() });
   $("#pb").onclick = doPunch;
   $("#hm").onclick = manualDialog;
@@ -495,6 +499,34 @@ async function doPunch() {
       body: `<p>ເມື່ອກົດສະແກນ ລະບົບຈະຂໍຕຳແໜ່ງ GPS ຂອງໂທລະສັບ <b>ສະເພາະຕອນສະແກນ</b> ເພື່ອຢືນຢັນວ່າທ່ານຢູ່ບ່ອນເຮັດວຽກ.</p><ul class="sm"><li>ເຈົ້າໜ້າທີ່ HR ເທົ່ານັ້ນທີ່ເຫັນ</li><li>ເກັບໄວ້ ${esc(S.me.settings.gpsRetentionMonths)} ເດືອນ ແລ້ວລຶບພິກັດ (ເກັບແຕ່ເວລາ)</li><li>ຖ້າບໍ່ອະນຸຍາດ ຍັງສະແກນໄດ້ ແຕ່ຈະຖືກໝາຍໃຫ້ HR ກວດ</li><li>ເວລາທີ່ບັນທຶກແມ່ນເວລາຂອງເຊີບເວີ ບໍ່ແມ່ນເວລາໃນໂທລະສັບ</li></ul>`,
       onOk: () => { LS.set("hr_gps_ok", "1"); setTimeout(go, 50); } });
   } else go();
+}
+/* ---------- ແຈ້ງເຕືອນເທິງມືຖື (web push) ---------- */
+const pushOk = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+const b64uBytes = (s) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4)), (c) => c.charCodeAt(0));
+async function pushSub() { if (!pushOk()) return null; const reg = await navigator.serviceWorker.getRegistration(); return reg ? reg.pushManager.getSubscription() : null; }
+function pushDialog() {
+  const what = isAdmin() ? "ລາຍງານລົດລໍຖ້າອະນຸມັດ, ສະແກນບໍ່ຜ່ານ ແລະ ຄຳຂໍເບີກເງິນທີ່ບໍ່ມີຫົວໜ້າ" : "ລືມສະແກນເຂົ້າ (08:45) ຫຼື ອອກ (17:45) ແລະ ໃບລາ/ເບີກເງິນ ທີ່ລໍຖ້າທ່ານອະນຸມັດ";
+  dialog({ title: "🔔 ແຈ້ງເຕືອນເທິງມືຖື", ok: "", cancel: "ປິດ", body: `<div id="pd" class="grid" style="gap:10px"><div class="mut sm">ກຳລັງກວດ…</div></div>`, onOpen: (r) => {
+    const run = (fn) => async (ev) => { ev.currentTarget.disabled = true; try { await fn(); } catch (e) { toast(e.message || String(e), true); } draw(); };
+    const draw = async () => {
+      const el = $("#pd", r); if (!el) return;
+      if (!pushOk()) { el.innerHTML = `<div class="warn-box">ເຄື່ອງນີ້ຍັງເປີດແຈ້ງເຕືອນບໍ່ໄດ້. iPhone: ເປີດໃນ Safari → ກົດ ແບ່ງປັນ → "ເພີ່ມໃສ່ໜ້າຈໍຫຼັກ" ແລ້ວເປີດແອັບຈາກໄອຄອນນັ້ນ</div>`; return; }
+      const sub = await pushSub().catch(() => null);
+      if (Notification.permission === "denied") { el.innerHTML = `<div class="warn-box">ທ່ານບລັອກແຈ້ງເຕືອນໄວ້ — ເປີດຄືນໃນການຕັ້ງຄ່າເວັບໄຊຂອງບຣາວເຊີ ແລ້ວລອງໃໝ່</div>`; return; }
+      el.innerHTML = sub ? `<div class="sm">✅ ເຄື່ອງນີ້ເປີດແຈ້ງເຕືອນແລ້ວ: ${esc(what)}</div><div class="row" style="gap:8px;flex-wrap:wrap"><button class="pri" id="pt">ສົ່ງທົດລອງ</button><button id="px">ປິດແຈ້ງເຕືອນ</button></div>`
+        : `<div class="sm">ຈະແຈ້ງເຕືອນ: ${esc(what)}</div><button class="pri" id="pon">🔔 ເປີດແຈ້ງເຕືອນໃນເຄື່ອງນີ້</button>`;
+      $("#pon", r) && ($("#pon", r).onclick = run(async () => {
+        if (await Notification.requestPermission() !== "granted") return;
+        const reg = await navigator.serviceWorker.register("sw.js"); await navigator.serviceWorker.ready;
+        const { key } = await api("pushKey");
+        const s = (await reg.pushManager.getSubscription()) || (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uBytes(key) }));
+        await api("pushSubscribe", { sub: s.toJSON() }); toast("ເປີດແຈ້ງເຕືອນແລ້ວ");
+      }));
+      $("#pt", r) && ($("#pt", r).onclick = run(async () => { const j = await api("pushTest"); toast(j.sent ? "ສົ່ງແລ້ວ — ລໍຖ້າແຈ້ງເຕືອນ" : "ສົ່ງບໍ່ໄດ້ — ກົດ ປິດ ແລ້ວເປີດແຈ້ງເຕືອນໃໝ່", !j.sent); }));
+      $("#px", r) && ($("#px", r).onclick = run(async () => { const s = await pushSub(); if (s) { await api("pushUnsubscribe", { endpoint: s.endpoint }); await s.unsubscribe(); } toast("ປິດແຈ້ງເຕືອນແລ້ວ"); }));
+    };
+    draw();
+  } });
 }
 /* ---------- ຂໍ້ມູນສ່ວນຕົວ + ຮູບ (ເຈົ້າຂອງ ແລະ HR ເທົ່ານັ້ນ) ---------- */
 const PF = [["phone", "ເບີໂທ", "tel"], ["address", "ທີ່ຢູ່ປັດຈຸບັນ", "area"], ["birth_date", "ວັນເກີດ", "date"], ["blood_type", "ກຸ່ມເລືອດ", "blood"],
@@ -743,12 +775,12 @@ function renderShell() {
     <nav class="tabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${k === S.tab}" data-tab="${k}">${esc(l)}</button>`).join("")}</nav></aside>
     <div style="min-width:0"><header class="top"><div class="wrap"><div style="flex:1;min-width:180px"><h1 class="hi">ສະບາຍດີ, ${isAdmin() ? "ແອດມິນ" : "HR"}</h1><div class="sm mut">ຍິນດີຕ້ອນຮັບສູ່ລະບົບບໍລິຫານພະນັກງານ</div></div>
     <select id="mo_m" style="width:auto" aria-label="ເດືອນ">${MONTHS.map((n, i) => `<option value="${String(i + 1).padStart(2, "0")}" ${+S.month.slice(5) === i + 1 ? "selected" : ""}>${n}</option>`).join("")}</select><select id="mo_y" style="width:auto" aria-label="ປີ">${[-3, -2, -1, 0, 1].map((d) => +curMonth().slice(0, 4) + d).concat(+S.month.slice(0, 4)).filter((y, i, a) => a.indexOf(y) === i).sort().map((y) => `<option ${y === +S.month.slice(0, 4) ? "selected" : ""}>${y}</option>`).join("")}</select><select id="dp" aria-label="ພະແນກ"><option value="">ທຸກພະແນກ</option>${depts.map((d) => `<option ${d === S.dept ? "selected" : ""}>${esc(d)}</option>`).join("")}</select>
-    <span class="net" id="net"><i></i> ເຊື່ອມຕໍ່ແລ້ວ</span><button class="sm" id="lo">ອອກ</button></div></header>
+    <span class="net" id="net"><i></i> ເຊື່ອມຕໍ່ແລ້ວ</span>${isAdmin() ? `<button class="sm" id="pushb" aria-label="ແຈ້ງເຕືອນ">🔔</button>` : ""}<button class="sm" id="lo">ອອກ</button></div></header>
     <main class="wrap" id="main"></main></div></div>`;
   // plain selects: Safari's <input type="month"> shows a day segment and leaves the value empty
   $("#mo_m").onchange = $("#mo_y").onchange = () => { S.month = $("#mo_y").value + "-" + $("#mo_m").value; SS.set("hr_month", S.month); renderTab(); };
   $("#dp").onchange = () => { S.dept = $("#dp").value; renderTab(); };
-  $("#lo").onclick = () => logout();
+  $("#lo").onclick = () => logout(); $("#pushb") && ($("#pushb").onclick = pushDialog);
   $$("[data-tab]").forEach((b) => b.onclick = () => { S.tab = b.dataset.tab; $$("[data-tab]").forEach((x) => x.setAttribute("aria-selected", x === b)); renderTab(); });
   renderTab();
 }
