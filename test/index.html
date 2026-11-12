@@ -466,11 +466,22 @@ const GPS_MSG = { denied: "ໂທລະສັບບລັອກຕຳແໜ່�
 const gpsOnce = (o) => new Promise((res) => navigator.geolocation.getCurrentPosition(
   (p) => res({ lat: p.coords.latitude, lng: p.coords.longitude, accuracy: Math.round(p.coords.accuracy) }),
   (e) => res({ gpsErr: e.code === 1 ? "denied" : e.code === 3 ? "timeout" : "unavailable" }), o));
+// the first GPS reading is often the worst (one scan was 290 m off, the retry a minute later passed): keep listening briefly and use the best fix
+const gpsBest = (o, goodM = 30, settleMs = 3000) => new Promise((res) => {
+  let best = null, done = false, settle = null;
+  const fix = (p) => ({ lat: p.coords.latitude, lng: p.coords.longitude, accuracy: Math.round(p.coords.accuracy) });
+  const finish = (r) => { if (done) return; done = true; navigator.geolocation.clearWatch(id); clearTimeout(cap); clearTimeout(settle); res(best || r); };
+  const cap = setTimeout(() => finish({ gpsErr: "timeout" }), o.timeout);
+  const id = navigator.geolocation.watchPosition((p) => {
+    const f = fix(p); if (!best || f.accuracy < best.accuracy) best = f;
+    if (f.accuracy <= goodM) finish(); else settle ||= setTimeout(finish, settleMs);
+  }, (e) => finish({ gpsErr: e.code === 1 ? "denied" : e.code === 3 ? "timeout" : "unavailable" }), o);
+});
 // weak indoor GPS: fall back to a network fix instead of failing, same 12 s worst case as one long try
 async function getPos(exact) {
   if (!navigator.geolocation) return { gpsErr: "unsupported" };
   if (exact) return gpsOnce({ enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }); // pinning a site must never use a rough network fix
-  const a = await gpsOnce({ enableHighAccuracy: true, timeout: 7000, maximumAge: 0 });
+  const a = await gpsBest({ enableHighAccuracy: true, timeout: 7000, maximumAge: 0 });
   return a.gpsErr && a.gpsErr !== "denied" ? gpsOnce({ enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }) : a;
 }
 // scan card only: redrawing the whole page after a scan made it jump to the top
