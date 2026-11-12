@@ -106,7 +106,7 @@ tr:last-child td{border-bottom:0}
 .net.busy i{background:#F2B84B}.net.off i{background:#F28B6B}
 .punch{width:100%;min-height:140px;border-radius:22px;font-size:28px;border:0;color:#fff;background:#16A34A;display:grid;place-items:center;gap:2px;padding:16px}
 .punch .e{font-size:52px;line-height:1}
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));gap:12px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));grid-auto-rows:1fr;gap:12px}
 .tile{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:18px;min-height:110px;display:grid;place-items:center;gap:4px;padding:12px;font-weight:600}
 .tile .e{font-size:42px;line-height:1}
 .et .ep{display:flex;gap:10px;align-items:center;min-width:200px}.et .ep .b{white-space:nowrap}.et td.sm{white-space:nowrap}.et button{white-space:nowrap}.ib{min-width:36px;padding-inline:8px}
@@ -128,11 +128,13 @@ details.fold>summary::-webkit-details-marker{display:none}details.fold>summary::
 .dlgbg{position:fixed;inset:0;background:rgba(20,30,32,.45);z-index:50;display:grid;place-items:center;padding:16px}
 .dlg{background:#fff;border-radius:18px;max-width:640px;width:100%;max-height:90vh;overflow:auto;padding:20px;display:grid;gap:14px}
 .dlg.wide{max-width:1000px}
+@media (max-width:600px){.dlg{padding:14px}.dlgbg{padding:8px}}
 .err-box{background:var(--acc2);color:var(--acc);padding:10px 12px;border-radius:10px;font-size:14px}
 .warn-box{background:var(--warn2);color:#6B4A00;padding:10px 12px;border-radius:10px;font-size:14px}
 .empty{padding:28px;text-align:center;color:var(--mut)}
-.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.cal div{border:1px solid var(--line2);border-radius:8px;padding:4px;min-height:52px;font-size:11px}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal div{border:1px solid var(--line2);border-radius:8px;padding:4px;min-height:52px;font-size:11px;min-width:0;overflow-wrap:anywhere;overflow:hidden}
+.cal .pill{white-space:normal;max-width:100%;padding:1px 4px;font-size:11px}
 #print{display:none}
 .doc{font-size:13px;line-height:1.7;color:#000;max-width:780px;margin:0 auto;position:relative}
 .doc table td,.doc table th{border:1px solid #999;padding:6px 8px;position:static;background:none;color:#000;font-size:13px}
@@ -398,54 +400,76 @@ const annHTML = (a, tail) => `<div class="ann ${a.urgent ? "urg" : ""}"><div cla
 function annBoard() {
   const el = $("#annb"), list = S.me.announcements || [];
   if (!el) return;
-  el.hidden = !list.length;
-  const todo = list.filter((a) => !a.acked), done = list.filter((a) => a.acked);
-  el.innerHTML = `<div class="row" style="justify-content:space-between"><h2>📢 ແຈ້ງການ</h2>${todo.length ? `<span class="pill p-bad">ໃໝ່ ${todo.length}</span>` : `<span class="pill p-ok">✅ ອ່ານໝົດແລ້ວ</span>`}</div>
-    ${todo.map((a) => annHTML(a, `<button class="ack" data-ui="secondary" data-ack="${esc(a.id)}">✅ ຮັບຊາບ</button>`)).join("")}
-    ${done.length ? `<details ${todo.length ? "" : "open"}><summary class="sm mut">ອ່ານແລ້ວ (${done.length})</summary><div class="grid" style="gap:8px;margin-top:8px">${done.map((a) => annHTML(a, `<div class="xs" style="color:var(--ok)">✅ ຮັບຊາບແລ້ວ</div>`)).join("")}</div></details>` : ""}`;
-  $$("[data-ack]", el).forEach((b) => b.onclick = async () => {
-    b.disabled = true;
-    try { await api("annAck", { id: b.dataset.ack }); list.find((a) => a.id === b.dataset.ack).acked = true; annBoard(); } catch (e) { b.disabled = false; toast(e.message); }
-  });
+  const todo = list.filter((a) => !a.acked);
+  el.hidden = !todo.length;
+  el.style.border = "1px solid var(--warn)";
+  el.innerHTML = todo.length ? `<button id="annOpen" data-ui="secondary" style="border:0;background:transparent;min-height:44px;padding:0;justify-content:flex-start;text-align:left;font-size:16px">📢 ແຈ້ງການໃໝ່ ${todo.length} — <span style="color:var(--pri);margin-left:4px">ອ່ານ</span></button>` : "";
+  $("#annOpen") && ($("#annOpen").onclick = annDialog);
+}
+// full notices list; acknowledging here updates the one-line notice on the home page
+function annDialog() {
+  const list = S.me.announcements || [];
+  dialog({ title: "📢 ແຈ້ງການ", ok: "", cancel: "ປິດ", wide: true, body: `<div id="annl" class="grid" style="gap:10px"></div>`, onOpen: (r) => {
+    const draw = () => {
+      const todo = list.filter((a) => !a.acked), done = list.filter((a) => a.acked), el = $("#annl", r); if (!el) return;
+      el.innerHTML = `${todo.map((a) => annHTML(a, `<button class="ack" data-ui="secondary" data-ack="${esc(a.id)}">✅ ຮັບຊາບ</button>`)).join("") || `<div class="sm" style="color:var(--ok)">✅ ອ່ານໝົດແລ້ວ</div>`}
+        ${done.length ? `<details><summary class="sm mut">ອ່ານແລ້ວ (${done.length})</summary><div class="grid" style="gap:8px;margin-top:8px">${done.map((a) => annHTML(a, `<div class="xs" style="color:var(--ok)">✅ ຮັບຊາບແລ້ວ</div>`)).join("")}</div></details>` : ""}`;
+      $$("[data-ack]", el).forEach((b) => b.onclick = async () => {
+        b.disabled = true;
+        try { await api("annAck", { id: b.dataset.ack }); list.find((a) => a.id === b.dataset.ack).acked = true; draw(); annBoard(); } catch (e) { b.disabled = false; toast(e.message); }
+      });
+    };
+    draw();
+  } });
 }
 function renderEmp() {
   const m = S.me, e = m.emp, annual = m.balances.find((b) => b.k === "annual" && b.active);
   $("#app").innerHTML = `
-  <div class="top"><div class="wrap" style="max-width:720px"><div id="hav">${avatar(null, e.name, 48)}</div><div style="flex:1;min-width:0"><h1 class="hi">ສະບາຍດີ, ${esc(e.name)}</h1><div class="sm mut">${esc(e.emp_code)} · ${esc(e.position || "")}</div></div>
-    <span class="net" id="net"><i></i> ເຊື່ອມຕໍ່ແລ້ວ</span><button class="sm" id="menub" aria-label="ເມນູ" style="min-width:44px;min-height:44px;font-size:20px">☰</button></div></div>
+  <div class="top"><div class="wrap" style="max-width:720px;align-items:center;flex-wrap:nowrap"><span class="net" id="net"><i></i> ເຊື່ອມຕໍ່ແລ້ວ</span><h1 class="hi" style="flex:1;min-width:0;font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(e.name)}<span id="hveh"></span></h1>
+    <button class="sm" id="menub" data-ui="secondary" aria-label="ເມນູ" style="min-width:44px;min-height:44px;font-size:20px">☰</button></div></div>
   <div class="wrap grid" style="max-width:720px;gap:14px">
     <section class="card grid" style="gap:12px" id="pcard"></section>
     ${m.isApprover ? `<section class="card grid" style="gap:10px"><div class="row" style="justify-content:space-between"><h2>✅ ລໍຖ້າອະນຸມັດ (ລາ / ເບີກເງິນ)</h2>${m.pendingApprovals ? `<span class="pill p-warn">${m.pendingApprovals}</span>` : ""}</div><div id="apl"><div class="mut sm">ກຳລັງໂຫຼດ…</div></div></section>` : ""}
     <section class="card grid" style="gap:12px" id="trk" hidden></section>
     <section class="card grid" style="gap:10px" id="annb" hidden></section>
-    <div class="tiles"><button class="tile" id="tLeave" data-ui="secondary"><span class="e" aria-hidden="true">📝</span>ຂໍລາ${annual && annual.quota ? `<small class="xs mut">ເຫຼືອ ${fmtD(annual.remaining)} ວັນ</small>` : ""}</button><button class="tile" id="tPay" data-ui="secondary"><span class="e" aria-hidden="true">💵</span>ສະລິບເງິນເດືອນ</button><button class="tile" id="tAdv" data-ui="secondary"><span class="e" aria-hidden="true">💸</span>ຂໍເບີກເງິນ</button><button class="tile" id="tAtt" data-ui="secondary"><span class="e" aria-hidden="true">📅</span>ປະຫວັດສະແກນ</button></div>
-    <details class="card fold"><summary>📝 ໂຄວຕາລາ ແລະ ໃບລາຂອງຂ້ອຍ</summary><div class="grid" style="gap:10px;margin-top:10px">
-      <div class="grid g4">${m.balances.filter((b) => b.active).map((b) => `<div><div class="xs mut">${esc(b.name)}</div><div class="b num" style="text-align:left">${b.quota ? `${fmtD(b.remaining)} / ${fmtD(b.quota)}` : `ໃຊ້ ${fmtD(b.used)}`} ວັນ</div>${b.pending ? `<div class="xs mut">ລໍຖ້າ ${fmtD(b.pending)}</div>` : ""}</div>`).join("")}</div>
-      ${!m.hasApprover ? `<div class="warn-box">ທ່ານຍັງບໍ່ມີຫົວໜ້າຜູ້ອະນຸມັດລາ — ແຈ້ງ HR</div>` : ""}
-      <div id="myl">${leaveListHTML(m.recentLeaves)}</div><div class="row"><button id="nl">+ ຂໍລາ</button><button id="alll" class="sm">ເບິ່ງທັງໝົດ</button></div></div></details>
-    <details class="card fold"><summary>💸 ເບີກເງິນລ່ວງໜ້າ</summary><div class="grid" style="gap:10px;margin-top:10px"><div id="myadv" class="mut sm">ກຳລັງໂຫຼດ…</div><button id="nadv" style="justify-self:start">+ ຂໍເບີກ</button></div></details>
-    <details class="card fold"><summary>💵 ສະລິບເງິນເດືອນ</summary><div class="grid" style="gap:10px;margin-top:10px"><div id="psl" class="mut sm">ຕ້ອງໃສ່ PIN ທຸກຄັ້ງ — ເປີດໄດ້ 10 ນາທີ</div><button id="psb" style="justify-self:start">ເປີດ (ໃສ່ PIN)</button></div></details>
-    <details class="card fold" id="dAtt"><summary>📅 ປະຫວັດການສະແກນ</summary><div class="grid" style="gap:10px;margin-top:10px"><div class="row"><input type="month" id="am" value="${esc(m.today.slice(0, 7))}" style="width:auto"><button id="attb" class="sm">ໂຫຼດ</button></div><div id="att" class="mut sm">ກົດເລືອກເດືອນເພື່ອເບິ່ງ</div></div></details>
+    <div class="tiles"><button class="tile" id="tLeave" data-ui="secondary"><span class="e" aria-hidden="true" style="line-height:0"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16M11 15h1v3"/></svg></span>ຂໍລາ${annual && annual.quota ? `<small class="xs mut">ເຫຼືອ ${fmtD(annual.remaining)} ວັນ</small>` : ""}</button><button class="tile" id="tPay" data-ui="secondary"><span class="e" aria-hidden="true" style="line-height:0"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="9" width="14" height="10" rx="2"/><circle cx="14" cy="14" r="2"/><path d="M17 9V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/></svg></span>ສະລິບເງິນເດືອນ</button><button class="tile" id="tAdv" data-ui="secondary"><span class="e" aria-hidden="true" style="line-height:0"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8V5a1 1 0 0 0-1-1H6a2 2 0 0 0 0 4h12a1 1 0 0 1 1 1v3m0 4v3a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V6"/><path d="M20 12v4h-4a2 2 0 0 1 0-4h4"/></svg></span>ຂໍເບີກເງິນ</button><button class="tile" id="tAtt" data-ui="secondary"><span class="e" aria-hidden="true" style="line-height:0"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span>ປະຫວັດສະແກນ</button></div>
     <section class="card grid" style="gap:12px" id="myjob" hidden></section>
     ${m.holidays.length ? `<div class="sm mut" style="text-align:center">🎉 ວັນພັກທີ່ຈະມາເຖິງ: ${m.holidays.map((d) => esc(dmy(d))).join(" · ")}</div>` : ""}
     <div class="mut xs" style="text-align:center">ເກັບພິກັດ GPS ສະເພາະຕອນສະແກນ · HR ເທົ່ານັ້ນທີ່ເຫັນ · ເກັບ ${esc(m.settings.gpsRetentionMonths)} ເດືອນ</div>
   </div>`;
   $("#menub").onclick = empMenu;
   drawPunch();
-  $("#tLeave").onclick = () => leaveForm(null); $("#tPay").onclick = openPayslips;
-  $("#tAtt").onclick = () => { $("#dAtt").open = true; $("#dAtt").scrollIntoView({ behavior: "smooth", block: "start" }); $("#attb").click(); };
+  $("#tLeave").onclick = () => myLeavesDialog(m); $("#tPay").onclick = openPayslips;
+  $("#tAdv").onclick = () => myAdvDialog(m); $("#tAtt").onclick = () => myAttDialog(m);
   annBoard();
   api("myProfile").then((j) => setAvatars(j.photo, e.name)).catch(() => {});
-  $("#nl").onclick = () => leaveForm(null);
-  $("#alll").onclick = async () => { try { const j = await api("myLeaves"); $("#myl").innerHTML = leaveListHTML(j.requests); bindLeaveList($("#myl")); } catch (e) { fail(e); } };
-  bindLeaveList($("#myl"));
-  $("#psb").onclick = openPayslips;
-  $("#tAdv").onclick = $("#nadv").onclick = () => advForm(m);
-  loadMyAdv();
-  $("#attb").onclick = async () => { try { const j = await api("myAttendance", { month: $("#am").value }); $("#att").innerHTML = calHTML(j.days, j.summary); } catch (e) { fail(e); } };
   if (m.isApprover) loadApprovals();
   loadTrucksEmp();
   loadMyJob(m);
+}
+// the home tiles open these pop-ups, so the home page is only boxes
+function myLeavesDialog(m) {
+  dialog({ title: "📝 ລາພັກ", ok: "", cancel: "ປິດ", wide: true, body: `<div class="grid" style="gap:12px">
+    <div class="grid g4">${m.balances.filter((b) => b.active).map((b) => `<div><div class="xs mut">${esc(b.name)}</div><div class="b num" style="text-align:left">${b.quota ? `${fmtD(b.remaining)} / ${fmtD(b.quota)}` : `ໃຊ້ ${fmtD(b.used)}`} ວັນ</div>${b.pending ? `<div class="xs mut">ລໍຖ້າ ${fmtD(b.pending)}</div>` : ""}</div>`).join("")}</div>
+    ${!m.hasApprover ? `<div class="warn-box">ທ່ານຍັງບໍ່ມີຫົວໜ້າຜູ້ອະນຸມັດລາ — ແຈ້ງ HR</div>` : ""}
+    <button class="pri" id="nl">+ ຂໍລາ</button>
+    <h3>ໃບລາຂອງຂ້ອຍ</h3><div id="myl">${leaveListHTML(m.recentLeaves)}</div><button id="alll" class="sm" style="justify-self:start">ເບິ່ງທັງໝົດ</button></div>`,
+    onOpen: (r) => {
+      $("#nl", r).onclick = () => leaveForm(null);
+      $("#alll", r).onclick = async () => { try { const j = await api("myLeaves"); $("#myl", r).innerHTML = leaveListHTML(j.requests); bindLeaveList($("#myl", r)); } catch (e) { fail(e); } };
+      bindLeaveList($("#myl", r));
+    } });
+}
+function myAdvDialog(m) {
+  dialog({ title: "💸 ເບີກເງິນລ່ວງໜ້າ", ok: "", cancel: "ປິດ", wide: true, body: `<div class="grid" style="gap:12px"><button class="pri" id="nadv">+ ຂໍເບີກ</button><div id="myadv" class="mut sm">ກຳລັງໂຫຼດ…</div></div>`,
+    onOpen: (r) => { $("#nadv", r).onclick = () => advForm(m); loadMyAdv(); } });
+}
+function myAttDialog(m) {
+  dialog({ title: "📅 ປະຫວັດການສະແກນ", ok: "", cancel: "ປິດ", wide: true, body: `<div class="grid" style="gap:10px"><input type="month" id="am" value="${esc(m.today.slice(0, 7))}" style="width:auto;justify-self:start"><div id="att" class="mut sm">ກຳລັງໂຫຼດ…</div></div>`,
+    onOpen: (r) => {
+      const load = async () => { try { const j = await api("myAttendance", { month: $("#am", r).value }); $("#att", r).innerHTML = calHTML(j.days, j.summary); } catch (e) { $("#att", r).innerHTML = `<div class="err-box">${esc(e.message)}</div>`; } };
+      $("#am", r).onchange = load; load();
+    } });
 }
 // rarely used actions live behind one menu so the header stays calm on a phone
 function empMenu() {
@@ -493,8 +517,8 @@ async function getPos(exact) {
 function drawPunch(msg = "") {
   const m = S.me, next = m.next, el = $("#pcard"); if (!el) return;
   const tp = m.todayPunches.map((p) => `<span class="pill ${p.kind === "in" ? "p-pri" : "p-bad"}">${p.kind === "in" ? "ເຂົ້າ" : "ອອກ"} ${esc(fmtTime(p.at))}</span>`).join("");
-  el.innerHTML = `<button class="punch ${next === "out" ? "out" : ""}" id="pb" data-ui="primary"><span class="e" aria-hidden="true">${next === "out" ? "🏠👈" : "👉🏢"}</span><span id="pbl">${next === "out" ? "ອອກວຽກ" : "ເຂົ້າວຽກ"}</span><small>ເວລາເຮັດວຽກ ${esc(m.settings.shift.start)}–${esc(m.settings.shift.end)} · ວັນທີ ${esc(dmy(m.today))}</small></button>
-      <div class="row">${tp || `<span class="mut sm">📭 ມື້ນີ້ຍັງບໍ່ມີການສະແກນ</span>`}</div>
+  el.innerHTML = `<button class="punch ${next === "out" ? "out" : ""}" id="pb" data-ui="primary" style="min-height:96px"><span id="pbl">${next === "out" ? "ອອກວຽກ" : "ເຂົ້າວຽກ"}</span></button>
+      <div class="row" style="justify-content:space-between"><span class="sm mut">ເວລາເຮັດວຽກ ${esc(m.settings.shift.start)}–${esc(m.settings.shift.end)}</span><span class="row" style="gap:6px">${tp || `<span class="pill p-ok">ຍັງບໍ່ໄດ້ສະແກນ</span>`}</span></div>
       <div id="pmsg" style="min-height:22px">${msg}</div>`;
   $("#pb").onclick = doPunch;
 }
@@ -721,6 +745,7 @@ function calHTML(days, sum) {
 }
 async function openPayslips() {
   const show = async () => {
+    if (!$("#psl")) dialog({ title: "💵 ສະລິບເງິນເດືອນ", ok: "", cancel: "ປິດ", wide: true, body: `<div id="psl" class="mut sm">ກຳລັງໂຫຼດ…</div>` });
     try {
       const j = await api("payslipMonths", { payToken: S.payToken });
       if (!j.months.length) { $("#psl").innerHTML = "ຍັງບໍ່ມີສະລິບ (HR ຕ້ອງປິດເດືອນກ່ອນ)"; return; }
@@ -738,7 +763,7 @@ async function openPayslips() {
   const onErr = (e) => { if (e.code === "pin_required") { S.payToken = null; openPayslips(); } else fail(e); };
   if (S.payToken) return show();
   dialog({ title: "ໃສ່ PIN ເພື່ອເບິ່ງເງິນເດືອນ", ok: "ເປີດ", body: `<label>PIN 6 ຫຼັກ<input id="pp" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></label>`,
-    onOk: async (r) => { const j = await api("payStepUp", { pin: val(r, "pp") }); S.payToken = j.token; setTimeout(() => { S.payToken = null; }, 10 * 60e3 - 5000); show(); } });
+    onOk: async (r) => { const j = await api("payStepUp", { pin: val(r, "pp") }); S.payToken = j.token; setTimeout(() => { S.payToken = null; }, 10 * 60e3 - 5000); setTimeout(show, 0); } });
 }
 
 /* ---------- print docs ---------- */
@@ -2096,16 +2121,18 @@ async function loadTrucksEmp() {
   const canEdit = (e) => e.status !== "approved" && e.date >= recent && (!(e.crew || []).length || inCrew(e));
   const todayE = T.entries.find((e) => e.date === T.today && e.veh === me.veh && canEdit(e));
   el.hidden = false;
-  el.innerHTML = `<div class="row" style="justify-content:space-between"><h2>ລາຍງານລົດ${me.veh ? " · " + esc(tVehName(me.veh)) : ""}</h2><span class="pill p-pri">${esc(me.nick)}</span></div>
-    <button id="trn" data-ui="secondary" style="min-height:52px;font-size:17px">🚚 ${todayE ? "ແກ້ໄຂລາຍງານມື້ນີ້" : "+ ບັນທຶກການສົ່ງ"}</button>
-    <div class="grid" style="gap:10px;grid-template-columns:1fr 1fr"><div class="kpi"><span class="mut sm">✅ ຮອບນີ້ · ອະນຸມັດແລ້ວ</span><span class="v">${fmt(tot(true))} ₭</span></div><div class="kpi"><span class="mut sm">⏳ ລໍຖ້າອະນຸມັດ</span><span class="v" style="color:var(--warn)">${fmt(tot(false))} ₭</span></div></div>
-    <div class="xs mut">ຮອບ ${esc(dmy(p.start))}–${esc(dmy(p.end))} · ເຂົ້າເງິນເດືອນ ${esc(monthLabel(pm))} · ບັນທຶກ/ແກ້ຍ້ອນຫຼັງໄດ້ ${back} ມື້</div>
+  if (me.veh && $("#hveh")) $("#hveh").textContent = " · " + tVehName(me.veh);
+  const listHTML = () => `<div class="xs mut">ຮອບ ${esc(dmy(p.start))}–${esc(dmy(p.end))} · ເຂົ້າເງິນເດືອນ ${esc(monthLabel(pm))} · ບັນທຶກ/ແກ້ຍ້ອນຫຼັງໄດ້ ${back} ມື້</div>
     <div class="grid" style="gap:8px">${vis.length ? vis.map((e) => `<div class="row" style="justify-content:space-between;border-top:1px solid var(--line2);padding-top:8px;flex-wrap:nowrap"><div style="min-width:0;flex:1"><div class="b sm">${esc(dmy(e.date))} · ${esc(tVehName(e.veh))}</div><div class="xs mut">${esc(tQty(e))}</div><div class="xs">${(e.crew || []).length ? esc(e.crew.join(", ")) : `<span style="color:var(--acc)">ຍັງບໍ່ມີທີມ</span>`}</div></div>
       <div style="display:grid;gap:4px;justify-items:end"><b class="num">${inCrew(e) ? fmt(tShare(e, me.nick)) + " ₭" : "—"}</b>${pill(TST, e.status === "approved" ? "approved" : "pending")}${canEdit(e) ? `<button class="sm" data-tme="${esc(e.id)}">ແກ້ໄຂ</button>` : ""}</div></div>`).join("") : `<div class="mut sm">ຍັງບໍ່ມີລາຍງານ</div>`}</div>`;
-  if (cfg.partner?.nick === me.nick) { const b = document.createElement("button"); b.textContent = `🤝 ສະຫຼຸບລົດຮ່ວມ ${cfg.partner.veh} · ${monthLabel(pm)}`; b.onclick = () => tPartnerDlg(pm, false); $("#trn").after(b); }
+  const last = vis[0];
+  el.innerHTML = `<div class="row" style="justify-content:space-between;flex-wrap:nowrap"><h2>🚚 ລາຍງານ${me.veh ? esc(tVehName(me.veh)) : "ລົດ"}</h2><button id="trn" data-ui="secondary" style="min-height:44px">${todayE ? "✏️ ແກ້ໄຂມື້ນີ້" : "+ ບັນທຶກ"}</button></div>
+    <div class="grid" style="gap:10px;grid-template-columns:1fr 1fr"><div class="kpi"><span class="mut sm">✅ ອະນຸມັດແລ້ວ</span><span class="v">${fmt(tot(true))} ₭</span></div><div class="kpi"><span class="mut sm">⏳ ລໍຖ້າ</span><span class="v" style="color:var(--warn)">${fmt(tot(false))} ₭</span></div></div>
+    <div class="row sm mut" style="gap:6px">${last ? `${esc(dmy(last.date).slice(0, 5))} · ${last.status === "approved" ? "ອະນຸມັດແລ້ວ" : "ລໍຖ້າ"}` : "ຍັງບໍ່ມີລາຍງານ"}${vis.length ? ` — <button class="sm" id="tall" data-ui="secondary" style="min-height:36px">ເບິ່ງທັງໝົດ (${vis.length})</button>` : ""}</div>`;
+  if (cfg.partner?.nick === me.nick) { const b = document.createElement("button"); b.textContent = `🤝 ສະຫຼຸບລົດຮ່ວມ ${cfg.partner.veh} · ${monthLabel(pm)}`; b.onclick = () => tPartnerDlg(pm, false); el.appendChild(b); }
   $("#trn").onclick = () => tEntryForm(todayE || null, loadTrucksEmp);
-  const tt = $("#tTrip"); if (tt) { tt.hidden = false; tt.onclick = () => tEntryForm(todayE || null, loadTrucksEmp); }
-  $$("[data-tme]", el).forEach((b) => b.onclick = () => tEntryForm(T.entries.find((e) => e.id === b.dataset.tme), loadTrucksEmp));
+  $("#tall") && ($("#tall").onclick = () => dialog({ title: "🚚 ລາຍງານ" + (me.veh ? tVehName(me.veh) : "ລົດ"), ok: "", cancel: "ປິດ", wide: true, body: `<div class="grid" style="gap:10px">${listHTML()}</div>`,
+    onOpen: (r, close) => $$("[data-tme]", r).forEach((b) => b.onclick = () => { close(); tEntryForm(T.entries.find((e) => e.id === b.dataset.tme), loadTrucksEmp); }) }));
 }
 
 /* leave admin */
