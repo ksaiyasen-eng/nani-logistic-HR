@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700&display=swap">
 <style>
-:root{--ink:#1B2333;--mut:#667085;--line:#E3E8EF;--line2:#EEF1F6;--bg:#EEF2F8;--card:#fff;--pri:#2563EB;--pri-h:#1D4ED8;--pri2:#E8EFFE;--acc:#D9483B;--acc2:#FDECEA;--warn:#9A6B00;--warn2:#FBF1D6;--ok:#2F7A3E;--ok2:#E2F1E4;--hero:#1F2430;--r:20px;--sh:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.06)}
+:root{--soft:#FBFAF7;--ink:#1B2333;--mut:#667085;--line:#E3E8EF;--line2:#EEF1F6;--bg:#EEF2F8;--card:#fff;--pri:#2563EB;--pri-h:#1D4ED8;--pri2:#E8EFFE;--acc:#D9483B;--acc2:#FDECEA;--warn:#9A6B00;--warn2:#FBF1D6;--ok:#2F7A3E;--ok2:#E2F1E4;--hero:#1F2430;--r:20px;--sh:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.06)}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Noto Sans Lao",system-ui,sans-serif;-webkit-text-size-adjust:100%}
@@ -146,7 +146,7 @@ details.fold>summary::-webkit-details-marker{display:none}details.fold>summary::
 .fsel{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 input.cell{min-height:44px}}
 @media (prefers-color-scheme:dark){
-:root{color-scheme:dark;--ink:#E7EBF2;--mut:#98A2B3;--line:#2B3342;--line2:#232A36;--bg:#0F141C;--card:#171D27;--pri:#2563EB;--pri-h:#1D4ED8;--pri2:#1A2740;--acc:#C93F33;--acc2:#3A1F1C;--warn:#E3B04B;--warn2:#3A2E10;--ok:#6FCF82;--ok2:#173321;--hero:#2563EB;--sh:0 1px 2px rgba(0,0,0,.3)}
+:root{color-scheme:dark;--soft:#1C2330;--ink:#E7EBF2;--mut:#98A2B3;--line:#2B3342;--line2:#232A36;--bg:#0F141C;--card:#171D27;--pri:#2563EB;--pri-h:#1D4ED8;--pri2:#1A2740;--acc:#C93F33;--acc2:#3A1F1C;--warn:#E3B04B;--warn2:#3A2E10;--ok:#6FCF82;--ok2:#173321;--hero:#2563EB;--sh:0 1px 2px rgba(0,0,0,.3)}
 a,a:hover,.tabs button[aria-selected=true],.p-pri{color:#8AB4FF}
 button,input,select,textarea,.emp,.tw,.dlg{background:var(--card)}
 button:hover{background:#1F2734}
@@ -667,11 +667,11 @@ async function loadApprovals() {
   try {
     const j = await api("approvals");
     const el = $("#apl"); if (!el) return;
-    const advH = (j.advances || []).map((r) => `<div class="card grid" style="gap:6px;padding:12px;background:#FBFAF7">
+    const advH = (j.advances || []).map((r) => `<div class="card grid" style="gap:6px;padding:12px;background:var(--soft)">
       <div class="row" style="justify-content:space-between"><div class="b">💸 ${esc(r.name)} <span class="mut xs">${esc(r.emp_code)}</span></div><span class="xs mut">${esc(r.doc_no)}${r.asDelegate ? " · ແທນຫົວໜ້າ" : ""}</span></div>
       <div class="sm">ຂໍເບີກ <b>${fmt(r.amount)} ₭</b> · ${esc(advPlanText(r))}</div><div class="sm">ເຫດຜົນ: ${esc(r.reason)}</div>
       <div class="row"><button class="sm" data-adoc="${esc(r.id)}">📄 ເອກະສານ</button><span style="flex:1"></span><button class="sm" data-arej="${esc(r.id)}">ປະຕິເສດ</button><button class="sm pri" data-aok="${esc(r.id)}">ອະນຸມັດ → ສົ່ງ HR</button></div></div>`).join("");
-    el.innerHTML = advH + (j.pending.length ? j.pending.map((r) => `<div class="card grid" style="gap:6px;padding:12px;background:#FBFAF7">
+    el.innerHTML = advH + (j.pending.length ? j.pending.map((r) => `<div class="card grid" style="gap:6px;padding:12px;background:var(--soft)">
       <div class="row" style="justify-content:space-between"><div class="b">${esc(r.name)} <span class="mut xs">${esc(r.emp_code)}</span></div><span class="xs mut">${esc(r.doc_no)}${r.asDelegate ? " · ແທນຫົວໜ້າ" : ""}</span></div>
       <div class="sm">${esc(r.typeName || r.type_key)} · ${esc(dmy(r.from_date))}–${esc(dmy(r.to_date))}${r.half_day !== "none" ? (r.half_day === "am" ? " (ເຊົ້າ)" : " (ບ່າຍ)") : ""} · <b>${fmtD(r.days)} ວັນ</b></div>
       <div class="sm">ເຫດຜົນ: ${esc(r.reason)}</div>
@@ -1656,7 +1656,7 @@ async function tabJd(m) {
             ${(j.qualifications || []).length ? `<div><div class="b">ຄຸນສົມບັດ</div><ul style="margin:4px 0;padding-left:20px">${j.qualifications.map((q) => `<li>${esc(q)}</li>`).join("")}</ul></div>` : ""}
             <div class="row" style="gap:16px"><span><span class="mut">ເງິນເດືອນ:</span> ${blank(j.salary) ? `<i class="mut">ຍັງບໍ່ລະບຸ</i>` : esc(j.salary)}</span><span><span class="mut">ເວລາວຽກ:</span> ${blank(j.hours) ? `<i class="mut">ຍັງບໍ່ລະບຸ</i>` : esc(j.hours)}</span></div>
           </div>
-          <aside class="grid" style="gap:12px;background:#FBFAF7;border:1px solid var(--line2);border-radius:12px;padding:14px;font-size:13px">
+          <aside class="grid" style="gap:12px;background:var(--soft);border:1px solid var(--line2);border-radius:12px;padding:14px;font-size:13px">
             <div class="b" style="color:var(--pri)">ເຊື່ອມກັບຕຳແໜ່ງນີ້</div>
             <div class="grid" style="gap:2px"><div class="mut">ພະນັກງານ (ຈາກ HR)</div>${ppl.length ? ppl.map((e) => `<div>${esc(e.name)} <span class="xs mut">${esc(e.emp_code)}${e.dept ? " · " + esc(e.dept) : ""}</span></div>`).join("") : `<div class="mut">— ${hrAdm ? "ຜູກຕຳແໜ່ງ HR ດ້ານເທິງ" : "ຍັງບໍ່ມີ"}</div>`}</div>
             <div class="grid" style="gap:4px"><div class="mut">ພະແນກ · ລິ້ງວຽກ · ເອກະສານ</div>${dps.length ? dps.map((d) => `<div class="row" style="gap:4px"><span style="flex:1;min-width:120px">${esc(d.name)} <span class="xs mut">${(d.links || []).length} ລິ້ງ</span></span><button class="sm" data-glink="${esc(d.id)}">ລິ້ງ</button><button class="sm" data-gdocs="${esc(d.id)}">ເອກະສານ</button></div>`).join("") : `<div class="mut">—${adm ? " ເລືອກ JD ນີ້ໃນ ແກ້ໄຂພະແນກ" : ""}</div>`}</div>
