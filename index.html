@@ -657,7 +657,8 @@ async function loadMyAdv() {
     el.className = "";
     el.innerHTML = j.rows.length ? `<div class="grid" style="gap:8px">${j.rows.map((r) => `<div class="row" style="justify-content:space-between;border-top:1px solid var(--line2);padding-top:8px">
       <div><div class="b sm">${esc(r.doc_no)} · ${fmt(r.amount)} ₭</div><div class="xs mut">${esc(advPlanText(r))}</div>${r.note ? `<div class="xs mut">${esc(r.note)}</div>` : ""}</div>
-      <div class="row">${pill(AST, r.status)}${["pending", "head_ok"].includes(r.status) ? `<button class="sm" data-acx="${esc(r.id)}">ຍົກເລີກ</button>` : ""}</div></div>`).join("")}</div>` : `<div class="mut sm">ຍັງບໍ່ມີການເບີກ</div>`;
+      <div class="row">${pill(AST, r.status)}<button class="sm" data-adoc="${esc(r.id)}">📄 ເອກະສານ</button>${["pending", "head_ok"].includes(r.status) ? `<button class="sm" data-acx="${esc(r.id)}">ຍົກເລີກ</button>` : ""}</div></div>`).join("")}</div>` : `<div class="mut sm">ຍັງບໍ່ມີການເບີກ</div>`;
+    $$("[data-adoc]", el).forEach((b) => b.onclick = () => printAdv(j.rows.find((x) => x.id === b.dataset.adoc), S.me.emp));
     $$("[data-acx]", el).forEach((b) => b.onclick = () => dialog({ title: "ຍົກເລີກຄຳຂໍເບີກ?", ok: "ຍົກເລີກຄຳຂໍ", cancel: "ບໍ່", danger: true,
       onOk: async () => { await api("advCancel", { id: b.dataset.acx }); toast("ຍົກເລີກແລ້ວ"); loadMyAdv(); } }));
   } catch (e) { el.innerHTML = `<div class="err-box">${esc(e.message)}</div>`; }
@@ -669,7 +670,7 @@ async function loadApprovals() {
     const advH = (j.advances || []).map((r) => `<div class="card grid" style="gap:6px;padding:12px;background:#FBFAF7">
       <div class="row" style="justify-content:space-between"><div class="b">💸 ${esc(r.name)} <span class="mut xs">${esc(r.emp_code)}</span></div><span class="xs mut">${esc(r.doc_no)}${r.asDelegate ? " · ແທນຫົວໜ້າ" : ""}</span></div>
       <div class="sm">ຂໍເບີກ <b>${fmt(r.amount)} ₭</b> · ${esc(advPlanText(r))}</div><div class="sm">ເຫດຜົນ: ${esc(r.reason)}</div>
-      <div class="row"><span style="flex:1"></span><button class="sm" data-arej="${esc(r.id)}">ປະຕິເສດ</button><button class="sm pri" data-aok="${esc(r.id)}">ອະນຸມັດ → ສົ່ງ HR</button></div></div>`).join("");
+      <div class="row"><button class="sm" data-adoc="${esc(r.id)}">📄 ເອກະສານ</button><span style="flex:1"></span><button class="sm" data-arej="${esc(r.id)}">ປະຕິເສດ</button><button class="sm pri" data-aok="${esc(r.id)}">ອະນຸມັດ → ສົ່ງ HR</button></div></div>`).join("");
     el.innerHTML = advH + (j.pending.length ? j.pending.map((r) => `<div class="card grid" style="gap:6px;padding:12px;background:#FBFAF7">
       <div class="row" style="justify-content:space-between"><div class="b">${esc(r.name)} <span class="mut xs">${esc(r.emp_code)}</span></div><span class="xs mut">${esc(r.doc_no)}${r.asDelegate ? " · ແທນຫົວໜ້າ" : ""}</span></div>
       <div class="sm">${esc(r.typeName || r.type_key)} · ${esc(dmy(r.from_date))}–${esc(dmy(r.to_date))}${r.half_day !== "none" ? (r.half_day === "am" ? " (ເຊົ້າ)" : " (ບ່າຍ)") : ""} · <b>${fmtD(r.days)} ວັນ</b></div>
@@ -677,6 +678,7 @@ async function loadApprovals() {
       <div class="xs mut">ໂຄວຕາເຫຼືອ (ລວມໃບນີ້): ${r.balance ? fmtD(r.balance.remaining) : "—"} ວັນ${num(r.unpaid_days) ? ` · <span style="color:var(--acc)">ເກີນໂຄວຕາ/ບໍ່ຮັບເງິນ ${fmtD(r.unpaid_days)} ວັນ</span>` : ""}</div>
       <div class="row">${r.has_attachment ? `<button class="sm" data-att="${esc(r.id)}">ເບິ່ງໄຟລ໌ແນບ</button>` : ""}<button class="sm" data-doc="${esc(r.id)}">ໃບລາ</button><span style="flex:1"></span>
       <button class="sm" data-rej="${esc(r.id)}">ປະຕິເສດ</button><button class="sm pri" data-apv="${esc(r.id)}" data-days="${esc(r.days)}" data-unpaid="${esc(r.unpaid_days)}">ອະນຸມັດ</button></div></div>`).join("") : advH ? "" : `<div class="mut sm">ບໍ່ມີລາຍການລໍຖ້າ</div>`);
+    $$("[data-adoc]", el).forEach((b) => b.onclick = () => printAdv((j.advances || []).find((x) => x.id === b.dataset.adoc)));
     $$("[data-aok]", el).forEach((b) => b.onclick = () => dialog({ title: "ອະນຸມັດການເບີກເງິນ → ສົ່ງ HR", ok: "ອະນຸມັດ", body: `<label>ໝາຍເຫດ (ຖ້າມີ)<input id="dn"></label>`,
       onOk: async (r) => { await api("advDecideHead", { id: b.dataset.aok, decision: "approve", note: val(r, "dn") }); toast("ອະນຸມັດແລ້ວ — ລໍຖ້າ HR"); startEmp(); } }));
     $$("[data-arej]", el).forEach((b) => b.onclick = () => dialog({ title: "ປະຕິເສດການເບີກເງິນ", danger: true, ok: "ປະຕິເສດ", body: `<label>ໝາຍເຫດ (ບັງຄັບ)<textarea id="dn"></textarea></label>`,
@@ -795,6 +797,24 @@ async function printLeave(id) {
       <div style="font-size:11px;margin-top:6px">ຕາອະນຸມັດດິຈິຕອນຈາກລະບົບ Nany Logistic HR (ບໍ່ແມ່ນລາຍເຊັນຕາມກົດໝາຍ)</div>
       <div class="sig"><div>ຜູ້ຍື່ນ<br><br>${esc(d.name)}</div><div>ຫົວໜ້າຜູ້ອະນຸມັດ<br><br>${esc(d.decided_by_name || d.approver_name || "")}</div><div>ພະແນກບຸກຄະລາກອນ (HR)<br><br>&nbsp;</div></div></div>`);
   } catch (e) { fail(e); }
+}
+// advance request form to print or save as PDF; signatures go on paper, the approvals shown come from the system
+function printAdv(r, who = {}) {
+  if (!r) return;
+  const plan = advPlan(r.amount, r.installments, r.start_month), st = AST[r.status]?.[0] || r.status, nm = who.name || r.name || "";
+  doPrint(`<div class="doc">${r.status !== "paid" ? `<div class="wm">${esc(st)}</div>` : ""}
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #000;padding-bottom:8px"><div><div style="font-size:20px;font-weight:700">Nany Logistic</div><div>ໃບຂໍເບີກເງິນລ່ວງໜ້າ</div></div><div style="text-align:right">ເລກທີ <b>${esc(r.doc_no)}</b><br>ວັນທີຂໍ ${esc(dmy(String(r.created_at || "").slice(0, 10)))}</div></div>
+    <table style="width:100%;margin-top:14px"><tr><th style="width:30%">ຊື່ ແລະ ນາມສະກຸນ</th><td>${esc(nm)}</td><th>ລະຫັດ</th><td>${esc(who.emp_code || r.emp_code || "")}</td></tr>
+    <tr><th>ພະແນກ</th><td>${esc(who.dept || r.dept || "")}</td><th>ຕຳແໜ່ງ</th><td>${esc(who.position || r.position || "")}</td></tr>
+    <tr><th>ຈຳນວນເງິນຂໍເບີກ</th><td colspan="3"><b>${fmt(r.amount)} ₭</b></td></tr>
+    <tr><th>ເຫດຜົນ</th><td colspan="3">${esc(r.reason)}</td></tr>
+    <tr><th>ການຫັກຄືນໃນເງິນເດືອນ</th><td colspan="3">${plan.map(([mo, v], i) => `ງວດ ${i + 1} · ${esc(monthLabel(mo))}: ${fmt(v)} ₭`).join("<br>")}</td></tr></table>
+    <table style="width:100%;margin-top:14px"><tr><th style="width:30%">ສະຖານະ</th><td><b>${esc(st)}</b></td></tr>
+    <tr><th>1. ຫົວໜ້າ / ຜູ້ຈັດການ ອະນຸມັດ</th><td>${r.head_name ? esc(r.head_name) + (r.head_at ? " · " + esc(fmtDT(r.head_at)) : "") : "—"}</td></tr>
+    <tr><th>2. HR ອະນຸມັດ ແລະ ຈ່າຍເງິນ</th><td>${r.status === "paid" && r.decided_at ? esc(fmtDT(r.decided_at)) : "—"}</td></tr>
+    <tr><th>ໝາຍເຫດ</th><td>${esc(r.note || "")}</td></tr></table>
+    <div style="font-size:11px;margin-top:6px">ຂັ້ນຕອນ: ຫົວໜ້າ/ຜູ້ຈັດການ ອະນຸມັດ → HR ອະນຸມັດ ແລະ ຈ່າຍເງິນ → ຫັກຄືນໃນເງິນເດືອນຕາມງວດຂ້າງເທິງ · ຂໍ້ມູນການອະນຸມັດຈາກລະບົບ Nany Logistic HR</div>
+    <div class="sig" style="grid-template-columns:repeat(4,1fr)"><div>ຜູ້ຂໍເບີກ<br><br>${esc(nm)}</div><div>ຫົວໜ້າ / ຜູ້ຈັດການ<br><br>${esc(r.head_name || "")}</div><div>HR / ການເງິນ (ຜູ້ຈ່າຍ)<br><br>&nbsp;</div><div>ຜູ້ຮັບເງິນ<br><br>${esc(nm)}</div></div></div>`);
 }
 function payslipHTML(r, month) {
   const c = r.computed; const line = (k, v) => `<tr><td>${esc(k)}</td><td class="num">${fmt(v)}</td></tr>`;
@@ -1156,26 +1176,26 @@ async function tabAdv(m) {
   // still owed = instalments from this month on
   const left = (r) => r.status === "paid" ? advPlan(r.amount, r.installments, r.start_month).filter(([mo]) => mo >= curDate().slice(0, 7)).reduce((a, x) => a + x[1], 0) : 0;
   const fb = (k, l) => `<button class="sm ${f === k ? "pri" : ""}" data-af="${k}">${l}</button>`;
-  m.innerHTML = `<div class="grid" style="gap:14px"><div class="row"><h2 style="flex:1">💸 ເບີກເງິນລ່ວງໜ້າ</h2>${fb("todo", `ລໍຖ້າ HR (${todo.length})`)}${fb("paid", "ຈ່າຍແລ້ວ")}${fb("all", "ທັງໝົດ")}</div>
-    <div class="sm mut">ອະນຸມັດ = ຈ່າຍເງິນແລ້ວ. ການຫັກຄືນ: ແຖບ ຄິດໄລ່ຜົນຕອບແທນ → ປຸ່ມ 💸 ດຶງເງິນເບີກ</div>
+  m.innerHTML = `<div class="grid" style="gap:14px"><div class="row"><h2 style="flex:1">💸 ເບີກເງິນລ່ວງໜ້າ</h2>${fb("todo", `ລໍຖ້າອະນຸມັດ (${todo.length})`)}${fb("paid", "ຈ່າຍແລ້ວ")}${fb("all", "ທັງໝົດ")}</div>
+    <div class="sm mut">ຂັ້ນຕອນ: ຫົວໜ້າ/ຜູ້ຈັດການ ອະນຸມັດກ່ອນ → HR ອະນຸມັດ = ຈ່າຍເງິນແລ້ວ → ຫັກຄືນ: ແຖບ ຄິດໄລ່ຜົນຕອບແທນ → ປຸ່ມ 💸 ດຶງເງິນເບີກ</div>
     <section class="card"><div class="tw"><table><thead><tr><th>ເລກທີ</th><th>ພະນັກງານ</th><th class="num">ຈຳນວນ</th><th>ຫັກຄືນ</th><th>ເຫດຜົນ</th><th>ສະຖານະ</th><th class="num">ຄ້າງຫັກ</th><th></th></tr></thead><tbody>
     ${rows.length ? rows.map((r) => `<tr><td class="sm">${esc(r.doc_no)}<div class="xs mut">${esc(dmy(String(r.created_at).slice(0, 10)))}</div></td><td><b>${esc(r.name)}</b> <span class="xs mut">${esc(r.emp_code)}</span></td>
       <td class="num b">${fmt(r.amount)}</td><td class="sm">${esc(advPlanText(r))}</td><td class="sm">${esc(r.reason)}${r.note ? `<div class="xs mut">${esc(r.note)}</div>` : ""}</td>
       <td>${pill(AST, r.status)}${r.head_name ? `<div class="xs mut">👔 ${esc(r.head_name)}</div>` : ""}</td><td class="num">${r.status === "paid" ? fmt(left(r)) : "—"}</td>
-      <td style="white-space:nowrap">${todo.includes(r) ? `<button class="sm pri" data-aph="${esc(r.id)}">ອະນຸມັດ+ຈ່າຍ</button> <button class="sm" data-arh="${esc(r.id)}">ປະຕິເສດ</button>` : ""}</td></tr>`).join("") : `<tr><td colspan="8" class="empty">ບໍ່ມີລາຍການ</td></tr>`}
+      <td style="white-space:nowrap"><button class="sm" data-apdoc="${esc(r.id)}" aria-label="ເອກະສານ">📄</button> ${r.status === "head_ok" ? `<button class="sm pri" data-aph="${esc(r.id)}">ອະນຸມັດ+ຈ່າຍ</button> ` : r.status === "pending" ? `<span class="xs mut">ລໍຖ້າຫົວໜ້າ</span> ` : ""}${todo.includes(r) ? `<button class="sm" data-arh="${esc(r.id)}">ປະຕິເສດ</button>` : ""}</td></tr>`).join("") : `<tr><td colspan="8" class="empty">ບໍ່ມີລາຍການ</td></tr>`}
     </tbody></table></div></section></div>`;
   $$("[data-af]", m).forEach((b) => b.onclick = () => { S.cache.advF = b.dataset.af; refreshTab(); });
   const byId = (id) => j.rows.find((r) => r.id === id);
+  $$("[data-apdoc]", m).forEach((b) => b.onclick = () => printAdv(byId(b.dataset.apdoc)));
   $$("[data-arh]", m).forEach((b) => b.onclick = () => dialog({ title: "ປະຕິເສດການເບີກເງິນ", danger: true, ok: "ປະຕິເສດ", body: `<label>ໝາຍເຫດ (ບັງຄັບ)<textarea id="dn"></textarea></label>`,
     onOk: async (d) => { await api("advDecideHR", { id: b.dataset.arh, decision: "reject", note: val(d, "dn") }); toast("ປະຕິເສດແລ້ວ"); refreshTab(); } }));
   $$("[data-aph]", m).forEach((b) => b.onclick = () => { const r = byId(b.dataset.aph), cur = curDate().slice(0, 7), ms = [...new Set([r.start_month, ...Array.from({ length: 4 }, (_, i) => ymShift(cur, i))])].sort();
     dialog({ title: `ອະນຸມັດ ແລະ ຈ່າຍ ${fmt(r.amount)} ₭ · ${r.name}`, ok: "ອະນຸມັດ — ຈ່າຍເງິນແລ້ວ", body: `<div class="grid" style="gap:12px">
-      ${r.status === "pending" ? `<div class="warn-box">ຫົວໜ້າຍັງບໍ່ໄດ້ອະນຸມັດ — ອະນຸມັດຂ້າມຫົວໜ້າ</div>` : ""}
       <div class="grid g2"><label>ຫັກຄືນ<select id="an">${Array.from({ length: 12 }, (_, i) => `<option value="${i + 1}" ${i + 1 === r.installments ? "selected" : ""}>${i ? `ຜ່ອນ ${i + 1} ເດືອນ` : "ຫັກເທື່ອດຽວ"}</option>`).join("")}</select></label>
         <label>ເລີ່ມຫັກເດືອນ<select id="as">${ms.map((x) => `<option value="${x}" ${x === r.start_month ? "selected" : ""}>${esc(monthLabel(x))}</option>`).join("")}</select></label></div>
       <div id="ap" class="sm mut"></div><label>ໝາຍເຫດ (ຖ້າມີ)<input id="dn"></label></div>`,
       onOpen: (d) => { const draw = () => { $("#ap", d).textContent = advPlan(r.amount, val(d, "an"), val(d, "as")).map(([mo, v]) => `${monthLabel(mo)} ${fmt(v)} ₭`).join(" · "); }; d.addEventListener("change", draw); draw(); },
-      onOk: async (d) => { await api("advDecideHR", { id: r.id, decision: "approve", skipHead: r.status === "pending", installments: num(val(d, "an")), startMonth: val(d, "as"), note: val(d, "dn") }); toast("ອະນຸມັດ ແລະ ບັນທຶກການຈ່າຍແລ້ວ"); refreshTab(); } }); });
+      onOk: async (d) => { await api("advDecideHR", { id: r.id, decision: "approve", installments: num(val(d, "an")), startMonth: val(d, "as"), note: val(d, "dn") }); toast("ອະນຸມັດ ແລະ ບັນທຶກການຈ່າຍແລ້ວ"); refreshTab(); } }); });
 }
 // payroll: set each person's "advance" deduction to the instalments due this month
 async function advPullDialog(j) {
