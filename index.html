@@ -331,7 +331,8 @@ const val = (root, id) => { const el = $("#" + id, root); return el ? el.value.t
 
 function logout(msg) {
   stopPoll();
-  pushSub().then((s) => s && api("pushUnsubscribe", { endpoint: s.endpoint }).then(() => s.unsubscribe())).catch(() => {}); // a shared phone must not keep getting this person's alerts
+  // only a logout the person chose stops this phone's alerts (shared phones); an expired session (msg set) must keep them
+  if (!msg) pushSub().then((s) => s && api("pushUnsubscribe", { endpoint: s.endpoint }).then(() => s.unsubscribe())).catch(() => {});
   if (S.role === "emp") LS.set("hr_emp_tok", null); else SS.set("hr_tok", null);
   S.role = S.token = S.payToken = S.me = null; S.cache = {}; T.cfg = null; T.entries = [];
   SS.set("hub_tok", null); H.bills = null; H.docs = {};
@@ -394,7 +395,7 @@ async function renderLogin(msg) {
 
 /* ---------- employee portal ---------- */
 function deviceHash() { let d = LS.get("hr_dev"); if (!d) { d = [...crypto.getRandomValues(new Uint8Array(12))].map((x) => x.toString(16).padStart(2, "0")).join(""); LS.set("hr_dev", d); } return d; }
-async function startEmp() { $("#app").innerHTML = `<div class="wrap"><div class="empty">ກຳລັງໂຫຼດ…</div></div>`; try { S.me = await api("me"); renderEmp(); } catch (e) { if (S.token) $("#app").innerHTML = `<div class="wrap"><div class="err-box">${esc(e.message)}</div><button onclick="startEmp()">ລອງໃໝ່</button></div>`; } }
+async function startEmp() { $("#app").innerHTML = `<div class="wrap"><div class="empty">ກຳລັງໂຫຼດ…</div></div>`; try { S.me = await api("me"); renderEmp(); pushResync(); } catch (e) { if (S.token) $("#app").innerHTML = `<div class="wrap"><div class="err-box">${esc(e.message)}</div><button onclick="startEmp()">ລອງໃໝ່</button></div>`; } }
 const annDay = (iso) => dmy(new Date(new Date(iso).getTime() + 7 * 3600e3).toISOString());
 const annHTML = (a, tail) => `<div class="ann ${a.urgent ? "urg" : ""}"><div class="b">${a.urgent ? "🚨 " : "📢 "}${a.pinned ? "📌 " : ""}${esc(a.title)}</div>${a.body ? `<div class="bd sm">${esc(a.body)}</div>` : ""}<div class="xs mut">${esc(annDay(a.created_at))}${a.until ? ` · ຮອດ ${esc(dmy(a.until))}` : ""}</div>${tail}</div>`;
 function annBoard() {
@@ -549,6 +550,11 @@ async function doPunch() {
 /* ---------- ແຈ້ງເຕືອນເທິງມືຖື (web push) ---------- */
 const pushOk = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 const b64uBytes = (s) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4)), (c) => c.charCodeAt(0));
+// after each login, tell the server again about this phone's alerts, so a row the server lost comes back without the person re-enabling 🔔
+async function pushResync() {
+  if (S.role === "staff" || !pushOk() || Notification.permission !== "granted") return;
+  try { const s = await pushSub(); if (s) await api("pushSubscribe", { sub: s.toJSON() }); } catch { /* best effort; 🔔 still works by hand */ }
+}
 async function pushSub() { if (!pushOk()) return null; const reg = await navigator.serviceWorker.getRegistration(); return reg ? reg.pushManager.getSubscription() : null; }
 function pushDialog() {
   const what = isAdmin() ? "ລາຍງານລົດລໍຖ້າອະນຸມັດ, ສະແກນບໍ່ຜ່ານ ແລະ ຄຳຂໍເບີກເງິນທີ່ບໍ່ມີຫົວໜ້າ" : "ລືມສະແກນເຂົ້າ (08:45) ຫຼື ອອກ (17:45) ແລະ ໃບລາ/ເບີກເງິນ ທີ່ລໍຖ້າທ່ານອະນຸມັດ";
@@ -812,7 +818,7 @@ const TABS_STAFF = [["home", "ໜ້າຫຼັກ"], ["scan", "ສະແກນ
 const isAdmin = () => S.role === "admin";
 async function startHR() {
   try { const j = await api("employees"); S.cache.emps = j.employees; S.cache.settings = j.settings; } catch (e) { return; }
-  renderShell();
+  renderShell(); pushResync();
 }
 function renderShell() {
   const tabs = isAdmin() ? TABS_ADMIN : TABS_STAFF;
