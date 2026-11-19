@@ -310,37 +310,51 @@ function toast(msg, err) { const d = document.createElement("div"); if (err) d.c
 const fail = (e) => toast(e.message || String(e), true);
 
 /* dialog: never alert/confirm/prompt */
-// phone back button closes the open pop-up instead of leaving the app
-const DLG_LOSE = "ກົດຍ້ອນກັບອີກຄັ້ງເພື່ອປິດ — ຂໍ້ມູນທີ່ກອກໄວ້ຈະຫາຍ";
-let dlgHist = false, dlgBacking = false, dlgDirty = "", dlgWarned = false, dlgAfter = null;
-// deferred: a flow that closes one pop-up and opens the next keeps the same history entry
+// phone back button closes the open pop-up instead of leaving the app.
+// History entries are added only right after a tap or typing: Android Chrome skips entries a page adds on its own,
+// so the back button must never re-add one. Entries: {dlg:1} while a pop-up is open, plus a guard {dlg:2} once it holds unsaved work.
+const DLG_LOSE = "ຂໍ້ມູນທີ່ກອກໄວ້ຍັງບໍ່ໄດ້ບັນທຶກ";
+let dlgHist = false, dlgGuard = false, dlgBacking = false, dlgDirty = "", dlgAfter = null;
+function dlgGuardOn() { if (dlgHist && !dlgGuard) { dlgGuard = true; history.pushState({ dlg: 2 }, ""); } }
+// unsaved work: the first back press shows this message with a close button instead of closing
+function dlgMark(msg) { dlgDirty = msg; dlgGuardOn(); if ($("#dlgX")) $("#dlgE").innerHTML = ""; }
+// deferred: a flow that closes one pop-up and opens the next keeps the same history entries
 function dlgClose() {
   $("#dlg").innerHTML = ""; dlgDirty = "";
-  setTimeout(() => { if (dlgHist && !$("#dlg").firstChild) { dlgHist = false; dlgBacking = true; history.back(); } }, 0);
+  setTimeout(() => { if (dlgHist && !$("#dlg").firstChild) { const n = dlgGuard ? 2 : 1; dlgHist = dlgGuard = false; dlgBacking = true; history.go(-n); } }, 0);
 }
 addEventListener("popstate", () => {
   if (dlgBacking) { dlgBacking = false; return; }
   if (!dlgHist) return;
-  const stay = () => history.pushState({ dlg: 1 }, "");
-  if ($("#dlgO")?.disabled) { stay(); toast("ກຳລັງບັນທຶກ — ກະລຸນາລໍຖ້າ"); return; } // leaving now would hide the result of the save
-  if (dlgDirty && !dlgWarned) { dlgWarned = true; stay(); $("#dlgE").innerHTML = `<div class="warn-box">${esc(dlgDirty)}</div>`; return; }
-  const after = dlgAfter; dlgHist = false; dlgClose(); after?.();
+  const saving = $("#dlgO")?.disabled, after = dlgAfter;
+  if ((history.state?.dlg || 0) >= 1) { // back from the guard: the pop-up stays open
+    dlgGuard = false;
+    if (saving) toast("ກຳລັງບັນທຶກ — ກະລຸນາລໍຖ້າ");
+    else if (dlgDirty) {
+      $("#dlgE").innerHTML = `<div class="warn-box grid" style="gap:8px">${esc(dlgDirty)}<button type="button" id="dlgX" class="dng" style="justify-self:start">ປິດໜ້ານີ້</button></div>`;
+      $("#dlgX").onclick = () => { dlgClose(); after?.(); };
+    } else { dlgClose(); after?.(); }
+    return;
+  }
+  // left the pop-up's entries entirely
+  if (saving) { history.pushState({ dlg: 1 }, ""); toast("ກຳລັງບັນທຶກ — ກະລຸນາລໍຖ້າ"); return; } // rare: a second back during a save
+  dlgHist = dlgGuard = false; dlgClose(); after?.();
 });
 function dialog({ title, body = "", ok = "ຕົກລົງ", cancel = "ຍົກເລີກ", danger = false, wide = false, onOk, onOpen }) {
   const host = $("#dlg");
   host.innerHTML = `<div class="dlgbg"><div class="dlg ${wide ? "wide" : ""}" role="dialog" aria-modal="true" aria-labelledby="dlgT">
     <h2 id="dlgT">${esc(title)}</h2><div id="dlgB">${body}</div>
     <div class="dlgf"><div id="dlgE"></div><div class="row" style="justify-content:flex-end">${cancel ? `<button id="dlgC">${esc(cancel)}</button>` : ""}${ok ? `<button id="dlgO" class="${danger ? "dng" : "pri"}">${esc(ok)}</button>` : ""}</div></div></div></div>`;
-  dlgDirty = ""; dlgWarned = false; dlgAfter = null;
-  host.oninput = () => { if (!ok) return; dlgDirty = DLG_LOSE; if (dlgWarned) { dlgWarned = false; $("#dlgE").innerHTML = ""; } }; // view-only pop-ups have nothing to lose
+  dlgDirty = ""; dlgAfter = null;
+  host.oninput = () => { if (ok) dlgMark(DLG_LOSE); }; // view-only pop-ups have nothing to lose
   if (!dlgHist) { dlgHist = true; history.pushState({ dlg: 1 }, ""); }
   const me = host.firstChild, close = () => { if (host.firstChild === me) dlgClose(); }; // a slow save must not close the pop-up opened after it
   $("#dlgC") && ($("#dlgC").onclick = close);
   $(".dlgbg").addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#dlgO")?.disabled) close(); });
   if ($("#dlgO")) $("#dlgO").onclick = async () => {
-    const b = $("#dlgO"), c = $("#dlgC"); b.disabled = true; if (c) c.disabled = true; dlgWarned = false; $("#dlgE").innerHTML = "";
+    const b = $("#dlgO"), c = $("#dlgC"); b.disabled = true; if (c) c.disabled = true; dlgGuardOn(); $("#dlgE").innerHTML = ""; // guard added on the tap, so back during the save just waits
     try { const r = onOk ? await onOk($("#dlgB")) : true; if (r !== false) close(); }
-    catch (e) { if (host.firstChild === me) $("#dlgE").innerHTML = `<div class="err-box">${esc(e.message)}</div>`; else toast(e.message, true); }
+    catch (e) { if (host.firstChild === me) { $("#dlgE").innerHTML = `<div class="err-box">${esc(e.message)}</div>`; if (dlgDirty) dlgGuardOn(); } else toast(e.message, true); } // save failed: unsaved work is protected again (pushed from {dlg:1}, so at worst a back closes the pop-up)
     finally { if ($("#dlgO")) b.disabled = false; if (c) c.disabled = false; }
   };
   onOpen && onOpen($("#dlgB"), close);
@@ -562,13 +576,14 @@ async function doPunch() {
       if (e.code === "state_changed") { const msg = $("#pmsg").innerHTML; S.me = await api("me"); drawPunch(msg); }
     }
   };
+  // scanning out inside working hours asks first; a night scan-out is not "early"
+  const early = S.me.next === "out" && ((t) => t >= S.me.settings.shift.start && t < S.me.settings.shift.end)(fmtTime(new Date().toISOString()));
+  const ask = () => early ? dialog({ title: "ສະແກນອອກກ່ອນເວລາ?", ok: "ສະແກນອອກ", body: `<p>ຍັງບໍ່ຮອດເວລາເລີກວຽກ ${esc(S.me.settings.shift.end)}. ຖ້າກົດຜິດ ຕ້ອງໃຫ້ HR ແກ້ໄຂ.</p>`, onOk: () => { setTimeout(go, 50); } }) : ($("#pb").disabled = true, setTimeout(go, 50)); // the GPS prompt waits until the closing pop-up's history step is done
   if (!LS.get("hr_gps_ok")) {
     dialog({ title: "ການເກັບຕຳແໜ່ງ GPS", ok: "ເຂົ້າໃຈ ແລະ ສະແກນ",
       body: `<p>ເມື່ອກົດສະແກນ ລະບົບຈະຂໍຕຳແໜ່ງ GPS ຂອງໂທລະສັບ <b>ສະເພາະຕອນສະແກນ</b> ເພື່ອຢືນຢັນວ່າທ່ານຢູ່ບ່ອນເຮັດວຽກ.</p><ul class="sm"><li>ເຈົ້າໜ້າທີ່ HR ເທົ່ານັ້ນທີ່ເຫັນ</li><li>ເກັບໄວ້ ${esc(S.me.settings.gpsRetentionMonths)} ເດືອນ ແລ້ວລຶບພິກັດ (ເກັບແຕ່ເວລາ)</li><li>ຖ້າບໍ່ອະນຸຍາດ ຍັງສະແກນໄດ້ ແຕ່ຈະຖືກໝາຍໃຫ້ HR ກວດ</li><li>ເວລາທີ່ບັນທຶກແມ່ນເວລາຂອງເຊີບເວີ ບໍ່ແມ່ນເວລາໃນໂທລະສັບ</li></ul>`,
-      onOk: () => { LS.set("hr_gps_ok", "1"); setTimeout(go, 50); } });
-  } else if (S.me.next === "out" && ((t) => t >= S.me.settings.shift.start && t < S.me.settings.shift.end)(fmtTime(new Date().toISOString()))) { // only inside working hours: a night scan-out is not "early"
-    dialog({ title: "ສະແກນອອກກ່ອນເວລາ?", ok: "ສະແກນອອກ", body: `<p>ຍັງບໍ່ຮອດເວລາເລີກວຽກ ${esc(S.me.settings.shift.end)}. ຖ້າກົດຜິດ ຕ້ອງໃຫ້ HR ແກ້ໄຂ.</p>`, onOk: () => { setTimeout(go, 50); } });
-  } else go();
+      onOk: () => { LS.set("hr_gps_ok", "1"); setTimeout(ask, 0); } });
+  } else ask();
 }
 /* ---------- ແຈ້ງເຕືອນເທິງມືຖື (web push) ---------- */
 const pushOk = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
@@ -1020,7 +1035,7 @@ function bindEmpActions(root) {
 function showPins(pins) {
   $("#dlgB").innerHTML = `<div class="warn-box">ສະແດງຄັ້ງດຽວ — ປິດໜ້າຕ່າງນີ້ແລ້ວຈະເບິ່ງອີກບໍ່ໄດ້</div>${pins.length ? `<div class="tw" style="margin-top:10px"><table><thead><tr><th>ລະຫັດ</th><th>ຊື່</th><th>PIN_ແຈກ</th></tr></thead><tbody>${pins.map((p) => `<tr><td>${esc(p.emp_code)}</td><td>${esc(p.name)}</td><td class="b" style="font-size:18px;letter-spacing:2px">${esc(p.pin)}</td></tr>`).join("")}</tbody></table></div>` : `<p>ທຸກຄົນມີ PIN ແລ້ວ</p>`}`;
   $("#dlgO").remove(); $("#dlgC").textContent = "ປິດ"; $("#dlgC").onclick = () => { dlgClose(); renderTab(); };
-  dlgDirty = "ກົດຍ້ອນກັບອີກຄັ້ງເພື່ອປິດ — ປິດແລ້ວຈະເບິ່ງ PIN ອີກບໍ່ໄດ້"; dlgAfter = renderTab;
+  dlgMark("ປິດແລ້ວຈະເບິ່ງ PIN ອີກບໍ່ໄດ້ — ຈົດ PIN ກ່ອນ"); dlgAfter = renderTab;
 }
 function empForm(e) {
   const s = S.cache.settings || {}; const x = e || { bank: "BCEL", work_days: 26, active: true };
@@ -1107,7 +1122,7 @@ function csvImport(kind) {
         const check = $("#dlgO").onclick;
         $("#cf", r).addEventListener("change", () => { $("#cp", r).innerHTML = ""; $("#dlgE").innerHTML = ""; $("#dlgO").textContent = "ກວດສອບກ່ອນ"; $("#dlgO").onclick = check; }, { once: true });
         $("#dlgO").textContent = "ຢືນຢັນນຳເຂົ້າ";
-        $("#dlgO").onclick = async () => { $("#dlgO").disabled = $("#dlgC").disabled = true; dlgWarned = false; try { const j = await api(action, { rows: payload }); toast("ນຳເຂົ້າແລ້ວ"); dlgClose(); renderTab(); } catch (e) { $("#dlgE").innerHTML = `<div class="err-box">${esc(e.message)}</div>`; $("#dlgO").disabled = $("#dlgC").disabled = false; } };
+        $("#dlgO").onclick = async () => { $("#dlgO").disabled = $("#dlgC").disabled = true; dlgGuardOn(); try { const j = await api(action, { rows: payload }); toast("ນຳເຂົ້າແລ້ວ"); dlgClose(); renderTab(); } catch (e) { $("#dlgE").innerHTML = `<div class="err-box">${esc(e.message)}</div>`; $("#dlgO").disabled = $("#dlgC").disabled = false; dlgGuardOn(); } };
         return false;
       } catch (e) {
         if (e.code === "import_errors") { $("#cp", r).innerHTML = `<div class="err-box">ແຖວທີ່ຜິດ (ບໍ່ນັບແຖວຫົວ):<br>${e.data.errors.slice(0, 30).map((x) => `ແຖວ ${x.row + 1}: ${esc(x.error)}`).join("<br>")}</div>`; return false; }
@@ -1654,7 +1669,7 @@ function billForm(it) {
       if (!past.length) return put([]);
       setTimeout(() => dialog({ title: "ເດືອນກ່ອນໆ ຈ່າຍແລ້ວບໍ?", ok: "ຈ່າຍແລ້ວທັງໝົດ", cancel: "ສະແດງເປັນຄ້າງຈ່າຍ",
         body: `<p class="sm">ລາຍການນີ້ເລີ່ມ ${esc(monthLabel(sm))} — ມີ <b>${past.length} ເດືອນ</b> ກ່ອນເດືອນນີ້. ຖ້າຈ່າຍແລ້ວ ລະບົບຈະບັນທຶກວ່າ "ຈ່າຍກ່ອນເລີ່ມໃຊ້ລະບົບ".</p>`,
-        onOk: () => put(past), onOpen: (r2, close) => { dlgDirty = DLG_LOSE; $("#dlgC").onclick = async () => { const c = $("#dlgC"), o = $("#dlgO"); c.disabled = o.disabled = true; dlgWarned = false; try { await put([]); close(); } catch (e) { $("#dlgE").innerHTML = `<div class="err-box">${esc(e.message)}</div>`; c.disabled = o.disabled = false; } }; } }), 0);
+        onOk: () => put(past), onOpen: (r2, close) => { dlgMark(DLG_LOSE); $("#dlgC").onclick = async () => { const c = $("#dlgC"), o = $("#dlgO"); c.disabled = o.disabled = true; dlgGuardOn(); try { await put([]); close(); } catch (e) { $("#dlgE").innerHTML = `<div class="err-box">${esc(e.message)}</div>`; c.disabled = o.disabled = false; dlgGuardOn(); } }; } }), 0);
     } });
 }
 function payForm(it, ym) {
